@@ -588,7 +588,7 @@ data to multiple clients have data centers that are well-networked, so that gett
 data onto and off of their storage systems can be done very quickly over the internet
 by an end-user with a good internet connection.
 
-Five years ago, the idea of storing next generation sequencing data might have
+Five years ago, the idea of storing next generation sequencing data in the cloud might have
 sounded a little
 crazy---it always seemed a laborious task getting the data off of the remote server at the 
 sequencing center, so why not just keep the data in-house once you have it?

@@ -207,14 +207,14 @@ with these contents, which give it the rule for running TrimmoMcAwesome on
 the reads from sample `001`:
 ```yaml
 rule trim_awesome:
-	input: 
-		"data/raw/001_R1.fq",
-		"data/raw/001_R1.fq"
-	output:
-		"results/awesome/001_R1.fq",
-		"results/awesome/001_R2.fq"
-	shell:
-		"TrimmoMcAwesome {input} {output}"
+    input:
+        "data/raw/001_R1.fq",
+        "data/raw/001_R2.fq"
+    output:
+        "results/awesome/001_R1.fq",
+        "results/awesome/001_R2.fq"
+    shell:
+        "TrimmoMcAwesome {input} {output}"
 ```
 Notice that this rule takes the raw fastq files as input to TrimmoMcAwesome, and
 puts the trimmed output files into a diretory `results/awesome`.
@@ -235,19 +235,18 @@ Job counts:
 	1	trim_awesome
 	1
 
-[Thu Apr  1 07:36:01 2021]
+[Mon Aug  9 11:43:31 2021]
 rule trim_awesome:
-    input: data/raw/001_R1.fq, data/raw/001_R1.fq
+    input: data/raw/001_R1.fq, data/raw/001_R2.fq
     output: results/awesome/001_R1.fq, results/awesome/001_R2.fq
     jobid: 0
 
-TrimmoMcAwesome data/raw/001_R1.fq data/raw/001_R1.fq results/awesome/001_R1.fq results/awesome/001_R2.fq
+TrimmoMcAwesome data/raw/001_R1.fq data/raw/001_R2.fq results/awesome/001_R1.fq results/awesome/001_R2.fq
 Job counts:
 	count	jobs
 	1	trim_awesome
 	1
 This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
-
 ```
 
 It is worth sitting down and looking closely at this output. The first block shows how many
@@ -289,7 +288,7 @@ write a new rule block for every sample in your Snakefile till it looked like:
 rule trim_awesome_001:
 	input: 
 		"data/raw/001_R1.fq",
-		"data/raw/001_R1.fq"
+		"data/raw/001_R2.fq"
 	output:
 		"results/awesome/001_R1.fq",
 		"results/awesome/001_R2.fq"
@@ -300,7 +299,7 @@ rule trim_awesome_001:
 rule trim_awesome_002:
 	input: 
 		"data/raw/002_R1.fq",
-		"data/raw/002_R1.fq"
+		"data/raw/002_R2.fq"
 	output:
 		"results/awesome/002_R1.fq",
 		"results/awesome/002_R2.fq"
@@ -312,7 +311,7 @@ rule trim_awesome_002:
 rule trim_awesome_005:
 	input: 
 		"data/raw/005_R1.fq",
-		"data/raw/005_R1.fq"
+		"data/raw/005_R2.fq"
 	output:
 		"results/awesome/005_R1.fq",
 		"results/awesome/005_R2.fq"
@@ -322,7 +321,8 @@ rule trim_awesome_005:
 
 Boy! Doing that would really suck! It would require lots of typing, lots of
 chances to make an error, and if you wanted to change something in the shell
-block, for example, you would have to change all of the rules. What a hassle!  Obviously,
+block, for example, you would have to change all of the rules.
+What a hassle!  Obviously,
 no sane person would do that.  And, thankfully no one has to, because
 Snakemake allows a single block to apply to multiple instances of output
 (and hence input) by using _wildcards_.  The next section takes us through

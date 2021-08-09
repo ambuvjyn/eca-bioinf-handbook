@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2021-06-02" />
+<meta name="date" content="2021-08-09" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -627,9 +627,9 @@ go into the file, <code>Snakefile</code>. Make a Snakefile within the <code>smk-
 with these contents, which give it the rule for running TrimmoMcAwesome on
 the reads from sample <code>001</code>:</p>
 <div class="sourceCode" id="cb411"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb411-1"><a href="managing-workflows-with-snakemake.html#cb411-1"></a><span class="fu">rule trim_awesome</span><span class="kw">:</span></span>
-<span id="cb411-2"><a href="managing-workflows-with-snakemake.html#cb411-2"></a><span class="at">    </span><span class="fu">input</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb411-2"><a href="managing-workflows-with-snakemake.html#cb411-2"></a><span class="at">    </span><span class="fu">input</span><span class="kw">:</span></span>
 <span id="cb411-3"><a href="managing-workflows-with-snakemake.html#cb411-3"></a><span class="at">        </span><span class="st">&quot;data/raw/001_R1.fq&quot;</span><span class="at">,</span></span>
-<span id="cb411-4"><a href="managing-workflows-with-snakemake.html#cb411-4"></a><span class="at">        </span><span class="st">&quot;data/raw/001_R1.fq&quot;</span></span>
+<span id="cb411-4"><a href="managing-workflows-with-snakemake.html#cb411-4"></a><span class="at">        </span><span class="st">&quot;data/raw/001_R2.fq&quot;</span></span>
 <span id="cb411-5"><a href="managing-workflows-with-snakemake.html#cb411-5"></a><span class="at">    </span><span class="fu">output</span><span class="kw">:</span></span>
 <span id="cb411-6"><a href="managing-workflows-with-snakemake.html#cb411-6"></a><span class="at">        </span><span class="st">&quot;results/awesome/001_R1.fq&quot;</span><span class="at">,</span></span>
 <span id="cb411-7"><a href="managing-workflows-with-snakemake.html#cb411-7"></a><span class="at">        </span><span class="st">&quot;results/awesome/001_R2.fq&quot;</span></span>
@@ -649,19 +649,18 @@ Job counts:
     1   trim_awesome
     1
 
-[Thu Apr  1 07:36:01 2021]
+[Mon Aug  9 11:43:31 2021]
 rule trim_awesome:
-    input: data/raw/001_R1.fq, data/raw/001_R1.fq
+    input: data/raw/001_R1.fq, data/raw/001_R2.fq
     output: results/awesome/001_R1.fq, results/awesome/001_R2.fq
     jobid: 0
 
-TrimmoMcAwesome data/raw/001_R1.fq data/raw/001_R1.fq results/awesome/001_R1.fq results/awesome/001_R2.fq
+TrimmoMcAwesome data/raw/001_R1.fq data/raw/001_R2.fq results/awesome/001_R1.fq results/awesome/001_R2.fq
 Job counts:
     count   jobs
     1   trim_awesome
     1
-This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.
-</code></pre>
+This was a dry-run (flag -n). The order of jobs does not reflect the order of execution.</code></pre>
 <p>It is worth sitting down and looking closely at this output. The first block shows how many
 jobs will run. The second block shows the rule that will be run in the job, and it
 explicitly shows the values of the <code>input</code> and <code>output</code> of the block. The line at the top
@@ -692,7 +691,7 @@ write a new rule block for every sample in your Snakefile till it looked like:</
 <div class="sourceCode" id="cb416"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb416-1"><a href="managing-workflows-with-snakemake.html#cb416-1"></a><span class="fu">rule trim_awesome_001</span><span class="kw">:</span></span>
 <span id="cb416-2"><a href="managing-workflows-with-snakemake.html#cb416-2"></a><span class="at">    </span><span class="fu">input</span><span class="kw">:</span><span class="at"> </span></span>
 <span id="cb416-3"><a href="managing-workflows-with-snakemake.html#cb416-3"></a><span class="at">        </span><span class="st">&quot;data/raw/001_R1.fq&quot;</span><span class="at">,</span></span>
-<span id="cb416-4"><a href="managing-workflows-with-snakemake.html#cb416-4"></a><span class="at">        </span><span class="st">&quot;data/raw/001_R1.fq&quot;</span></span>
+<span id="cb416-4"><a href="managing-workflows-with-snakemake.html#cb416-4"></a><span class="at">        </span><span class="st">&quot;data/raw/001_R2.fq&quot;</span></span>
 <span id="cb416-5"><a href="managing-workflows-with-snakemake.html#cb416-5"></a><span class="at">    </span><span class="fu">output</span><span class="kw">:</span></span>
 <span id="cb416-6"><a href="managing-workflows-with-snakemake.html#cb416-6"></a><span class="at">        </span><span class="st">&quot;results/awesome/001_R1.fq&quot;</span><span class="at">,</span></span>
 <span id="cb416-7"><a href="managing-workflows-with-snakemake.html#cb416-7"></a><span class="at">        </span><span class="st">&quot;results/awesome/001_R2.fq&quot;</span></span>
@@ -703,7 +702,7 @@ write a new rule block for every sample in your Snakefile till it looked like:</
 <span id="cb416-12"><a href="managing-workflows-with-snakemake.html#cb416-12"></a><span class="fu">rule trim_awesome_002</span><span class="kw">:</span></span>
 <span id="cb416-13"><a href="managing-workflows-with-snakemake.html#cb416-13"></a><span class="at">    </span><span class="fu">input</span><span class="kw">:</span><span class="at"> </span></span>
 <span id="cb416-14"><a href="managing-workflows-with-snakemake.html#cb416-14"></a><span class="at">        </span><span class="st">&quot;data/raw/002_R1.fq&quot;</span><span class="at">,</span></span>
-<span id="cb416-15"><a href="managing-workflows-with-snakemake.html#cb416-15"></a><span class="at">        </span><span class="st">&quot;data/raw/002_R1.fq&quot;</span></span>
+<span id="cb416-15"><a href="managing-workflows-with-snakemake.html#cb416-15"></a><span class="at">        </span><span class="st">&quot;data/raw/002_R2.fq&quot;</span></span>
 <span id="cb416-16"><a href="managing-workflows-with-snakemake.html#cb416-16"></a><span class="at">    </span><span class="fu">output</span><span class="kw">:</span></span>
 <span id="cb416-17"><a href="managing-workflows-with-snakemake.html#cb416-17"></a><span class="at">        </span><span class="st">&quot;results/awesome/002_R1.fq&quot;</span><span class="at">,</span></span>
 <span id="cb416-18"><a href="managing-workflows-with-snakemake.html#cb416-18"></a><span class="at">        </span><span class="st">&quot;results/awesome/002_R2.fq&quot;</span></span>
@@ -715,7 +714,7 @@ write a new rule block for every sample in your Snakefile till it looked like:</
 <span id="cb416-24"><a href="managing-workflows-with-snakemake.html#cb416-24"></a><span class="fu">rule trim_awesome_005</span><span class="kw">:</span></span>
 <span id="cb416-25"><a href="managing-workflows-with-snakemake.html#cb416-25"></a><span class="at">    </span><span class="fu">input</span><span class="kw">:</span><span class="at"> </span></span>
 <span id="cb416-26"><a href="managing-workflows-with-snakemake.html#cb416-26"></a><span class="at">        </span><span class="st">&quot;data/raw/005_R1.fq&quot;</span><span class="at">,</span></span>
-<span id="cb416-27"><a href="managing-workflows-with-snakemake.html#cb416-27"></a><span class="at">        </span><span class="st">&quot;data/raw/005_R1.fq&quot;</span></span>
+<span id="cb416-27"><a href="managing-workflows-with-snakemake.html#cb416-27"></a><span class="at">        </span><span class="st">&quot;data/raw/005_R2.fq&quot;</span></span>
 <span id="cb416-28"><a href="managing-workflows-with-snakemake.html#cb416-28"></a><span class="at">    </span><span class="fu">output</span><span class="kw">:</span></span>
 <span id="cb416-29"><a href="managing-workflows-with-snakemake.html#cb416-29"></a><span class="at">        </span><span class="st">&quot;results/awesome/005_R1.fq&quot;</span><span class="at">,</span></span>
 <span id="cb416-30"><a href="managing-workflows-with-snakemake.html#cb416-30"></a><span class="at">        </span><span class="st">&quot;results/awesome/005_R2.fq&quot;</span></span>
@@ -723,7 +722,8 @@ write a new rule block for every sample in your Snakefile till it looked like:</
 <span id="cb416-32"><a href="managing-workflows-with-snakemake.html#cb416-32"></a><span class="at">        </span><span class="st">&quot;TrimmoMcAwesome {input} {output}&quot;</span></span></code></pre></div>
 <p>Boy! Doing that would really suck! It would require lots of typing, lots of
 chances to make an error, and if you wanted to change something in the shell
-block, for example, you would have to change all of the rules. What a hassle! Obviously,
+block, for example, you would have to change all of the rules.
+What a hassle! Obviously,
 no sane person would do that. And, thankfully no one has to, because
 Snakemake allows a single block to apply to multiple instances of output
 (and hence input) by using <em>wildcards</em>. The next section takes us through
