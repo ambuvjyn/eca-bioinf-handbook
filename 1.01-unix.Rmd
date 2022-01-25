@@ -40,7 +40,7 @@ typing the user must do to complete any particular tasks.  There are a number of
 different "shells" that people use.  We will focus on one called "bash," which stands
 for the "Bourne again shell."  Many of the shells share a number of features.
 
-Many common operating systems are built upon a Unix or upon Linux---an open-source flavor of
+Many common operating systems are built upon Unix or upon Linux---an open-source flavor of
 Unix that is, in many scenarios, indistinguishable.  Hereafter we will refer
 to both Unix and Linux as "Unix" systems).  For example all Apple Macintosh computers are
 built on top of the Berkeley Standard Distribution of Unix and bash is the default
@@ -176,13 +176,13 @@ directory is set, by default, to your home directory.  However, when you are doi
 bioinformatics or otherwise hacking on the command line, you will typically
 want to be "in another directory" (meaning you will want the current working
 directory set to some other directory).  For this, Unix provides the `cd` command, which
-stands for **c**hange **d**irectory. The syntax is super simple:
+stands for **c**hange **d**irectory. The syntax is simple:
 
-cd _path_
+`cd` _path_
 
 where _path_ is an absolute or a relative path.  For example, to 
 get to the `git-repos` directory from my home directory would require
-a simple command `cd Documents/git-repos`.  Once there, I could change to
+a simple command: `cd Documents/git-repos`.  Once there, I could change to
 my `Desktop` directory with `cd ../../Desktop`.  Witness:
 ```sh
 % pwd
@@ -224,7 +224,7 @@ of `cd`, and it will tell you which directory you have returned to.  For example
 % pwd
 /Users/eriq/Documents/git-repos
 ```
-Note the output of `cd -` is the newly-returned-to current working directory.
+Note that the output of `cd -` is the newly-returned-to current working directory.
 
 ### Updating your command prompt {#comm-prompt}
 
@@ -261,7 +261,7 @@ window to navigate in!"  Do not despair. This is a normal reaction when you firs
 Fortunately, Unix file-system navigation can be made much less painful (or even enjoyable)
 for you by becoming a master of _TAB-completion_.  Imagine the Unix shell is watching
 your every keystroke and trying to guess what you are about to type.  If you type the first part
-of a directory name after a command like `cd` and then hit the TAB key, the shell will respond
+of a directory name after a command, like `cd` and then hit the TAB key, the shell will respond
 with its best guess of how you want to complete what you are typing.
 
 Take the file hierarchy of Figure&nbsp;\@ref(fig:file-hierarchy), and imagine that we are in the root
@@ -410,8 +410,8 @@ the default output of `ls` (that
 depends on the length of the filenames and the width of your terminal), and it
 offers little information beyond the names of the files.  
 
-You can tell the `ls` command to provide more information, by using it with the `-l` 
-option.  Appropriately, with the `-l` option, the `ls` command will return
+You can direct the `ls` command to provide more information, by using it with the `-l` 
+option (that is a lower case "L", for "long").  Appropriately, with the `-l` option, the `ls` command will return
 output in _long_ format:
 ```sh
 2019-02-08 21:09 /osu-chinook/--% ls -l
@@ -433,21 +433,22 @@ drwxr-xr-x 14 eriq kruegg  4096 Feb  8 15:49 sliced
 Each row contains information about only a single file.
 The first column indicates what kind of file
 each entry is, and also tells us which users have permission to
-do certain things with the file (more on this in a few sections).
+do certain things with the file (more on this in Section \@ref(file-perm)).
 The third and fourth columns show that the owner of
 each file is `eriq`, who is a user in the group called `kruegg`. After that
-is the size of the file (in bytes) and the date and time it was last modified.
+we see the size of the file (in bytes) and the date and time it was last modified.
 
 There are a few options to `ls` that are particularly useful.  One is `-a`, which causes
 `ls` to include in its listing all files, even _hidden_ ones. In a Unix file system,
 any file whose name starts with a `.` is considered a _hidden_ file.  Commonly, such
 files are configuration files or other files used by programs that you typically 
-don't interact with directly. (We will see an example of this when we start working with `git` for version control, Section&nbsp;\@ref(git-workings).) The `-d` option for `ls` is also'
+don't interact with directly. (We will see an example of this when we start working with `git` for version control, Section&nbsp;\@ref(git-workings).) The `-d` option for `ls` is also
 quite handy.  Recall that when you provide the name of a directory as an argument to `ls`,
 the default behavior is to list the contents of the directory.  This can be troublesome
 when you are listing the contents of a subdirectory: `ls ~/Documents/git-repos/*` lists the
-contents (which can be substantial) of each of the directories in my  directory, but
-I might only want to know the name of each of those directories, rather than their full contents.
+contents (which can be substantial) of each of the directories in my `git-repos` directory, but
+I might only want to know the name of each of those directories, rather than the full contents
+of each diretory.
 `ls -d ~/Documents/git-repos` will do that for you.  Finally, the `-R` option to `ls` will cause the operating system to drill down, _recursively_ into all the subdirectories of the one you
 supplied to the command, and list their contents, as well.  
 
@@ -455,11 +456,13 @@ supplied to the command, and list their contents, as well.
 ### Globbing
 
 If you have ever had to move a large number of files of a certain type from
-one folder to another in a Finder window, you know that individually clicking and
-selecting each one and then dragging them can be a tedious task (not to mention the disaster
-that ensues if you slip on your mouse and end up dropping all the files some place
-you did not intend).  Unix provides a wonderful system called _filename expansion_ or 
-"globbing" for quickly providing the names of a large number of files and paths which let's
+one folder to another in a Finder window, you know that clicking and
+selecting each file and then individually dragging it could be a tedious task.
+Of course, in a graphical file browser your can select multiple files to move at
+once. Unix provides a similar system for operating upon multiple files at once; however
+it works a little differently, and is based on defining groups of files according
+to matching their names to certain patterns.  This system, called _filename expansion_ or 
+"globbing," quickly provides the names of a large number of files and paths, which let's
 you operate on multiple files quickly and efficiently. In short, globbing allows for
 _wildcard matching_ in path names.  This means that you can 
 specify multiple files that have names that share a common part, but differ in other parts.
@@ -492,10 +495,10 @@ You can be more specific in globbing by putting things within `[` and `]`.  For 
 `A[A-D]*` would pick out any files starting with, `AA`, `AB`, `AC`, or `AD`.  Or you could
 have said `A[a-d]*` which would get any files starting with `Aa`, `Ab`, `Ac`, or `Ad`. And you
 can also do it with numbers: `[0-9]`.  You can also negate the contents of the `[]`, with `^`.  Thus,
-`100_[^ABC]*` picks out all files that start with `100_` followed by anything that is _not_ and `A`, `B`, or a `C`.
+`100_[^ABC]*` picks out all files that start with `100_` followed by anything that is _not_ an `A`, `B`, or a `C`.
 
 
-Finally, you can be really specific about replacements in file names by iterating over
+Finally, you can be even more specific about replacements in file names by iterating over
 different possibilities with a comma-separated list within curly braces.  For example, `img.{png,jpg,svg}`
 will iterate over the values in curly braces and expand to `img.png img.jpg img.svg`.  Interestingly,
 with curly braces, this forms all those file names whether they exist or not.  So, unlike `*` it isn't
@@ -504,7 +507,7 @@ really matching available file names.
 
 The last thing to note about all of these globbing constructs is that they are not intimately
 associated with the `ls` command.  Rather, they simply provide expansions on the command
-line, and the the `ls` command is listing all those files.  For example, try `echo *.txt`.
+line, and the `ls` command is listing all those files.  For example, try `echo *.txt`.
 
 
 ### What makes a good file-name?
@@ -522,11 +525,11 @@ standard Windows system comes with such space-containing directory names as `My 
 Pictures`.  Yikes!  Please _don't ever do that in your Unix life!_  One can deal with spaces in file
 names, but there is really no reason to include spaces in your file names, and having spaces in file
 names will typically break a good many scripts.  Rather than a space, use an underscore, `_`, or a 
-dash, `-`.  You've gotta admit that, not only does `My-Documents` work better, but it actually
-looks better too!
+dash, `-`.  You've must admit that, not only does `My-Documents` work better, but it actually
+_looks_ better too!
 
 However, should you have to deal with files having spaces in their name, you can
-address them by either backslash escaping the spaces, or putting the whole
+address them by either backslash-escaping the spaces, or putting the whole
 file name in quotation marks (single or double quotation marks will work).
 If you have a file called `dumb file name.jpg`, you can address it on the 
 command line as either of the following three:
@@ -573,7 +576,9 @@ command line might including a command and a subcommand, like `samtools view` or
 know that it needs to run the `view` routine, and interpret all following
 options in that context.
 
-We will now break down each element in "`command` _options_ _arguments_".
+We will now break down each element in  
+  
+`command` _options_ _arguments_.
 
 ### The `command` {#anatomy-command}
 
@@ -586,8 +591,8 @@ understand where and how the bash shell searches for these command files. Unders
 well, and knowing how to add directories that the shell searches for executable
 commands will alleviate a lot of frustration that often arises with Unix.
 
-In brief, all Unix shells (and the bash shell specifically) maintain what is called
-an _environment variable_ called `PATH` that is a colon-separated list of pathnames
+In brief, all Unix shells (and the bash shell specifically) maintain
+an _environment variable_ called `PATH` that is a colon-separated list of the pathnames
 where the shell searches for commands.  You can print the `PATH` variable using
 the `echo` command:
 ```sh
@@ -624,7 +629,7 @@ Thus, the `tar` command takes the single character options `-x`, `-v`, and `-f`,
 an option named like `--check-links`.  Some utilities also have two different names---a single-letter
 name and a long name---for many options.
 For example, the `bcftools view` program uses either `-a` or `--trim-alt-alleles` to invoke the option
-that trims alternate alleles not seen in a given subset of individuals.  Other tools, like BEAGLE, are perfectly
+that trims alternate alleles not seen in a given subset of individuals.  Other tools, like BEAGLE, are perfectly content to
 have options that are named with multiple letters following just a single dash.
 
 Sometimes options take parameter values, like `bcftools view -g het`.  In that case, `het` is 
@@ -634,7 +639,7 @@ With some unix utilities' single-letter options can be bunged together
 following a single dash, like, `tar -xvf` being synonymous with `tar -x -v -f`.  This
 is not universal, and it is not recommended to expect it.
 
-Holy Cow!  This is not terribly standardized, and probably won't make sense till
+Holy Cow!  This is not terribly standardized, and probably won't make sense until
 you really get in there and starting playing around in Unix...
 
 ### Arguments 
@@ -655,7 +660,7 @@ Zheesh! The above looks like a horrible mish-mash.  How do we find out
 how to use/invoke different commands and programs in Unix?  Well, most
 programs are documented, and you have to learn how to read the documentation.
 
-If a utility is properly installed, you should be able to find its manual page with
+If a Unix utility is properly installed, you should be able to find its manual page with
 the `man` command.  For example, `man ls` or `man tar`.   These "man-pages", as the
 results are called, have a fairly uniform format.  They start with a summary of what the
 utility does, then then show how it is invoked and what the possible options are by
@@ -665,7 +670,9 @@ and usually square brackets are put around things that are not required.  This f
 can get quite ugly and hard to parse for an old human brain, like mine, but stick with it.
 
 If you don't have a man-page for a program, you might try invoking the program with
-the `--help` option, or maybe with no option at all.
+the `--help` option, or maybe with no option at all. Sometimes, that returns a textual
+explanation of how the program should be invoked, and the options that are avaiable.
+
 
 
 
@@ -702,7 +709,9 @@ mkdir -p new-dir/under-new-dir
 ```
 
 If there is already a file (regular or directory) with the same path specifiation as a directory you are 
-trying to create, you will get an error from `mkdir`.
+trying to create, you will get an error from `mkdir` (unless you are using the `-p` option,
+in which case `mkdir` doesn't do anything, but neither does it complain about the fact that a 
+directory already exists where you wanted to make one).
 
 
 
@@ -758,7 +767,8 @@ final argument have a trailing `/`.
 Note, if any files in `dest_dir` have the same name as the files you are moving into
 `dest_dir` they _will_ get overwritten.
 
-So, you have gotta be careful not to overwrite stuff that you don't want to overwrite.
+So, you have must be careful not to overwrite files that you don't want to overwrite.
+Using `mv` can be dangerous in that way.
 
 #### `cp`
 
@@ -792,18 +802,20 @@ to remove all the files in a directory with a `.jpg` extension, you would do `rm
 within that directory.  However, it's a disaster to accidentally remove a number of files you
 might not have wanted to.  So, especially as you are getting familiar with Unix, it is
 worth it to experiment with your globbing using `ls` first, to see what the results are,
-and only when you are convinced that you won't remove any files you really want should you
-end up using `rm` to remove those files.
+and, only when you are convinced that you won't remove any files that you do not
+want to trash, should you
+then use `rm` to remove those files.
 
 
 
 ### "Viewing" Files
 
-In a typical GUI-based environment, when you interact with files on your computer,
+When using a Graphical User Interface, or GUI, 
+when you interact with files on your computer,
 you typically open the files with some application.  For example, you open Word files
 with Microsoft Word.  When working on the Unix shell, that same paradigm does not
 really exist.  Rather, (apart from a few cases like the text editors, `nano`, `vim` and
-`emacs`, instead of opening a file and letting the user interact with it the shell is 
+`emacs`) instead of opening a file and letting the user interact with it, the shell is 
 much happier just streaming the contents of the file to the terminal.  
 
 The most basic of such commands is the `cat` command, which _catenates_ the contents
@@ -821,10 +833,11 @@ you need to stop the command from continuing to spew stuff across your screen, y
 shell."  Usually that will stop it.
 
 ```{block2, note-text-terminal, type='rmdtip'}
-**A note regarding terminals:** On a Mac, the Terminal app is quite fast at spewing text
+**A note regarding terminals:** On a Mac, both the Terminal app and the application
+iTerm2 are quite fast at spewing text
 across the screen.  Megabytes of text or binary gibberish can flash by in seconds flat.  This 
-is not the case with the terminal window within RStudio, which can by abysmally slow, and usually
-doesn't store many lines of output.
+is not the case with the terminal window within RStudio, which can by abysmally slow, and 
+usually doesn't store many lines of output.
 ```
 
 Sometimes you want to just look at the top of a file.  The `head` command
@@ -838,9 +851,10 @@ One particularly cool thing about `cat` is that if you say
 ```sh
 cat file1 file2
 ```
-it will catenate the contents of both files, in order, to _stdout_.  
+it will catenate the contents of both files, in the order they
+are listed on the command line, to _stdout_.  
 
-Now, one Big Important Unix fact is that many programs written to run in the
+Now, one **Big Important Unix Fact** is that many programs written to run in the
 Unix shell behave in the same way regarding their output: they write their
 output to _stdout_.  We have already seen this with `ls`: its output just
 gets written to the screen, which is where _stdout_ goes by default. 
@@ -974,7 +988,7 @@ then `srs` becomes a file whose full listing (from `ls -l srs`) looks like:
 lrwxrwxr-x  1 eriq  staff    40B Jan  9 19:24 srs@ -> /Users/eriq/Documents/git-repos/srsStuff
 ```
 
-### File Permissions
+### File Permissions {#file-perm}
 
 Unix systems often host many different users.  Some users might belong to the
 same research group, and might like to be able to read the files (and/or use

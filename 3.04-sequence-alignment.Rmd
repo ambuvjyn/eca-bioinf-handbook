@@ -366,7 +366,7 @@ that holds all that information.  The exercise this week shows one example of th
 using `awk` and a TAB-delimited spreadsheet.
 
 
-## Processing alignment output with `samtools`
+## Processing alignment output with `samtools` {#samtools}
 
 Doing the alignment with `bwa mem` is only the first step of getting data ready to do
 variant calling. Once the SAM format data comes out of `bwa mem`, a number of things

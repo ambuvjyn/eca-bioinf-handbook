@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <title>Chapter 4 Essential Unix/Linux Terminal Knowledge | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</title>
   <meta name="description" content="A book example for a Chapman &amp; Hall book." />
-  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+  <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
   <meta property="og:title" content="Chapter 4 Essential Unix/Linux Terminal Knowledge | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
   <meta property="og:type" content="book" />
@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2021-08-09" />
+<meta name="date" content="2022-01-25" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -33,7 +33,9 @@
   
 <link rel="prev" href="overview-of-essential-computing-skills.html"/>
 <link rel="next" href="shell-programming.html"/>
-<script src="libs/jquery/jquery.min.js"></script>
+<script src="libs/header-attrs/header-attrs.js"></script>
+<script src="libs/jquery/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook/css/style.css" rel="stylesheet" />
 <link href="libs/gitbook/css/plugin-table.css" rel="stylesheet" />
 <link href="libs/gitbook/css/plugin-bookdown.css" rel="stylesheet" />
@@ -49,23 +51,23 @@
 
 
 
-
-<script src="libs/accessible-code-block/empty-anchor.js"></script>
+<link href="libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="libs/anchor-sections/anchor-sections.js"></script>
 
 
 <style type="text/css">
-code.sourceCode > span { display: inline-block; line-height: 1.25; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-code.sourceCode > span:empty { height: 1.2em; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
-code.sourceCode { white-space: pre; position: relative; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
 pre.sourceCode { margin: 0; }
 @media screen {
 div.sourceCode { overflow: auto; }
 }
 @media print {
-code.sourceCode { white-space: pre-wrap; }
-code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -85,7 +87,7 @@ pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-le
 div.sourceCode
   {   }
 @media screen {
-code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 code span.al { color: #ff0000; font-weight: bold; } /* Alert */
 code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
@@ -118,6 +120,29 @@ code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 </style>
 
+<style type="text/css">
+/* Used with Pandoc 2.11+ new --citeproc when CSL is used */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
 <link rel="stylesheet" href="css/style.css" type="text/css" />
 </head>
 
@@ -136,14 +161,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="divider"></li>
 <li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a></li>
 <li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a></li>
-<li class="chapter" data-level="2" data-path="erics-notes-of-what-he-might-do.html"><a href="erics-notes-of-what-he-might-do.html"><i class="fa fa-check"></i><b>2</b> Eric’s Notes of what he might do</a><ul>
+<li class="chapter" data-level="2" data-path="erics-notes-of-what-he-might-do.html"><a href="erics-notes-of-what-he-might-do.html"><i class="fa fa-check"></i><b>2</b> Eric’s Notes of what he might do</a>
+<ul>
 <li class="chapter" data-level="2.1" data-path="erics-notes-of-what-he-might-do.html"><a href="erics-notes-of-what-he-might-do.html#table-of-topics"><i class="fa fa-check"></i><b>2.1</b> Table of topics</a></li>
 </ul></li>
 <li class="part"><span><b>I Part I: Essential Computing Skills</b></span></li>
 <li class="chapter" data-level="3" data-path="overview-of-essential-computing-skills.html"><a href="overview-of-essential-computing-skills.html"><i class="fa fa-check"></i><b>3</b> Overview of Essential Computing Skills</a></li>
-<li class="chapter" data-level="4" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html"><i class="fa fa-check"></i><b>4</b> Essential Unix/Linux Terminal Knowledge</a><ul>
+<li class="chapter" data-level="4" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html"><i class="fa fa-check"></i><b>4</b> Essential Unix/Linux Terminal Knowledge</a>
+<ul>
 <li class="chapter" data-level="4.1" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#getting-a-bash-shell-on-your-system"><i class="fa fa-check"></i><b>4.1</b> Getting a bash shell on your system</a></li>
-<li class="chapter" data-level="4.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#navigating-the-unix-filesystem"><i class="fa fa-check"></i><b>4.2</b> Navigating the Unix filesystem</a><ul>
+<li class="chapter" data-level="4.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#navigating-the-unix-filesystem"><i class="fa fa-check"></i><b>4.2</b> Navigating the Unix filesystem</a>
+<ul>
 <li class="chapter" data-level="4.2.1" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#changing-the-working-directory-with-cd"><i class="fa fa-check"></i><b>4.2.1</b> Changing the working directory with <code>cd</code></a></li>
 <li class="chapter" data-level="4.2.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#comm-prompt"><i class="fa fa-check"></i><b>4.2.2</b> Updating your command prompt</a></li>
 <li class="chapter" data-level="4.2.3" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#tab-completion-for-paths"><i class="fa fa-check"></i><b>4.2.3</b> TAB-completion for paths</a></li>
@@ -151,13 +179,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="4.2.5" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#globbing"><i class="fa fa-check"></i><b>4.2.5</b> Globbing</a></li>
 <li class="chapter" data-level="4.2.6" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#what-makes-a-good-file-name"><i class="fa fa-check"></i><b>4.2.6</b> What makes a good file-name?</a></li>
 </ul></li>
-<li class="chapter" data-level="4.3" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#the-anatomy-of-a-unix-command"><i class="fa fa-check"></i><b>4.3</b> The anatomy of a Unix command</a><ul>
+<li class="chapter" data-level="4.3" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#the-anatomy-of-a-unix-command"><i class="fa fa-check"></i><b>4.3</b> The anatomy of a Unix command</a>
+<ul>
 <li class="chapter" data-level="4.3.1" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#anatomy-command"><i class="fa fa-check"></i><b>4.3.1</b> The <code>command</code></a></li>
 <li class="chapter" data-level="4.3.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#the-options"><i class="fa fa-check"></i><b>4.3.2</b> The <em>options</em></a></li>
 <li class="chapter" data-level="4.3.3" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#arguments"><i class="fa fa-check"></i><b>4.3.3</b> Arguments</a></li>
 <li class="chapter" data-level="4.3.4" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#getting-information-about-unix-commands"><i class="fa fa-check"></i><b>4.3.4</b> Getting information about Unix commands</a></li>
 </ul></li>
-<li class="chapter" data-level="4.4" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#handling-manipulating-and-viewing-files-and-streams"><i class="fa fa-check"></i><b>4.4</b> Handling, Manipulating, and Viewing files and streams</a><ul>
+<li class="chapter" data-level="4.4" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#handling-manipulating-and-viewing-files-and-streams"><i class="fa fa-check"></i><b>4.4</b> Handling, Manipulating, and Viewing files and streams</a>
+<ul>
 <li class="chapter" data-level="4.4.1" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#creating-new-directories"><i class="fa fa-check"></i><b>4.4.1</b> Creating new directories</a></li>
 <li class="chapter" data-level="4.4.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#fundamental-file-handling-commands"><i class="fa fa-check"></i><b>4.4.2</b> Fundamental file-handling commands</a></li>
 <li class="chapter" data-level="4.4.3" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#viewing-files"><i class="fa fa-check"></i><b>4.4.3</b> “Viewing” Files</a></li>
@@ -165,27 +195,32 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="4.4.5" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#stdin-and"><i class="fa fa-check"></i><b>4.4.5</b> stdin, <code>&lt;</code> and <code>|</code></a></li>
 <li class="chapter" data-level="4.4.6" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#stderr"><i class="fa fa-check"></i><b>4.4.6</b> stderr</a></li>
 <li class="chapter" data-level="4.4.7" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#symbolic-links"><i class="fa fa-check"></i><b>4.4.7</b> Symbolic links</a></li>
-<li class="chapter" data-level="4.4.8" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#file-permissions"><i class="fa fa-check"></i><b>4.4.8</b> File Permissions</a></li>
+<li class="chapter" data-level="4.4.8" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#file-perm"><i class="fa fa-check"></i><b>4.4.8</b> File Permissions</a></li>
 <li class="chapter" data-level="4.4.9" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#editing-text-files-at-the-terminal"><i class="fa fa-check"></i><b>4.4.9</b> Editing text files at the terminal</a></li>
 </ul></li>
-<li class="chapter" data-level="4.5" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#unix-env"><i class="fa fa-check"></i><b>4.5</b> Customizing your Environment</a><ul>
+<li class="chapter" data-level="4.5" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#unix-env"><i class="fa fa-check"></i><b>4.5</b> Customizing your Environment</a>
+<ul>
 <li class="chapter" data-level="4.5.1" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#appearances-matter"><i class="fa fa-check"></i><b>4.5.1</b> Appearances matter</a></li>
 <li class="chapter" data-level="4.5.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#where-are-my-programscommands-at"><i class="fa fa-check"></i><b>4.5.2</b> Where are my programs/commands at?!</a></li>
 </ul></li>
 <li class="chapter" data-level="4.6" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#a-few-more-important-keystrokes"><i class="fa fa-check"></i><b>4.6</b> A Few More Important Keystrokes</a></li>
 <li class="chapter" data-level="4.7" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#a-short-list-of-additional-useful-commands."><i class="fa fa-check"></i><b>4.7</b> A short list of additional useful commands.</a></li>
-<li class="chapter" data-level="4.8" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#two-important-computing-concepts"><i class="fa fa-check"></i><b>4.8</b> Two important computing concepts</a><ul>
+<li class="chapter" data-level="4.8" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#two-important-computing-concepts"><i class="fa fa-check"></i><b>4.8</b> Two important computing concepts</a>
+<ul>
 <li class="chapter" data-level="4.8.1" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#compression"><i class="fa fa-check"></i><b>4.8.1</b> Compression</a></li>
 <li class="chapter" data-level="4.8.2" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#hashing"><i class="fa fa-check"></i><b>4.8.2</b> Hashing</a></li>
 </ul></li>
 <li class="chapter" data-level="4.9" data-path="essential-unixlinux-terminal-knowledge.html"><a href="essential-unixlinux-terminal-knowledge.html#unix-quick-study-guide"><i class="fa fa-check"></i><b>4.9</b> Unix: Quick Study Guide</a></li>
 </ul></li>
-<li class="chapter" data-level="5" data-path="shell-programming.html"><a href="shell-programming.html"><i class="fa fa-check"></i><b>5</b> Shell programming</a><ul>
+<li class="chapter" data-level="5" data-path="shell-programming.html"><a href="shell-programming.html"><i class="fa fa-check"></i><b>5</b> Shell programming</a>
+<ul>
 <li class="chapter" data-level="5.1" data-path="shell-programming.html"><a href="shell-programming.html#an-example-script"><i class="fa fa-check"></i><b>5.1</b> An example script</a></li>
-<li class="chapter" data-level="5.2" data-path="shell-programming.html"><a href="shell-programming.html#the-structure-of-a-bash-script"><i class="fa fa-check"></i><b>5.2</b> The Structure of a Bash Script</a><ul>
+<li class="chapter" data-level="5.2" data-path="shell-programming.html"><a href="shell-programming.html#the-structure-of-a-bash-script"><i class="fa fa-check"></i><b>5.2</b> The Structure of a Bash Script</a>
+<ul>
 <li class="chapter" data-level="5.2.1" data-path="shell-programming.html"><a href="shell-programming.html#paragraph-before-shebang"><i class="fa fa-check"></i><b>5.2.1</b> A bit more on <code>;</code> and <code>&amp;</code></a></li>
 </ul></li>
-<li class="chapter" data-level="5.3" data-path="shell-programming.html"><a href="shell-programming.html#variables"><i class="fa fa-check"></i><b>5.3</b> Variables</a><ul>
+<li class="chapter" data-level="5.3" data-path="shell-programming.html"><a href="shell-programming.html#variables"><i class="fa fa-check"></i><b>5.3</b> Variables</a>
+<ul>
 <li class="chapter" data-level="5.3.1" data-path="shell-programming.html"><a href="shell-programming.html#assigning-values-to-variables"><i class="fa fa-check"></i><b>5.3.1</b> Assigning values to variables</a></li>
 <li class="chapter" data-level="5.3.2" data-path="shell-programming.html"><a href="shell-programming.html#accessing-values-from-variables"><i class="fa fa-check"></i><b>5.3.2</b> Accessing values from variables</a></li>
 <li class="chapter" data-level="5.3.3" data-path="shell-programming.html"><a href="shell-programming.html#what-does-the-shell-do-with-the-value-substituted-for-a-variable"><i class="fa fa-check"></i><b>5.3.3</b> What does the shell do with the value substituted for a variable?</a></li>
@@ -196,7 +231,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="5.4" data-path="shell-programming.html"><a href="shell-programming.html#evaluate-a-command-and-substitute-the-result-on-the-command-line"><i class="fa fa-check"></i><b>5.4</b> Evaluate a command and substitute the result on the command line</a></li>
 <li class="chapter" data-level="5.5" data-path="shell-programming.html"><a href="shell-programming.html#groupingcollecting-output-from-multiple-commands-commands-and-commands"><i class="fa fa-check"></i><b>5.5</b> Grouping/Collecting output from multiple commands: <code>(commands)</code> and <code>{ commands; }</code></a></li>
-<li class="chapter" data-level="5.6" data-path="shell-programming.html"><a href="shell-programming.html#exit-status"><i class="fa fa-check"></i><b>5.6</b> Exit Status</a><ul>
+<li class="chapter" data-level="5.6" data-path="shell-programming.html"><a href="shell-programming.html#exit-status"><i class="fa fa-check"></i><b>5.6</b> Exit Status</a>
+<ul>
 <li class="chapter" data-level="5.6.1" data-path="shell-programming.html"><a href="shell-programming.html#combinations-of-exit-statuses"><i class="fa fa-check"></i><b>5.6.1</b> Combinations of exit statuses</a></li>
 </ul></li>
 <li class="chapter" data-level="5.7" data-path="shell-programming.html"><a href="shell-programming.html#unix-for-loops"><i class="fa fa-check"></i><b>5.7</b> Loops and repetition</a></li>
@@ -207,8 +243,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="5.12" data-path="shell-programming.html"><a href="shell-programming.html#reading-files-line-by-line"><i class="fa fa-check"></i><b>5.12</b> reading files line by line</a></li>
 <li class="chapter" data-level="5.13" data-path="shell-programming.html"><a href="shell-programming.html#further-reading"><i class="fa fa-check"></i><b>5.13</b> Further reading</a></li>
 </ul></li>
-<li class="chapter" data-level="6" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html"><i class="fa fa-check"></i><b>6</b> Sed, awk, and regular expressions</a><ul>
-<li class="chapter" data-level="6.1" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html#awk"><i class="fa fa-check"></i><b>6.1</b> awk</a><ul>
+<li class="chapter" data-level="6" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html"><i class="fa fa-check"></i><b>6</b> Sed, awk, and regular expressions</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html#awk"><i class="fa fa-check"></i><b>6.1</b> awk</a>
+<ul>
 <li class="chapter" data-level="6.1.1" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html#line-cycling-tests-and-actions"><i class="fa fa-check"></i><b>6.1.1</b> Line-cycling, tests and actions</a></li>
 <li class="chapter" data-level="6.1.2" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html#column-splitting-fields--f-nf-print-ofs-and-begin"><i class="fa fa-check"></i><b>6.1.2</b> Column splitting, fields, <code>-F</code>, <code>$</code>, <code>NF</code>, <code>print</code>, <code>OFS</code> and <code>BEGIN</code></a></li>
 <li class="chapter" data-level="6.1.3" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html#a-brief-introduction-to-regular-expressions"><i class="fa fa-check"></i><b>6.1.3</b> A brief introduction to regular expressions</a></li>
@@ -220,40 +258,48 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="chapter" data-level="6.2" data-path="sed-awk-and-regular-expressions.html"><a href="sed-awk-and-regular-expressions.html#sed"><i class="fa fa-check"></i><b>6.2</b> sed</a></li>
 </ul></li>
-<li class="chapter" data-level="7" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html"><i class="fa fa-check"></i><b>7</b> Working on remote servers</a><ul>
-<li class="chapter" data-level="7.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#accessing-remote-computers"><i class="fa fa-check"></i><b>7.1</b> Accessing remote computers</a><ul>
+<li class="chapter" data-level="7" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html"><i class="fa fa-check"></i><b>7</b> Working on remote servers</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#accessing-remote-computers"><i class="fa fa-check"></i><b>7.1</b> Accessing remote computers</a>
+<ul>
 <li class="chapter" data-level="7.1.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#windows"><i class="fa fa-check"></i><b>7.1.1</b> Windows</a></li>
 <li class="chapter" data-level="7.1.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#hummingbird"><i class="fa fa-check"></i><b>7.1.2</b> Hummingbird</a></li>
 <li class="chapter" data-level="7.1.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#summit"><i class="fa fa-check"></i><b>7.1.3</b> Summit</a></li>
 <li class="chapter" data-level="7.1.4" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#sedna"><i class="fa fa-check"></i><b>7.1.4</b> Sedna</a></li>
 </ul></li>
-<li class="chapter" data-level="7.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#transferring-files-to-remote-computers"><i class="fa fa-check"></i><b>7.2</b> Transferring files to remote computers</a><ul>
+<li class="chapter" data-level="7.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#transferring-files-to-remote-computers"><i class="fa fa-check"></i><b>7.2</b> Transferring files to remote computers</a>
+<ul>
 <li class="chapter" data-level="7.2.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#sftp-via-lftp"><i class="fa fa-check"></i><b>7.2.1</b> <code>sftp</code> (via <code>lftp</code>)</a></li>
 <li class="chapter" data-level="7.2.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#git"><i class="fa fa-check"></i><b>7.2.2</b> git</a></li>
 <li class="chapter" data-level="7.2.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#globus"><i class="fa fa-check"></i><b>7.2.3</b> Globus</a></li>
 <li class="chapter" data-level="7.2.4" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#interfacing-with-the-cloud"><i class="fa fa-check"></i><b>7.2.4</b> Interfacing with “The Cloud”</a></li>
 <li class="chapter" data-level="7.2.5" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#get-seqs"><i class="fa fa-check"></i><b>7.2.5</b> Getting files from a sequencing center</a></li>
 </ul></li>
-<li class="chapter" data-level="7.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#tmux"><i class="fa fa-check"></i><b>7.3</b> <code>tmux</code>: the terminal multiplexer</a><ul>
+<li class="chapter" data-level="7.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#tmux"><i class="fa fa-check"></i><b>7.3</b> <code>tmux</code>: the terminal multiplexer</a>
+<ul>
 <li class="chapter" data-level="7.3.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#an-analogy-for-how-tmux-works"><i class="fa fa-check"></i><b>7.3.1</b> An analogy for how <code>tmux</code> works</a></li>
 <li class="chapter" data-level="7.3.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#first-steps-with-tmux"><i class="fa fa-check"></i><b>7.3.2</b> First steps with <code>tmux</code></a></li>
 <li class="chapter" data-level="7.3.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#further-steps-with-tmux"><i class="fa fa-check"></i><b>7.3.3</b> Further steps with <code>tmux</code></a></li>
 </ul></li>
 <li class="chapter" data-level="7.4" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#tmux-for-mac-users"><i class="fa fa-check"></i><b>7.4</b> <code>tmux</code> for Mac users</a></li>
-<li class="chapter" data-level="7.5" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#installing-software-on-an-hpcc"><i class="fa fa-check"></i><b>7.5</b> Installing Software on an HPCC</a><ul>
+<li class="chapter" data-level="7.5" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#installing-software-on-an-hpcc"><i class="fa fa-check"></i><b>7.5</b> Installing Software on an HPCC</a>
+<ul>
 <li class="chapter" data-level="7.5.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#modules"><i class="fa fa-check"></i><b>7.5.1</b> Modules</a></li>
 <li class="chapter" data-level="7.5.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#miniconda"><i class="fa fa-check"></i><b>7.5.2</b> Miniconda</a></li>
 <li class="chapter" data-level="7.5.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#installing-java-programs"><i class="fa fa-check"></i><b>7.5.3</b> Installing Java Programs</a></li>
 </ul></li>
-<li class="chapter" data-level="7.6" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#vim-its-time-to-get-serious-with-text-editing"><i class="fa fa-check"></i><b>7.6</b> <code>vim</code>: it’s time to get serious with text editing</a><ul>
+<li class="chapter" data-level="7.6" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#vim-its-time-to-get-serious-with-text-editing"><i class="fa fa-check"></i><b>7.6</b> <code>vim</code>: it’s time to get serious with text editing</a>
+<ul>
 <li class="chapter" data-level="7.6.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#using-neovim-and-nvim-r-and-tmux-to-use-r-well-on-the-cluster"><i class="fa fa-check"></i><b>7.6.1</b> Using neovim and Nvim-R and tmux to use R well on the cluster</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="8" data-path="chap-HPCC.html"><a href="chap-HPCC.html"><i class="fa fa-check"></i><b>8</b> High Performance Computing Clusters (HPCC’s)</a><ul>
+<li class="chapter" data-level="8" data-path="chap-HPCC.html"><a href="chap-HPCC.html"><i class="fa fa-check"></i><b>8</b> High Performance Computing Clusters (HPCC’s)</a>
+<ul>
 <li class="chapter" data-level="8.1" data-path="chap-HPCC.html"><a href="chap-HPCC.html#an-oversimplified-but-useful-view-of-a-computing-cluster"><i class="fa fa-check"></i><b>8.1</b> An oversimplified, but useful, view of a computing cluster</a></li>
 <li class="chapter" data-level="8.2" data-path="chap-HPCC.html"><a href="chap-HPCC.html#cluster-computing-and-the-job-scheduler"><i class="fa fa-check"></i><b>8.2</b> Cluster computing and the job scheduler</a></li>
 <li class="chapter" data-level="8.3" data-path="chap-HPCC.html"><a href="chap-HPCC.html#slurm-info"><i class="fa fa-check"></i><b>8.3</b> Learning about the resources on your HPCC</a></li>
-<li class="chapter" data-level="8.4" data-path="chap-HPCC.html"><a href="chap-HPCC.html#getting-compute-resources-allocated-to-your-jobs-on-an-hpcc"><i class="fa fa-check"></i><b>8.4</b> Getting compute resources allocated to your jobs on an HPCC</a><ul>
+<li class="chapter" data-level="8.4" data-path="chap-HPCC.html"><a href="chap-HPCC.html#getting-compute-resources-allocated-to-your-jobs-on-an-hpcc"><i class="fa fa-check"></i><b>8.4</b> Getting compute resources allocated to your jobs on an HPCC</a>
+<ul>
 <li class="chapter" data-level="8.4.1" data-path="chap-HPCC.html"><a href="chap-HPCC.html#interactive-sessions"><i class="fa fa-check"></i><b>8.4.1</b> Interactive sessions</a></li>
 <li class="chapter" data-level="8.4.2" data-path="chap-HPCC.html"><a href="chap-HPCC.html#slurm-batch"><i class="fa fa-check"></i><b>8.4.2</b> Batch jobs</a></li>
 <li class="chapter" data-level="8.4.3" data-path="chap-HPCC.html"><a href="chap-HPCC.html#slurm-job-arrays"><i class="fa fa-check"></i><b>8.4.3</b> SLURM Job Arrays</a></li>
@@ -269,14 +315,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="part"><span><b>II Part II: Reproducible Research Strategies</b></span></li>
 <li class="chapter" data-level="9" data-path="introduction-to-reproducible-research.html"><a href="introduction-to-reproducible-research.html"><i class="fa fa-check"></i><b>9</b> Introduction to Reproducible Research</a></li>
-<li class="chapter" data-level="10" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html"><i class="fa fa-check"></i><b>10</b> Rstudio and Project-centered Organization</a><ul>
+<li class="chapter" data-level="10" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html"><i class="fa fa-check"></i><b>10</b> Rstudio and Project-centered Organization</a>
+<ul>
 <li class="chapter" data-level="10.1" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html#organizing-big-projects"><i class="fa fa-check"></i><b>10.1</b> Organizing big projects</a></li>
-<li class="chapter" data-level="10.2" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html#using-rstudio-in-workflows-with-remote-computers-and-hpccs"><i class="fa fa-check"></i><b>10.2</b> Using RStudio in workflows with remote computers and HPCCs</a><ul>
+<li class="chapter" data-level="10.2" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html#using-rstudio-in-workflows-with-remote-computers-and-hpccs"><i class="fa fa-check"></i><b>10.2</b> Using RStudio in workflows with remote computers and HPCCs</a>
+<ul>
 <li class="chapter" data-level="10.2.1" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html#keeping-an-rstudio-project-in-sync-with-github"><i class="fa fa-check"></i><b>10.2.1</b> Keeping an RStudio project “in sync” with GitHub</a></li>
 <li class="chapter" data-level="10.2.2" data-path="rstudio-and-project-centered-organization.html"><a href="rstudio-and-project-centered-organization.html#evaluating-scripts-line-by-line-on-a-remote-machine-from-within-rstudio"><i class="fa fa-check"></i><b>10.2.2</b> Evaluating scripts line by line on a remote machine from within RStudio</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="11" data-path="version-control.html"><a href="version-control.html"><i class="fa fa-check"></i><b>11</b> Version control</a><ul>
+<li class="chapter" data-level="11" data-path="version-control.html"><a href="version-control.html"><i class="fa fa-check"></i><b>11</b> Version control</a>
+<ul>
 <li class="chapter" data-level="11.1" data-path="version-control.html"><a href="version-control.html#why-use-version-control"><i class="fa fa-check"></i><b>11.1</b> Why use version control?</a></li>
 <li class="chapter" data-level="11.2" data-path="version-control.html"><a href="version-control.html#git-workings"><i class="fa fa-check"></i><b>11.2</b> How git works</a></li>
 <li class="chapter" data-level="11.3" data-path="version-control.html"><a href="version-control.html#git-workflow-patterns"><i class="fa fa-check"></i><b>11.3</b> git workflow patterns</a></li>
@@ -284,21 +333,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="11.5" data-path="version-control.html"><a href="version-control.html#git-on-the-command-line"><i class="fa fa-check"></i><b>11.5</b> git on the command line</a></li>
 </ul></li>
 <li class="chapter" data-level="12" data-path="a-fast-furious-overview-of-the-tidyverse.html"><a href="a-fast-furious-overview-of-the-tidyverse.html"><i class="fa fa-check"></i><b>12</b> A fast, furious overview of the tidyverse</a></li>
-<li class="chapter" data-level="13" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html"><i class="fa fa-check"></i><b>13</b> Authoring reproducibly with Rmarkdown</a><ul>
+<li class="chapter" data-level="13" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html"><i class="fa fa-check"></i><b>13</b> Authoring reproducibly with Rmarkdown</a>
+<ul>
 <li class="chapter" data-level="13.1" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html#notebooks"><i class="fa fa-check"></i><b>13.1</b> Notebooks</a></li>
-<li class="chapter" data-level="13.2" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html#references"><i class="fa fa-check"></i><b>13.2</b> References</a><ul>
+<li class="chapter" data-level="13.2" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html#references"><i class="fa fa-check"></i><b>13.2</b> References</a>
+<ul>
 <li class="chapter" data-level="13.2.1" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html#zotero-and-rmarkdown"><i class="fa fa-check"></i><b>13.2.1</b> Zotero and Rmarkdown</a></li>
 </ul></li>
 <li class="chapter" data-level="13.3" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html#bookdown"><i class="fa fa-check"></i><b>13.3</b> Bookdown</a></li>
 <li class="chapter" data-level="13.4" data-path="authoring-reproducibly-with-rmarkdown.html"><a href="authoring-reproducibly-with-rmarkdown.html#google-docs"><i class="fa fa-check"></i><b>13.4</b> Google Docs</a></li>
 </ul></li>
-<li class="chapter" data-level="14" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html"><i class="fa fa-check"></i><b>14</b> Managing Workflows with Snakemake</a><ul>
-<li class="chapter" data-level="14.1" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#a-simple-snakemake-example"><i class="fa fa-check"></i><b>14.1</b> A Simple Snakemake Example</a><ul>
+<li class="chapter" data-level="14" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html"><i class="fa fa-check"></i><b>14</b> Managing Workflows with Snakemake</a>
+<ul>
+<li class="chapter" data-level="14.1" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#a-simple-snakemake-example"><i class="fa fa-check"></i><b>14.1</b> A Simple Snakemake Example</a>
+<ul>
 <li class="chapter" data-level="14.1.1" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#snakefile-1-a-simple-rule-to-trimmomcawesome-the-files-from-001"><i class="fa fa-check"></i><b>14.1.1</b> Snakefile #1: A simple rule to TrimmoMcAwesome the files from 001</a></li>
 <li class="chapter" data-level="14.1.2" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#snakefile-2-a-single-trimmomcawesome-rule-using-wildcards"><i class="fa fa-check"></i><b>14.1.2</b> Snakefile #2: A single TrimmoMcAwesome rule using wildcards</a></li>
 <li class="chapter" data-level="14.1.3" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#snakefile-3-add-trim_stupendous-in-there"><i class="fa fa-check"></i><b>14.1.3</b> Snakefile #3: Add <code>trim_stupendous</code> in there</a></li>
 </ul></li>
-<li class="chapter" data-level="14.2" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#ugly-complex-file-namesa-job-for-snakemake-input-functions"><i class="fa fa-check"></i><b>14.2</b> Ugly, complex file names…a job for Snakemake input functions!</a><ul>
+<li class="chapter" data-level="14.2" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#ugly-complex-file-namesa-job-for-snakemake-input-functions"><i class="fa fa-check"></i><b>14.2</b> Ugly, complex file names…a job for Snakemake input functions!</a>
+<ul>
 <li class="chapter" data-level="14.2.1" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#playing-with-pandas"><i class="fa fa-check"></i><b>14.2.1</b> Playing with Pandas</a></li>
 <li class="chapter" data-level="14.2.2" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#a-quick-sidebar-spoofing-a-snakemake-input-function"><i class="fa fa-check"></i><b>14.2.2</b> A Quick Sidebar: Spoofing a Snakemake input function</a></li>
 <li class="chapter" data-level="14.2.3" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#snakefile-4-an-input-function-for-trim_awesome"><i class="fa fa-check"></i><b>14.2.3</b> Snakefile #4: an input function for trim_awesome</a></li>
@@ -306,7 +360,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="14.3" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#input-functions-from-python-dictionaries"><i class="fa fa-check"></i><b>14.3</b> Input functions from Python Dictionaries</a></li>
 <li class="chapter" data-level="14.4" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#generating-lists-of-files-with-expand"><i class="fa fa-check"></i><b>14.4</b> Generating lists of files with expand()</a></li>
 <li class="chapter" data-level="14.5" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#a-python-primer-for-using-snakemake"><i class="fa fa-check"></i><b>14.5</b> A Python Primer for Using Snakemake</a></li>
-<li class="chapter" data-level="14.6" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#using-snakemake-on-a-computing-cluster"><i class="fa fa-check"></i><b>14.6</b> Using Snakemake on a Computing Cluster</a><ul>
+<li class="chapter" data-level="14.6" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#using-snakemake-on-a-computing-cluster"><i class="fa fa-check"></i><b>14.6</b> Using Snakemake on a Computing Cluster</a>
+<ul>
 <li class="chapter" data-level="14.6.1" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#installing-and-configuring-the-snakemake-slurm-profile"><i class="fa fa-check"></i><b>14.6.1</b> Installing and Configuring the Snakemake SLURM profile</a></li>
 <li class="chapter" data-level="14.6.2" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#playing-with-our-new-slurm-profile"><i class="fa fa-check"></i><b>14.6.2</b> Playing with our new SLURM profile</a></li>
 <li class="chapter" data-level="14.6.3" data-path="managing-workflows-with-snakemake.html"><a href="managing-workflows-with-snakemake.html#managing-cluster-resources-with-snakemake"><i class="fa fa-check"></i><b>14.6.3</b> Managing cluster resources with Snakemake</a></li>
@@ -315,34 +370,41 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 <li class="part"><span><b>III Part III: Bioinformatic Analyses</b></span></li>
 <li class="chapter" data-level="15" data-path="overview-of-bioinformatic-analyses.html"><a href="overview-of-bioinformatic-analyses.html"><i class="fa fa-check"></i><b>15</b> Overview of Bioinformatic Analyses</a></li>
-<li class="chapter" data-level="16" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html"><i class="fa fa-check"></i><b>16</b> DNA Sequences and Sequencing</a><ul>
-<li class="chapter" data-level="16.1" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#dna-stuff"><i class="fa fa-check"></i><b>16.1</b> DNA Stuff</a><ul>
+<li class="chapter" data-level="16" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html"><i class="fa fa-check"></i><b>16</b> DNA Sequences and Sequencing</a>
+<ul>
+<li class="chapter" data-level="16.1" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#dna-stuff"><i class="fa fa-check"></i><b>16.1</b> DNA Stuff</a>
+<ul>
 <li class="chapter" data-level="16.1.1" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#dna-replication-with-dna-polymerase"><i class="fa fa-check"></i><b>16.1.1</b> DNA Replication with DNA Polymerase</a></li>
 <li class="chapter" data-level="16.1.2" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#the-importance-of-the-3-hydroxyl"><i class="fa fa-check"></i><b>16.1.2</b> The importance of the 3’ hydroxyl…</a></li>
 </ul></li>
 <li class="chapter" data-level="16.2" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#sanger-sequencing"><i class="fa fa-check"></i><b>16.2</b> Sanger sequencing</a></li>
 <li class="chapter" data-level="16.3" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#illumina-sequencing-by-synthesis"><i class="fa fa-check"></i><b>16.3</b> Illumina Sequencing by Synthesis</a></li>
-<li class="chapter" data-level="16.4" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#library-prep-protocols"><i class="fa fa-check"></i><b>16.4</b> Library Prep Protocols</a><ul>
+<li class="chapter" data-level="16.4" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#library-prep-protocols"><i class="fa fa-check"></i><b>16.4</b> Library Prep Protocols</a>
+<ul>
 <li class="chapter" data-level="16.4.1" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#wgs"><i class="fa fa-check"></i><b>16.4.1</b> WGS</a></li>
 <li class="chapter" data-level="16.4.2" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#rad-seq-methods"><i class="fa fa-check"></i><b>16.4.2</b> RAD-Seq methods</a></li>
 <li class="chapter" data-level="16.4.3" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#amplicon-sequencing"><i class="fa fa-check"></i><b>16.4.3</b> Amplicon Sequencing</a></li>
 <li class="chapter" data-level="16.4.4" data-path="dna-sequences-and-sequencing.html"><a href="dna-sequences-and-sequencing.html#capture-arrays-rapture-etc."><i class="fa fa-check"></i><b>16.4.4</b> Capture arrays, RAPTURE, etc.</a></li>
 </ul></li>
 </ul></li>
-<li class="chapter" data-level="17" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html"><i class="fa fa-check"></i><b>17</b> Bioinformatic file formats</a><ul>
+<li class="chapter" data-level="17" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html"><i class="fa fa-check"></i><b>17</b> Bioinformatic file formats</a>
+<ul>
 <li class="chapter" data-level="17.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#sequences"><i class="fa fa-check"></i><b>17.1</b> Sequences</a></li>
-<li class="chapter" data-level="17.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#fastq"><i class="fa fa-check"></i><b>17.2</b> FASTQ</a><ul>
+<li class="chapter" data-level="17.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#fastq"><i class="fa fa-check"></i><b>17.2</b> FASTQ</a>
+<ul>
 <li class="chapter" data-level="17.2.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#illumina-ids"><i class="fa fa-check"></i><b>17.2.1</b> Line 1: Illumina identifier lines</a></li>
 <li class="chapter" data-level="17.2.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#bqscores"><i class="fa fa-check"></i><b>17.2.2</b> Line 4: Base quality scores</a></li>
 <li class="chapter" data-level="17.2.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#a-fastq-tidyverse-interlude"><i class="fa fa-check"></i><b>17.2.3</b> A FASTQ ‘tidyverse’ Interlude</a></li>
 <li class="chapter" data-level="17.2.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#comparing-read-1-to-read-2"><i class="fa fa-check"></i><b>17.2.4</b> Comparing read 1 to read 2</a></li>
 </ul></li>
-<li class="chapter" data-level="17.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#fasta"><i class="fa fa-check"></i><b>17.3</b> FASTA</a><ul>
+<li class="chapter" data-level="17.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#fasta"><i class="fa fa-check"></i><b>17.3</b> FASTA</a>
+<ul>
 <li class="chapter" data-level="17.3.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#genomic-ranges"><i class="fa fa-check"></i><b>17.3.1</b> Genomic ranges</a></li>
 <li class="chapter" data-level="17.3.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#extracting-genomic-ranges-from-a-fasta-file"><i class="fa fa-check"></i><b>17.3.2</b> Extracting genomic ranges from a FASTA file</a></li>
 <li class="chapter" data-level="17.3.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#downloading-reference-genomes-from-ncbi"><i class="fa fa-check"></i><b>17.3.3</b> Downloading reference genomes from NCBI</a></li>
 </ul></li>
-<li class="chapter" data-level="17.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#alignments"><i class="fa fa-check"></i><b>17.4</b> Alignments</a><ul>
+<li class="chapter" data-level="17.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#alignments"><i class="fa fa-check"></i><b>17.4</b> Alignments</a>
+<ul>
 <li class="chapter" data-level="17.4.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#how-might-i-align-to-thee-let-me-count-the-ways"><i class="fa fa-check"></i><b>17.4.1</b> How might I align to thee? Let me count the ways…</a></li>
 <li class="chapter" data-level="17.4.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#play-with-simple-alignments"><i class="fa fa-check"></i><b>17.4.2</b> Play with simple alignments</a></li>
 <li class="chapter" data-level="17.4.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#sam-flags"><i class="fa fa-check"></i><b>17.4.3</b> SAM Flags</a></li>
@@ -352,27 +414,32 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="17.4.7" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#the-bam-format"><i class="fa fa-check"></i><b>17.4.7</b> The BAM format</a></li>
 <li class="chapter" data-level="17.4.8" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#quick-self-study"><i class="fa fa-check"></i><b>17.4.8</b> Quick self study</a></li>
 </ul></li>
-<li class="chapter" data-level="17.5" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#variants"><i class="fa fa-check"></i><b>17.5</b> Variants</a><ul>
+<li class="chapter" data-level="17.5" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#variants"><i class="fa fa-check"></i><b>17.5</b> Variants</a>
+<ul>
 <li class="chapter" data-level="17.5.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#vcf-format-the-body"><i class="fa fa-check"></i><b>17.5.1</b> VCF Format – The Body</a></li>
 <li class="chapter" data-level="17.5.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#vcf-format-the-header"><i class="fa fa-check"></i><b>17.5.2</b> VCF Format – The Header</a></li>
 <li class="chapter" data-level="17.5.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#boneyard"><i class="fa fa-check"></i><b>17.5.3</b> Boneyard</a></li>
 </ul></li>
 <li class="chapter" data-level="17.6" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#segments"><i class="fa fa-check"></i><b>17.6</b> Segments</a></li>
 <li class="chapter" data-level="17.7" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#conversionextractions-between-different-formats"><i class="fa fa-check"></i><b>17.7</b> Conversion/Extractions between different formats</a></li>
-<li class="chapter" data-level="17.8" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#visualization-of-genomic-data"><i class="fa fa-check"></i><b>17.8</b> Visualization of Genomic Data</a><ul>
+<li class="chapter" data-level="17.8" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#visualization-of-genomic-data"><i class="fa fa-check"></i><b>17.8</b> Visualization of Genomic Data</a>
+<ul>
 <li class="chapter" data-level="17.8.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#sample-data"><i class="fa fa-check"></i><b>17.8.1</b> Sample Data</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="18" data-path="genome-assembly.html"><a href="genome-assembly.html"><i class="fa fa-check"></i><b>18</b> Genome Assembly</a></li>
-<li class="chapter" data-level="19" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><i class="fa fa-check"></i><b>19</b> Alignment of sequence data to a reference genome (and associated steps)</a><ul>
+<li class="chapter" data-level="19" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><i class="fa fa-check"></i><b>19</b> Alignment of sequence data to a reference genome (and associated steps)</a>
+<ul>
 <li class="chapter" data-level="19.1" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#the-journey-of-each-dna-fragment-from-organism-to-sequencing-read"><i class="fa fa-check"></i><b>19.1</b> The Journey of each DNA Fragment from Organism to Sequencing Read</a></li>
 <li class="chapter" data-level="19.2" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#read-groups"><i class="fa fa-check"></i><b>19.2</b> Read Groups</a></li>
-<li class="chapter" data-level="19.3" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#aligning-reads-with-bwa"><i class="fa fa-check"></i><b>19.3</b> Aligning reads with <code>bwa</code></a><ul>
+<li class="chapter" data-level="19.3" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#aligning-reads-with-bwa"><i class="fa fa-check"></i><b>19.3</b> Aligning reads with <code>bwa</code></a>
+<ul>
 <li class="chapter" data-level="19.3.1" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#indexing-the-genome-for-alignment"><i class="fa fa-check"></i><b>19.3.1</b> Indexing the genome for alignment</a></li>
 <li class="chapter" data-level="19.3.2" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#mapping-reads-with-bwa-mem"><i class="fa fa-check"></i><b>19.3.2</b> Mapping reads with <code>bwa mem</code></a></li>
 <li class="chapter" data-level="19.3.3" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#hold-it-right-there-buddy-what-about-the-read-groups"><i class="fa fa-check"></i><b>19.3.3</b> Hold it Right There, Buddy! What about the Read Groups?</a></li>
 </ul></li>
-<li class="chapter" data-level="19.4" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#processing-alignment-output-with-samtools"><i class="fa fa-check"></i><b>19.4</b> Processing alignment output with <code>samtools</code></a><ul>
+<li class="chapter" data-level="19.4" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#samtools"><i class="fa fa-check"></i><b>19.4</b> Processing alignment output with <code>samtools</code></a>
+<ul>
 <li class="chapter" data-level="19.4.1" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#samtools-subcommands"><i class="fa fa-check"></i><b>19.4.1</b> <code>samtools</code> subcommands</a></li>
 </ul></li>
 <li class="chapter" data-level="19.5" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#boneyard-below-here"><i class="fa fa-check"></i><b>19.5</b> BONEYARD BELOW HERE</a></li>
@@ -381,8 +448,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="19.8" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#merging-bam-files"><i class="fa fa-check"></i><b>19.8</b> Merging BAM files</a></li>
 <li class="chapter" data-level="19.9" data-path="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html"><a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#divide-and-conquer-strategies"><i class="fa fa-check"></i><b>19.9</b> Divide and Conquer Strategies</a></li>
 </ul></li>
-<li class="chapter" data-level="20" data-path="variant-calling.html"><a href="variant-calling.html"><i class="fa fa-check"></i><b>20</b> Variant calling</a><ul>
-<li class="chapter" data-level="20.1" data-path="variant-calling.html"><a href="variant-calling.html#genotype-likelihoods"><i class="fa fa-check"></i><b>20.1</b> Genotype Likelihoods</a><ul>
+<li class="chapter" data-level="20" data-path="variant-calling.html"><a href="variant-calling.html"><i class="fa fa-check"></i><b>20</b> Variant calling</a>
+<ul>
+<li class="chapter" data-level="20.1" data-path="variant-calling.html"><a href="variant-calling.html#genotype-likelihoods"><i class="fa fa-check"></i><b>20.1</b> Genotype Likelihoods</a>
+<ul>
 <li class="chapter" data-level="20.1.1" data-path="variant-calling.html"><a href="variant-calling.html#basic-sketch-of-genotype-likelihood-calculations"><i class="fa fa-check"></i><b>20.1.1</b> Basic Sketch of Genotype Likelihood Calculations</a></li>
 <li class="chapter" data-level="20.1.2" data-path="variant-calling.html"><a href="variant-calling.html#specifics-of-different-genotype-likelihoods"><i class="fa fa-check"></i><b>20.1.2</b> Specifics of different genotype likelihoods</a></li>
 <li class="chapter" data-level="20.1.3" data-path="variant-calling.html"><a href="variant-calling.html#computing-genotype-likelihoods-with-three-different-softwares"><i class="fa fa-check"></i><b>20.1.3</b> Computing genotype likelihoods with three different softwares</a></li>
@@ -390,8 +459,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="21" data-path="boneyard-1.html"><a href="boneyard-1.html"><i class="fa fa-check"></i><b>21</b> Boneyard</a></li>
-<li class="chapter" data-level="22" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html"><i class="fa fa-check"></i><b>22</b> Basic Handling of VCF files</a><ul>
-<li class="chapter" data-level="22.1" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html#bcftools"><i class="fa fa-check"></i><b>22.1</b> bcftools</a><ul>
+<li class="chapter" data-level="22" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html"><i class="fa fa-check"></i><b>22</b> Basic Handling of VCF files</a>
+<ul>
+<li class="chapter" data-level="22.1" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html#bcftools"><i class="fa fa-check"></i><b>22.1</b> bcftools</a>
+<ul>
 <li class="chapter" data-level="22.1.1" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html#tell-me-about-my-vcf-file"><i class="fa fa-check"></i><b>22.1.1</b> Tell me about my VCF file!</a></li>
 <li class="chapter" data-level="22.1.2" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html#get-fragmentsparts-of-my-vcf-file"><i class="fa fa-check"></i><b>22.1.2</b> Get fragments/parts of my VCF file</a></li>
 <li class="chapter" data-level="22.1.3" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html#combine-vcf-files-in-various-ways"><i class="fa fa-check"></i><b>22.1.3</b> Combine VCF files in various ways</a></li>
@@ -401,9 +472,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="chapter" data-level="23" data-path="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"><a href="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"><i class="fa fa-check"></i><b>23</b> Bioinformatics for RAD seq data with and without a reference genome</a></li>
 <li class="chapter" data-level="24" data-path="processing-amplicon-sequencing-data.html"><a href="processing-amplicon-sequencing-data.html"><i class="fa fa-check"></i><b>24</b> Processing amplicon sequencing data</a></li>
 <li class="chapter" data-level="25" data-path="genome-annotation.html"><a href="genome-annotation.html"><i class="fa fa-check"></i><b>25</b> Genome Annotation</a></li>
-<li class="chapter" data-level="26" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html"><i class="fa fa-check"></i><b>26</b> Whole genome alignment strategies</a><ul>
+<li class="chapter" data-level="26" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html"><i class="fa fa-check"></i><b>26</b> Whole genome alignment strategies</a>
+<ul>
 <li class="chapter" data-level="26.1" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html#mapping-of-scaffolds-to-a-closely-related-genome"><i class="fa fa-check"></i><b>26.1</b> Mapping of scaffolds to a closely related genome</a></li>
-<li class="chapter" data-level="26.2" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html#obtaining-ancestral-states-from-an-outgroup-genome"><i class="fa fa-check"></i><b>26.2</b> Obtaining Ancestral States from an Outgroup Genome</a><ul>
+<li class="chapter" data-level="26.2" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html#obtaining-ancestral-states-from-an-outgroup-genome"><i class="fa fa-check"></i><b>26.2</b> Obtaining Ancestral States from an Outgroup Genome</a>
+<ul>
 <li class="chapter" data-level="26.2.1" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html#using-lastz-to-align-coho-to-the-chinook-genome"><i class="fa fa-check"></i><b>26.2.1</b> Using LASTZ to align coho to the chinook genome</a></li>
 <li class="chapter" data-level="26.2.2" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html#try-on-the-chinook-chromosomes"><i class="fa fa-check"></i><b>26.2.2</b> Try on the chinook chromosomes</a></li>
 <li class="chapter" data-level="26.2.3" data-path="whole-genome-alignment-strategies.html"><a href="whole-genome-alignment-strategies.html#explore-the-other-parameters-more"><i class="fa fa-check"></i><b>26.2.3</b> Explore the other parameters more</a></li>
@@ -412,7 +485,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li class="part"><span><b>IV Part IV: Analysis of Big Variant Data</b></span></li>
 <li class="chapter" data-level="27" data-path="bioinformatic-analysis-on-variant-data.html"><a href="bioinformatic-analysis-on-variant-data.html"><i class="fa fa-check"></i><b>27</b> Bioinformatic analysis on variant data</a></li>
 <li class="part"><span><b>V Part V: Population Genomics</b></span></li>
-<li class="chapter" data-level="28" data-path="topics-in-pop-gen.html"><a href="topics-in-pop-gen.html"><i class="fa fa-check"></i><b>28</b> Topics in pop gen</a><ul>
+<li class="chapter" data-level="28" data-path="topics-in-pop-gen.html"><a href="topics-in-pop-gen.html"><i class="fa fa-check"></i><b>28</b> Topics in pop gen</a>
+<ul>
 <li class="chapter" data-level="28.1" data-path="topics-in-pop-gen.html"><a href="topics-in-pop-gen.html#coalescent"><i class="fa fa-check"></i><b>28.1</b> Coalescent</a></li>
 <li class="chapter" data-level="28.2" data-path="topics-in-pop-gen.html"><a href="topics-in-pop-gen.html#measures-of-genetic-diversity-and-such"><i class="fa fa-check"></i><b>28.2</b> Measures of genetic diversity and such</a></li>
 <li class="chapter" data-level="28.3" data-path="topics-in-pop-gen.html"><a href="topics-in-pop-gen.html#demographic-inference-with-partial-a-partial-i-and-moments"><i class="fa fa-check"></i><b>28.3</b> Demographic inference with <span class="math inline">\(\partial a \partial i\)</span> and <em>moments</em></a></li>
@@ -444,7 +518,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="essential-unixlinux-terminal-knowledge" class="section level1">
+<div id="essential-unixlinux-terminal-knowledge" class="section level1" number="4">
 <h1><span class="header-section-number">Chapter 4</span> Essential Unix/Linux Terminal Knowledge</h1>
 <p>Unix was developed at AT&amp;T Bell Labs in the 1960s. Formally “UNIX” is a
 trademarked operating system,
@@ -468,7 +542,7 @@ that can be taxing even for today’s large, high performance computing systems;
 bioinformatic tools are tailored to run in a Unix environment; and finally, 7) essentially
 every high-performance computer cluster runs some variant of Unix, so if you are going to be
 using a cluster for your analyses (which is highly likely), then you have gotta know Unix!</p>
-<div id="getting-a-bash-shell-on-your-system" class="section level2">
+<div id="getting-a-bash-shell-on-your-system" class="section level2" number="4.1">
 <h2><span class="header-section-number">4.1</span> Getting a bash shell on your system</h2>
 <p>A special part of the Unix operating system is the “shell.” This is the system that
 interprets commands from the user. At times it behaves like an interpreted programming
@@ -476,7 +550,7 @@ language, and it also has a number of features that help to minimize the amount 
 typing the user must do to complete any particular tasks. There are a number of
 different “shells” that people use. We will focus on one called “bash,” which stands
 for the “Bourne again shell.” Many of the shells share a number of features.</p>
-<p>Many common operating systems are built upon a Unix or upon Linux—an open-source flavor of
+<p>Many common operating systems are built upon Unix or upon Linux—an open-source flavor of
 Unix that is, in many scenarios, indistinguishable. Hereafter we will refer
 to both Unix and Linux as “Unix” systems). For example all Apple Macintosh computers are
 built on top of the Berkeley Standard Distribution of Unix and bash is the default
@@ -485,10 +559,10 @@ use laptops that run a flavor of Linux like Ubuntu, Debian, or RedHat. Linux
 users should ensure that they are running the bash shell. This can be done
 by typing “bash” at the command line, or inserting that into their profile.
 To know what shell is currently running you can type:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="essential-unixlinux-terminal-knowledge.html#cb1-1"></a><span class="bu">echo</span> <span class="va">$0</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="essential-unixlinux-terminal-knowledge.html#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$0</span></span></code></pre></div>
 <p>at the Unix command line. If you are running <code>bash</code> the result should
 be</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="essential-unixlinux-terminal-knowledge.html#cb2-1"></a><span class="ex">-bash</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb2-1"><a href="essential-unixlinux-terminal-knowledge.html#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">-bash</span></span></code></pre></div>
 <p>PCs running Microsoft Windows are something of the exception in the computer world, in that
 they are not running an operating system built on Unix. However, Windows 10 now allows for
 a Linux Subsystem to be run. For Windows, it is also possible to install a lightweight
@@ -496,7 +570,7 @@ implementation of bash (like Git Bash). This is helpful for learning how to use 
 but it should be noted that most bioinformatic tools are still difficult to install
 on Windows.</p>
 </div>
-<div id="navigating-the-unix-filesystem" class="section level2">
+<div id="navigating-the-unix-filesystem" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Navigating the Unix filesystem</h2>
 <p>Most computer users will be familiar with the idea of saving documents into “folders.”
 These folders are typically navigated using a “point-and-click” interface
@@ -507,17 +581,17 @@ the Unix filesystem from a terminal prompt. So,
 we begin our foray into Unix and its command prompt with this essential skill.</p>
 <p>When you start a Unix shell in a terminal window you get a <em>command prompt</em>
 that might look something like this:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="essential-unixlinux-terminal-knowledge.html#cb3-1"></a><span class="ex">my-laptop</span>:~ me$</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb3-1"><a href="essential-unixlinux-terminal-knowledge.html#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">my-laptop:~</span> me$</span></code></pre></div>
 <p>or, perhaps something as simple as:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="essential-unixlinux-terminal-knowledge.html#cb4-1"></a>$</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb4-1"><a href="essential-unixlinux-terminal-knowledge.html#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span></span></code></pre></div>
 <p>or maybe something like:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="essential-unixlinux-terminal-knowledge.html#cb5-1"></a>/<span class="ex">~/--%</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb5-1"><a href="essential-unixlinux-terminal-knowledge.html#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/~/--%</span></span></code></pre></div>
 <p>We will adopt the convention in this book that, unless we are intentionally doing something
 fancier, the Unix command prompt is given
 by a percent sign, and this will be used when displaying text typed at a command
 prompt, followed by output from the command. For example</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="essential-unixlinux-terminal-knowledge.html#cb6-1"></a><span class="ex">%</span> pwd</span>
-<span id="cb6-2"><a href="essential-unixlinux-terminal-knowledge.html#cb6-2"></a><span class="ex">/Users/eriq</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb6-1"><a href="essential-unixlinux-terminal-knowledge.html#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb6-2"><a href="essential-unixlinux-terminal-knowledge.html#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq</span></span></code></pre></div>
 <p>shows that I issued the Unix command <code>pwd</code>, which instructs the computer to
 <strong>p</strong>rint <strong>w</strong>orking <strong>d</strong>irectory, and the computer responded by printing
 <code>/Users/eriq</code>, which, on my Mac OS X system is my <em>home directory</em>.
@@ -546,7 +620,7 @@ its meaning is different: it is used merely as a separator
 between directories nested within one another. Figure <a href="essential-unixlinux-terminal-knowledge.html#fig:file-hierarchy">4.1</a> shows
 an example hierarchy of some of the directories that are found on the author’s
 laptop.
-<div class="figure" style="text-align: center"><span id="fig:file-hierarchy"></span>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:file-hierarchy"></span>
 <img src="figs/file-hierarchy.png" alt="A partial view of the directories on the author's laptop." width="496" />
 <p class="caption">
 FIGURE 4.1: A partial view of the directories on the author’s laptop.
@@ -586,28 +660,27 @@ system administrator when restructuring the filesystem.</p>
 name is called the <em>basename</em> of the path. Hence the basename of <code>/Users/eriq/Documents/git-repos</code>
 is <code>git-repos</code>. And the basename of <code>../../Users</code> is <code>Users</code>.
 </div>
-
-<div id="changing-the-working-directory-with-cd" class="section level3">
+<div id="changing-the-working-directory-with-cd" class="section level3" number="4.2.1">
 <h3><span class="header-section-number">4.2.1</span> Changing the working directory with <code>cd</code></h3>
 <p>When you begin a Unix terminal session, the current working
 directory is set, by default, to your home directory. However, when you are doing
 bioinformatics or otherwise hacking on the command line, you will typically
 want to be “in another directory” (meaning you will want the current working
 directory set to some other directory). For this, Unix provides the <code>cd</code> command, which
-stands for <strong>c</strong>hange <strong>d</strong>irectory. The syntax is super simple:</p>
-<p>cd <em>path</em></p>
+stands for <strong>c</strong>hange <strong>d</strong>irectory. The syntax is simple:</p>
+<p><code>cd</code> <em>path</em></p>
 <p>where <em>path</em> is an absolute or a relative path. For example, to
 get to the <code>git-repos</code> directory from my home directory would require
-a simple command <code>cd Documents/git-repos</code>. Once there, I could change to
+a simple command: <code>cd Documents/git-repos</code>. Once there, I could change to
 my <code>Desktop</code> directory with <code>cd ../../Desktop</code>. Witness:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="essential-unixlinux-terminal-knowledge.html#cb7-1"></a><span class="ex">%</span> pwd</span>
-<span id="cb7-2"><a href="essential-unixlinux-terminal-knowledge.html#cb7-2"></a><span class="ex">/Users/eriq</span></span>
-<span id="cb7-3"><a href="essential-unixlinux-terminal-knowledge.html#cb7-3"></a><span class="ex">%</span> cd Documents/git-repos/</span>
-<span id="cb7-4"><a href="essential-unixlinux-terminal-knowledge.html#cb7-4"></a><span class="ex">%</span> pwd</span>
-<span id="cb7-5"><a href="essential-unixlinux-terminal-knowledge.html#cb7-5"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
-<span id="cb7-6"><a href="essential-unixlinux-terminal-knowledge.html#cb7-6"></a><span class="ex">%</span> cd ../../Desktop</span>
-<span id="cb7-7"><a href="essential-unixlinux-terminal-knowledge.html#cb7-7"></a><span class="ex">%</span> pwd</span>
-<span id="cb7-8"><a href="essential-unixlinux-terminal-knowledge.html#cb7-8"></a><span class="ex">/Users/eriq/Desktop</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb7-1"><a href="essential-unixlinux-terminal-knowledge.html#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb7-2"><a href="essential-unixlinux-terminal-knowledge.html#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq</span></span>
+<span id="cb7-3"><a href="essential-unixlinux-terminal-knowledge.html#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd Documents/git-repos/</span>
+<span id="cb7-4"><a href="essential-unixlinux-terminal-knowledge.html#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb7-5"><a href="essential-unixlinux-terminal-knowledge.html#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
+<span id="cb7-6"><a href="essential-unixlinux-terminal-knowledge.html#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd ../../Desktop</span>
+<span id="cb7-7"><a href="essential-unixlinux-terminal-knowledge.html#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb7-8"><a href="essential-unixlinux-terminal-knowledge.html#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq/Desktop</span></span></code></pre></div>
 <p>Once you have used <code>cd</code>, the working directory of your current shell will
 remain the same no matter how many other commands you issue,
 until you invoke the <code>cd</code> command another time and change
@@ -616,45 +689,45 @@ to a different directory.</p>
 will be set to your home directory. This is super-handy if you have been
 exploring the levels of a Unix filesystem above your home directory and cannot
 remember how to get back to your home directory. Just remember that</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="essential-unixlinux-terminal-knowledge.html#cb8-1"></a><span class="ex">%</span> cd</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb8-1"><a href="essential-unixlinux-terminal-knowledge.html#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd</span></code></pre></div>
 <p>will get you back home.</p>
 <p>Another useful shortcut is to supply <code>-</code> (a hyphen) as the path to <code>cd</code>. This will
 change the working directory back to where you were before your last invocation
 of <code>cd</code>, and it will tell you which directory you have returned to. For example, if you start in <code>/Users/eriq/Documents/git-repos</code> and then
 <code>cd</code> to <code>/bin</code>, you can get back to <code>git-repos</code> with <code>cd -</code> like so:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="essential-unixlinux-terminal-knowledge.html#cb9-1"></a><span class="ex">%</span> pwd</span>
-<span id="cb9-2"><a href="essential-unixlinux-terminal-knowledge.html#cb9-2"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
-<span id="cb9-3"><a href="essential-unixlinux-terminal-knowledge.html#cb9-3"></a><span class="ex">%</span> cd /bin/</span>
-<span id="cb9-4"><a href="essential-unixlinux-terminal-knowledge.html#cb9-4"></a><span class="ex">%</span> pwd</span>
-<span id="cb9-5"><a href="essential-unixlinux-terminal-knowledge.html#cb9-5"></a><span class="ex">/bin</span></span>
-<span id="cb9-6"><a href="essential-unixlinux-terminal-knowledge.html#cb9-6"></a><span class="ex">%</span> cd -</span>
-<span id="cb9-7"><a href="essential-unixlinux-terminal-knowledge.html#cb9-7"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
-<span id="cb9-8"><a href="essential-unixlinux-terminal-knowledge.html#cb9-8"></a><span class="ex">%</span> pwd</span>
-<span id="cb9-9"><a href="essential-unixlinux-terminal-knowledge.html#cb9-9"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span></code></pre></div>
-<p>Note the output of <code>cd -</code> is the newly-returned-to current working directory.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb9-1"><a href="essential-unixlinux-terminal-knowledge.html#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb9-2"><a href="essential-unixlinux-terminal-knowledge.html#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
+<span id="cb9-3"><a href="essential-unixlinux-terminal-knowledge.html#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd /bin/</span>
+<span id="cb9-4"><a href="essential-unixlinux-terminal-knowledge.html#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb9-5"><a href="essential-unixlinux-terminal-knowledge.html#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="ex">/bin</span></span>
+<span id="cb9-6"><a href="essential-unixlinux-terminal-knowledge.html#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd <span class="at">-</span></span>
+<span id="cb9-7"><a href="essential-unixlinux-terminal-knowledge.html#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
+<span id="cb9-8"><a href="essential-unixlinux-terminal-knowledge.html#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb9-9"><a href="essential-unixlinux-terminal-knowledge.html#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span></code></pre></div>
+<p>Note that the output of <code>cd -</code> is the newly-returned-to current working directory.</p>
 </div>
-<div id="comm-prompt" class="section level3">
+<div id="comm-prompt" class="section level3" number="4.2.2">
 <h3><span class="header-section-number">4.2.2</span> Updating your command prompt</h3>
 <p>When you are buzzing around in your filesystem, it is often difficult to remember
 which directory you are in. You can always type <code>pwd</code> to figure that out,
 but the bash shell also provides a way to print the current working directory
 <em>within your command prompt</em>.</p>
 <p>For example, the command:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb10-1"><a href="essential-unixlinux-terminal-knowledge.html#cb10-1"></a><span class="va">PS1=</span><span class="st">&#39;[\W]--% &#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb10-1"><a href="essential-unixlinux-terminal-knowledge.html#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="va">PS1=</span><span class="st">&#39;[\W]--% &#39;</span></span></code></pre></div>
 <p>redefines the command prompt to be the basename of the current directory surrounded
 by brackets and followed by <code>--%</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="essential-unixlinux-terminal-knowledge.html#cb11-1"></a><span class="ex">%</span> pwd</span>
-<span id="cb11-2"><a href="essential-unixlinux-terminal-knowledge.html#cb11-2"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
-<span id="cb11-3"><a href="essential-unixlinux-terminal-knowledge.html#cb11-3"></a><span class="ex">%</span> PS1=<span class="st">&#39;[\W]--% &#39;</span></span>
-<span id="cb11-4"><a href="essential-unixlinux-terminal-knowledge.html#cb11-4"></a>[<span class="ex">git-repos</span>]--% cd ../</span>
-<span id="cb11-5"><a href="essential-unixlinux-terminal-knowledge.html#cb11-5"></a>[<span class="ex">Documents</span>]--% cd ../</span>
-<span id="cb11-6"><a href="essential-unixlinux-terminal-knowledge.html#cb11-6"></a>[<span class="ex">~</span>]<span class="ex">--%</span> cd ../</span>
-<span id="cb11-7"><a href="essential-unixlinux-terminal-knowledge.html#cb11-7"></a>[<span class="ex">Users</span>]--% </span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb11-1"><a href="essential-unixlinux-terminal-knowledge.html#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> pwd</span>
+<span id="cb11-2"><a href="essential-unixlinux-terminal-knowledge.html#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/Users/eriq/Documents/git-repos</span></span>
+<span id="cb11-3"><a href="essential-unixlinux-terminal-knowledge.html#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> PS1=<span class="st">&#39;[\W]--% &#39;</span></span>
+<span id="cb11-4"><a href="essential-unixlinux-terminal-knowledge.html#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">[git-repos]--%</span> cd ../</span>
+<span id="cb11-5"><a href="essential-unixlinux-terminal-knowledge.html#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="ex">[Documents]--%</span> cd ../</span>
+<span id="cb11-6"><a href="essential-unixlinux-terminal-knowledge.html#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> cd ../</span>
+<span id="cb11-7"><a href="essential-unixlinux-terminal-knowledge.html#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="ex">[Users]--%</span> </span></code></pre></div>
 <p>This can make it considerably easier to keep track of where you are in your file system.</p>
 <p>We will discuss later how to invoke this change automatically in every terminal session
 when we talk about customizing environments in Section <a href="essential-unixlinux-terminal-knowledge.html#unix-env">4.5</a>.</p>
 </div>
-<div id="tab-completion-for-paths" class="section level3">
+<div id="tab-completion-for-paths" class="section level3" number="4.2.3">
 <h3><span class="header-section-number">4.2.3</span> TAB-completion for paths</h3>
 <p>Let’s be frank…typing path names in order to change from one directory to another can feel
 awfully tedious, especially when your every neuron is screaming, “Why can’t I just have a friggin’ Finder
@@ -662,7 +735,7 @@ window to navigate in!” Do not despair. This is a normal reaction when you fir
 Fortunately, Unix file-system navigation can be made much less painful (or even enjoyable)
 for you by becoming a master of <em>TAB-completion</em>. Imagine the Unix shell is watching
 your every keystroke and trying to guess what you are about to type. If you type the first part
-of a directory name after a command like <code>cd</code> and then hit the TAB key, the shell will respond
+of a directory name after a command, like <code>cd</code> and then hit the TAB key, the shell will respond
 with its best guess of how you want to complete what you are typing.</p>
 <p>Take the file hierarchy of Figure <a href="essential-unixlinux-terminal-knowledge.html#fig:file-hierarchy">4.1</a>, and imagine that we are in the root
 directory. At that point, if we type <code>cd A</code>, the shell will think "Ooh! I’ll bet they want to
@@ -687,22 +760,22 @@ time you hit TAB, nothing happens, but the <em>second</em> time you hit TAB, the
 names that match what you have written so far. For example, in our Figure <a href="essential-unixlinux-terminal-knowledge.html#fig:file-hierarchy">4.1</a> example,
 hitting TAB after typing <code>cd ~/D</code> does nothing. But the second time we hit TAB we get a list of
 matching names:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="essential-unixlinux-terminal-knowledge.html#cb12-1"></a><span class="ex">%</span> cd ~/D</span>
-<span id="cb12-2"><a href="essential-unixlinux-terminal-knowledge.html#cb12-2"></a><span class="ex">Desktop/</span>  Documents/  Downloads/</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb12-1"><a href="essential-unixlinux-terminal-knowledge.html#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd ~/D</span>
+<span id="cb12-2"><a href="essential-unixlinux-terminal-knowledge.html#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Desktop/</span>  Documents/  Downloads/</span></code></pre></div>
 <p>So, if we are heading to <code>Documents</code> we can see that adding <code>oc</code> to our command line, to create <code>cd Doc</code> would be sufficient to allow the shell to
 uniquely and correctly guess where we are heading. <code>cd Doc</code> will TAB-complete into <code>cd Documents/</code></p></li>
 <li><p>If there are multiple directory or file names that match the current command line, and they share
 more letters than those currently on the command line, TAB-completion will complete
 the name to the end of the shared portion of the name. An example helps: let’s say
 I have the following two directories with hideously long names in my <code>Downloads</code> folder:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb13-1"><a href="essential-unixlinux-terminal-knowledge.html#cb13-1"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count.gr8-results</span></span>
-<span id="cb13-2"><a href="essential-unixlinux-terminal-knowledge.html#cb13-2"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count-results</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb13-1"><a href="essential-unixlinux-terminal-knowledge.html#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count.gr8-results</span></span>
+<span id="cb13-2"><a href="essential-unixlinux-terminal-knowledge.html#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count-results</span></span></code></pre></div>
 <p>Then, TAB completing on <code>~/Downloads/WIFL.rep</code> will partially complete so that the prompt and command look like:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb14-1"><a href="essential-unixlinux-terminal-knowledge.html#cb14-1"></a><span class="ex">%</span> cd ~/Downloads/WIFL.rep_indiv_est.mixture_collection.count</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb14-1"><a href="essential-unixlinux-terminal-knowledge.html#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd ~/Downloads/WIFL.rep_indiv_est.mixture_collection.count</span></code></pre></div>
 <p>and hitting TAB twice gives:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb15-1"><a href="essential-unixlinux-terminal-knowledge.html#cb15-1"></a><span class="ex">%</span> cd ~/Downloads/WIFL.rep_indiv_est.mixture_collection.count</span>
-<span id="cb15-2"><a href="essential-unixlinux-terminal-knowledge.html#cb15-2"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count-results</span></span>
-<span id="cb15-3"><a href="essential-unixlinux-terminal-knowledge.html#cb15-3"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count.gr8-results</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb15-1"><a href="essential-unixlinux-terminal-knowledge.html#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> cd ~/Downloads/WIFL.rep_indiv_est.mixture_collection.count</span>
+<span id="cb15-2"><a href="essential-unixlinux-terminal-knowledge.html#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count-results</span></span>
+<span id="cb15-3"><a href="essential-unixlinux-terminal-knowledge.html#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="ex">WIFL.rep_indiv_est.mixture_collection.count.gr8-results</span></span></code></pre></div>
 <p>At this point, adding <code>-</code> and TAB completing will give the first of those directories.</p></li>
 </ol>
 <p>The last example shows just how much typing TAB completion can save you. So, don’t be
@@ -713,7 +786,7 @@ are TABs. Furthermore, a TAB is never going to execute a command, and it typical
 complete to a path that you don’t want (unless you got the first part of its name wrong), so there
 isn’t any risk to hitting TAB all the time.</p>
 </div>
-<div id="listing-the-contents-of-a-directory-with-ls" class="section level3">
+<div id="listing-the-contents-of-a-directory-with-ls" class="section level3" number="4.2.4">
 <h3><span class="header-section-number">4.2.4</span> Listing the contents of a directory with <code>ls</code></h3>
 <p>So far we have been focusing mostly on directories. However, directories themselves
 are not particularly interesting—they are merely containers. It is the <em>files</em> inside of directories
@@ -722,19 +795,19 @@ other directories—within a directory.</p>
 <p>Invoking the <code>ls</code> command without any other arguments (without anything after it)
 returns the contents of the current working directory. In our example,
 if we are in <code>/Users</code> then we get:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb16-1"><a href="essential-unixlinux-terminal-knowledge.html#cb16-1"></a><span class="ex">%</span> ls</span>
-<span id="cb16-2"><a href="essential-unixlinux-terminal-knowledge.html#cb16-2"></a><span class="ex">eriq</span>  zoe</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb16-1"><a href="essential-unixlinux-terminal-knowledge.html#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls</span>
+<span id="cb16-2"><a href="essential-unixlinux-terminal-knowledge.html#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="ex">eriq</span>  zoe</span></code></pre></div>
 <p>By default, <code>ls</code> gives output in several columns of text, with the directory contents
 sorted lexicographically. For example, the following is output from the <code>ls</code> command
 in a directory on a remote Unix machine:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb17-1"><a href="essential-unixlinux-terminal-knowledge.html#cb17-1"></a><span class="ex">%</span> ls</span>
-<span id="cb17-2"><a href="essential-unixlinux-terminal-knowledge.html#cb17-2"></a><span class="ex">bam</span>                      map-sliced-fastqs-etc.sh</span>
-<span id="cb17-3"><a href="essential-unixlinux-terminal-knowledge.html#cb17-3"></a><span class="ex">bam-slices</span>               play</span>
-<span id="cb17-4"><a href="essential-unixlinux-terminal-knowledge.html#cb17-4"></a><span class="ex">bwa-run-list.txt</span>         REDOS-map-sliced-fastqs-etc.sh</span>
-<span id="cb17-5"><a href="essential-unixlinux-terminal-knowledge.html#cb17-5"></a><span class="ex">fastq-file-prefixes.txt</span>  sliced</span>
-<span id="cb17-6"><a href="essential-unixlinux-terminal-knowledge.html#cb17-6"></a><span class="ex">fqslice-22.error</span>         slice-fastqs.sh</span>
-<span id="cb17-7"><a href="essential-unixlinux-terminal-knowledge.html#cb17-7"></a><span class="ex">fqslice-22.log</span>           slicer-lines.txt</span>
-<span id="cb17-8"><a href="essential-unixlinux-terminal-knowledge.html#cb17-8"></a><span class="ex">map-etc.sh</span>               Slicer-Logs-summary.txt</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb17-1"><a href="essential-unixlinux-terminal-knowledge.html#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls</span>
+<span id="cb17-2"><a href="essential-unixlinux-terminal-knowledge.html#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bam</span>                      map-sliced-fastqs-etc.sh</span>
+<span id="cb17-3"><a href="essential-unixlinux-terminal-knowledge.html#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bam-slices</span>               play</span>
+<span id="cb17-4"><a href="essential-unixlinux-terminal-knowledge.html#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa-run-list.txt</span>         REDOS-map-sliced-fastqs-etc.sh</span>
+<span id="cb17-5"><a href="essential-unixlinux-terminal-knowledge.html#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="ex">fastq-file-prefixes.txt</span>  sliced</span>
+<span id="cb17-6"><a href="essential-unixlinux-terminal-knowledge.html#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="ex">fqslice-22.error</span>         slice-fastqs.sh</span>
+<span id="cb17-7"><a href="essential-unixlinux-terminal-knowledge.html#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="ex">fqslice-22.log</span>           slicer-lines.txt</span>
+<span id="cb17-8"><a href="essential-unixlinux-terminal-knowledge.html#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="ex">map-etc.sh</span>               Slicer-Logs-summary.txt</span></code></pre></div>
 <p>The first line shows the command prompt and the command: <code>% ls</code>, and the remainder is
 the output of the command.</p>
 <p>Invoked without any further arguments, the <code>ls</code>
@@ -744,31 +817,31 @@ adding the path (absolute or relative) of that directory on the command line. Fo
 the example in Figure <a href="essential-unixlinux-terminal-knowledge.html#fig:file-hierarchy">4.1</a>, when we are in the home directory (<code>eriq</code>)
 we can see the directories/files
 contained within <code>Documents</code> like so:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb18-1"><a href="essential-unixlinux-terminal-knowledge.html#cb18-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ls Documents</span>
-<span id="cb18-2"><a href="essential-unixlinux-terminal-knowledge.html#cb18-2"></a><span class="ex">git-repos/</span>   pers/   work/</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb18-1"><a href="essential-unixlinux-terminal-knowledge.html#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ls Documents</span>
+<span id="cb18-2"><a href="essential-unixlinux-terminal-knowledge.html#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">git-repos/</span>   pers/   work/</span></code></pre></div>
 <p>If you give paths to more than one directory as arguments to <code>ls</code>, then
 the contents of each directory are listed after a heading line that gives
 the directory’s path (as given as an argument to <code>ls</code>), followed by a colon. For example:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb19-1"><a href="essential-unixlinux-terminal-knowledge.html#cb19-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ls Documents/git-repos Documents/work</span>
-<span id="cb19-2"><a href="essential-unixlinux-terminal-knowledge.html#cb19-2"></a><span class="ex">Documents</span>/git-repos:</span>
-<span id="cb19-3"><a href="essential-unixlinux-terminal-knowledge.html#cb19-3"></a><span class="ex">ARCHIVED_mega-bioinf-pop-gen.zip</span>  lowergranite_0.0.1.tar.gz</span>
-<span id="cb19-4"><a href="essential-unixlinux-terminal-knowledge.html#cb19-4"></a><span class="ex">AssignmentAdustment/</span>              mega-bioinf-pop-gen-examples/</span>
-<span id="cb19-5"><a href="essential-unixlinux-terminal-knowledge.html#cb19-5"></a><span class="ex">CKMRsim/</span>                          microhaps_np/</span>
-<span id="cb19-6"><a href="essential-unixlinux-terminal-knowledge.html#cb19-6"></a></span>
-<span id="cb19-7"><a href="essential-unixlinux-terminal-knowledge.html#cb19-7"></a><span class="ex">Documents</span>/work:</span>
-<span id="cb19-8"><a href="essential-unixlinux-terminal-knowledge.html#cb19-8"></a><span class="ex">assist/</span>          maps/            oxford/          uw_days/</span>
-<span id="cb19-9"><a href="essential-unixlinux-terminal-knowledge.html#cb19-9"></a><span class="ex">courses_audited/</span> misc/            personnel/</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb19-1"><a href="essential-unixlinux-terminal-knowledge.html#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ls Documents/git-repos Documents/work</span>
+<span id="cb19-2"><a href="essential-unixlinux-terminal-knowledge.html#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Documents/git-repos:</span></span>
+<span id="cb19-3"><a href="essential-unixlinux-terminal-knowledge.html#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ARCHIVED_mega-bioinf-pop-gen.zip</span>  lowergranite_0.0.1.tar.gz</span>
+<span id="cb19-4"><a href="essential-unixlinux-terminal-knowledge.html#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="ex">AssignmentAdustment/</span>              mega-bioinf-pop-gen-examples/</span>
+<span id="cb19-5"><a href="essential-unixlinux-terminal-knowledge.html#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="ex">CKMRsim/</span>                          microhaps_np/</span>
+<span id="cb19-6"><a href="essential-unixlinux-terminal-knowledge.html#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="essential-unixlinux-terminal-knowledge.html#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="ex">Documents/work:</span></span>
+<span id="cb19-8"><a href="essential-unixlinux-terminal-knowledge.html#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="ex">assist/</span>          maps/            oxford/          uw_days/</span>
+<span id="cb19-9"><a href="essential-unixlinux-terminal-knowledge.html#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="ex">courses_audited/</span> misc/            personnel/</span></code></pre></div>
 <p>You might also note in the above example, that some of the paths listed within
 each of the two directories are followed by a slash, <code>/</code>. This <code>ls</code> customization denotes that
 they are directories themselves. Much like your command prompt, <code>ls</code> can be customized in ways
 that make its output more informative. We will return to that in Section <a href="essential-unixlinux-terminal-knowledge.html#unix-env">4.5</a>.</p>
 <p>If you pass the path of a file to <code>ls</code>, and that file exists in your filesystem,
 then <code>ls</code> will respond by printing the file’s path:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb20-1"><a href="essential-unixlinux-terminal-knowledge.html#cb20-1"></a><span class="ex">%</span> ls Documents/git-repos/lowergranite_0.0.1.tar.gz </span>
-<span id="cb20-2"><a href="essential-unixlinux-terminal-knowledge.html#cb20-2"></a><span class="ex">Documents/git-repos/lowergranite_0.0.1.tar.gz</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb20-1"><a href="essential-unixlinux-terminal-knowledge.html#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls Documents/git-repos/lowergranite_0.0.1.tar.gz </span>
+<span id="cb20-2"><a href="essential-unixlinux-terminal-knowledge.html#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex">Documents/git-repos/lowergranite_0.0.1.tar.gz</span></span></code></pre></div>
 <p>If the file does not exist you get an error message to that effect:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb21-1"><a href="essential-unixlinux-terminal-knowledge.html#cb21-1"></a><span class="ex">%</span> ls Documents/try-this-name</span>
-<span id="cb21-2"><a href="essential-unixlinux-terminal-knowledge.html#cb21-2"></a><span class="ex">ls</span>: Documents/try-this-name: No such file or directory</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb21-1"><a href="essential-unixlinux-terminal-knowledge.html#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls Documents/try-this-name</span>
+<span id="cb21-2"><a href="essential-unixlinux-terminal-knowledge.html#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ls:</span> Documents/try-this-name: No such file or directory</span></code></pre></div>
 <p>The multi-column, default output of <code>ls</code> is useful when you want
 to scan the contents of a directory, and quickly see as many files
 as possible in the fewest lines of output.
@@ -777,52 +850,55 @@ structured. For example, you don’t know how many columns are going to be used 
 the default output of <code>ls</code> (that
 depends on the length of the filenames and the width of your terminal), and it
 offers little information beyond the names of the files.</p>
-<p>You can tell the <code>ls</code> command to provide more information, by using it with the <code>-l</code>
-option. Appropriately, with the <code>-l</code> option, the <code>ls</code> command will return
+<p>You can direct the <code>ls</code> command to provide more information, by using it with the <code>-l</code>
+option (that is a lower case “L,” for “long”). Appropriately, with the <code>-l</code> option, the <code>ls</code> command will return
 output in <em>long</em> format:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb22-1"><a href="essential-unixlinux-terminal-knowledge.html#cb22-1"></a><span class="ex">2019-02-08</span> 21:09 /osu-chinook/--% ls -l</span>
-<span id="cb22-2"><a href="essential-unixlinux-terminal-knowledge.html#cb22-2"></a><span class="ex">total</span> 108</span>
-<span id="cb22-3"><a href="essential-unixlinux-terminal-knowledge.html#cb22-3"></a><span class="ex">drwxr-xr-x</span>  2 eriq kruegg  4096 Feb  7 08:26 bam</span>
-<span id="cb22-4"><a href="essential-unixlinux-terminal-knowledge.html#cb22-4"></a><span class="ex">drwxr-xr-x</span> 14 eriq kruegg  4096 Feb  8 15:56 bam-slices</span>
-<span id="cb22-5"><a href="essential-unixlinux-terminal-knowledge.html#cb22-5"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg 17114 Feb  7 20:16 bwa-run-list.txt</span>
-<span id="cb22-6"><a href="essential-unixlinux-terminal-knowledge.html#cb22-6"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg   824 Feb  6 14:14 fastq-file-prefixes.txt</span>
-<span id="cb22-7"><a href="essential-unixlinux-terminal-knowledge.html#cb22-7"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg     0 Feb  7 20:14 fqslice-22.error</span>
-<span id="cb22-8"><a href="essential-unixlinux-terminal-knowledge.html#cb22-8"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg     0 Feb  7 20:14 fqslice-22.log</span>
-<span id="cb22-9"><a href="essential-unixlinux-terminal-knowledge.html#cb22-9"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg  1012 Feb  7 07:59 map-etc.sh</span>
-<span id="cb22-10"><a href="essential-unixlinux-terminal-knowledge.html#cb22-10"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg  1138 Feb  7 20:56 map-sliced-fastqs-etc.sh</span>
-<span id="cb22-11"><a href="essential-unixlinux-terminal-knowledge.html#cb22-11"></a><span class="ex">drwxr-xr-x</span>  3 eriq kruegg  4096 Feb  7 13:01 play</span>
-<span id="cb22-12"><a href="essential-unixlinux-terminal-knowledge.html#cb22-12"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg  1157 Feb  8 15:08 REDOS-map-sliced-fastqs-etc.sh</span>
-<span id="cb22-13"><a href="essential-unixlinux-terminal-knowledge.html#cb22-13"></a><span class="ex">drwxr-xr-x</span> 14 eriq kruegg  4096 Feb  8 15:49 sliced</span>
-<span id="cb22-14"><a href="essential-unixlinux-terminal-knowledge.html#cb22-14"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg   826 Feb  7 20:09 slice-fastqs.sh</span>
-<span id="cb22-15"><a href="essential-unixlinux-terminal-knowledge.html#cb22-15"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg  1729 Feb  7 16:11 slicer-lines.txt</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb22-1"><a href="essential-unixlinux-terminal-knowledge.html#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex">2019-02-08</span> 21:09 /osu-chinook/--% ls <span class="at">-l</span></span>
+<span id="cb22-2"><a href="essential-unixlinux-terminal-knowledge.html#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="ex">total</span> 108</span>
+<span id="cb22-3"><a href="essential-unixlinux-terminal-knowledge.html#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="ex">drwxr-xr-x</span>  2 eriq kruegg  4096 Feb  7 08:26 bam</span>
+<span id="cb22-4"><a href="essential-unixlinux-terminal-knowledge.html#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="ex">drwxr-xr-x</span> 14 eriq kruegg  4096 Feb  8 15:56 bam-slices</span>
+<span id="cb22-5"><a href="essential-unixlinux-terminal-knowledge.html#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg 17114 Feb  7 20:16 bwa-run-list.txt</span>
+<span id="cb22-6"><a href="essential-unixlinux-terminal-knowledge.html#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg   824 Feb  6 14:14 fastq-file-prefixes.txt</span>
+<span id="cb22-7"><a href="essential-unixlinux-terminal-knowledge.html#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg     0 Feb  7 20:14 fqslice-22.error</span>
+<span id="cb22-8"><a href="essential-unixlinux-terminal-knowledge.html#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg     0 Feb  7 20:14 fqslice-22.log</span>
+<span id="cb22-9"><a href="essential-unixlinux-terminal-knowledge.html#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg  1012 Feb  7 07:59 map-etc.sh</span>
+<span id="cb22-10"><a href="essential-unixlinux-terminal-knowledge.html#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg  1138 Feb  7 20:56 map-sliced-fastqs-etc.sh</span>
+<span id="cb22-11"><a href="essential-unixlinux-terminal-knowledge.html#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="ex">drwxr-xr-x</span>  3 eriq kruegg  4096 Feb  7 13:01 play</span>
+<span id="cb22-12"><a href="essential-unixlinux-terminal-knowledge.html#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg  1157 Feb  8 15:08 REDOS-map-sliced-fastqs-etc.sh</span>
+<span id="cb22-13"><a href="essential-unixlinux-terminal-knowledge.html#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="ex">drwxr-xr-x</span> 14 eriq kruegg  4096 Feb  8 15:49 sliced</span>
+<span id="cb22-14"><a href="essential-unixlinux-terminal-knowledge.html#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="ex">-rwxr--r--</span>  1 eriq kruegg   826 Feb  7 20:09 slice-fastqs.sh</span>
+<span id="cb22-15"><a href="essential-unixlinux-terminal-knowledge.html#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="ex">-rw-r--r--</span>  1 eriq kruegg  1729 Feb  7 16:11 slicer-lines.txt</span></code></pre></div>
 <p>Each row contains information about only a single file.
 The first column indicates what kind of file
 each entry is, and also tells us which users have permission to
-do certain things with the file (more on this in a few sections).
+do certain things with the file (more on this in Section <a href="essential-unixlinux-terminal-knowledge.html#file-perm">4.4.8</a>).
 The third and fourth columns show that the owner of
 each file is <code>eriq</code>, who is a user in the group called <code>kruegg</code>. After that
-is the size of the file (in bytes) and the date and time it was last modified.</p>
+we see the size of the file (in bytes) and the date and time it was last modified.</p>
 <p>There are a few options to <code>ls</code> that are particularly useful. One is <code>-a</code>, which causes
 <code>ls</code> to include in its listing all files, even <em>hidden</em> ones. In a Unix file system,
 any file whose name starts with a <code>.</code> is considered a <em>hidden</em> file. Commonly, such
 files are configuration files or other files used by programs that you typically
-don’t interact with directly. (We will see an example of this when we start working with <code>git</code> for version control, Section <a href="version-control.html#git-workings">11.2</a>.) The <code>-d</code> option for <code>ls</code> is also’
+don’t interact with directly. (We will see an example of this when we start working with <code>git</code> for version control, Section <a href="version-control.html#git-workings">11.2</a>.) The <code>-d</code> option for <code>ls</code> is also
 quite handy. Recall that when you provide the name of a directory as an argument to <code>ls</code>,
 the default behavior is to list the contents of the directory. This can be troublesome
 when you are listing the contents of a subdirectory: <code>ls ~/Documents/git-repos/*</code> lists the
-contents (which can be substantial) of each of the directories in my directory, but
-I might only want to know the name of each of those directories, rather than their full contents.
+contents (which can be substantial) of each of the directories in my <code>git-repos</code> directory, but
+I might only want to know the name of each of those directories, rather than the full contents
+of each diretory.
 <code>ls -d ~/Documents/git-repos</code> will do that for you. Finally, the <code>-R</code> option to <code>ls</code> will cause the operating system to drill down, <em>recursively</em> into all the subdirectories of the one you
 supplied to the command, and list their contents, as well.</p>
 </div>
-<div id="globbing" class="section level3">
+<div id="globbing" class="section level3" number="4.2.5">
 <h3><span class="header-section-number">4.2.5</span> Globbing</h3>
 <p>If you have ever had to move a large number of files of a certain type from
-one folder to another in a Finder window, you know that individually clicking and
-selecting each one and then dragging them can be a tedious task (not to mention the disaster
-that ensues if you slip on your mouse and end up dropping all the files some place
-you did not intend). Unix provides a wonderful system called <em>filename expansion</em> or
-“globbing” for quickly providing the names of a large number of files and paths which let’s
+one folder to another in a Finder window, you know that clicking and
+selecting each file and then individually dragging it could be a tedious task.
+Of course, in a graphical file browser your can select multiple files to move at
+once. Unix provides a similar system for operating upon multiple files at once; however
+it works a little differently, and is based on defining groups of files according
+to matching their names to certain patterns. This system, called <em>filename expansion</em> or
+“globbing,” quickly provides the names of a large number of files and paths, which let’s
 you operate on multiple files quickly and efficiently. In short, globbing allows for
 <em>wildcard matching</em> in path names. This means that you can
 specify multiple files that have names that share a common part, but differ in other parts.</p>
@@ -845,7 +921,6 @@ dot is included explicitly. Files with names starting with a dot are
 “hidden” files in Unix. You also will not see them in the results of <code>ls</code>, unless you
 use the <code>-a</code> option: <code>ls -a</code>.
 </div>
-
 <p>After the asterisk, the next most commonly-used wildcard is the question mark, <code>?</code>. The question mark
 denotes any single character in a file name. For example. If you had a series of files that looked
 like <code>AA-file.txt</code>, <code>AB-file.txt</code>, …, <code>AZ-file.txt</code>. You could get get all those by
@@ -854,17 +929,17 @@ using <code>A?-file.txt</code>. This would not expand to, for example, <code>AAZ
 <code>A[A-D]*</code> would pick out any files starting with, <code>AA</code>, <code>AB</code>, <code>AC</code>, or <code>AD</code>. Or you could
 have said <code>A[a-d]*</code> which would get any files starting with <code>Aa</code>, <code>Ab</code>, <code>Ac</code>, or <code>Ad</code>. And you
 can also do it with numbers: <code>[0-9]</code>. You can also negate the contents of the <code>[]</code>, with <code>^</code>. Thus,
-<code>100_[^ABC]*</code> picks out all files that start with <code>100_</code> followed by anything that is <em>not</em> and <code>A</code>, <code>B</code>, or a <code>C</code>.</p>
-<p>Finally, you can be really specific about replacements in file names by iterating over
+<code>100_[^ABC]*</code> picks out all files that start with <code>100_</code> followed by anything that is <em>not</em> an <code>A</code>, <code>B</code>, or a <code>C</code>.</p>
+<p>Finally, you can be even more specific about replacements in file names by iterating over
 different possibilities with a comma-separated list within curly braces. For example, <code>img.{png,jpg,svg}</code>
 will iterate over the values in curly braces and expand to <code>img.png img.jpg img.svg</code>. Interestingly,
 with curly braces, this forms all those file names whether they exist or not. So, unlike <code>*</code> it isn’t
 really matching available file names.</p>
 <p>The last thing to note about all of these globbing constructs is that they are not intimately
 associated with the <code>ls</code> command. Rather, they simply provide expansions on the command
-line, and the the <code>ls</code> command is listing all those files. For example, try <code>echo *.txt</code>.</p>
+line, and the <code>ls</code> command is listing all those files. For example, try <code>echo *.txt</code>.</p>
 </div>
-<div id="what-makes-a-good-file-name" class="section level3">
+<div id="what-makes-a-good-file-name" class="section level3" number="4.2.6">
 <h3><span class="header-section-number">4.2.6</span> What makes a good file-name?</h3>
 <p>If the foregoing discussion suggests to you that it might not be good to use an
 actual <code>*</code>, <code>?</code>, <code>[</code>, or <code>{</code> in names that you give to files and directories
@@ -877,16 +952,16 @@ In Windows and on a Mac it is easy to create file names that have spaces in them
 standard Windows system comes with such space-containing directory names as <code>My Documents</code> or <code>My Pictures</code>. Yikes! Please <em>don’t ever do that in your Unix life!</em> One can deal with spaces in file
 names, but there is really no reason to include spaces in your file names, and having spaces in file
 names will typically break a good many scripts. Rather than a space, use an underscore, <code>_</code>, or a
-dash, <code>-</code>. You’ve gotta admit that, not only does <code>My-Documents</code> work better, but it actually
-looks better too!</p>
+dash, <code>-</code>. You’ve must admit that, not only does <code>My-Documents</code> work better, but it actually
+<em>looks</em> better too!</p>
 <p>However, should you have to deal with files having spaces in their name, you can
-address them by either backslash escaping the spaces, or putting the whole
+address them by either backslash-escaping the spaces, or putting the whole
 file name in quotation marks (single or double quotation marks will work).
 If you have a file called <code>dumb file name.jpg</code>, you can address it on the
 command line as either of the following three:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb23-1"><a href="essential-unixlinux-terminal-knowledge.html#cb23-1"></a><span class="ex">dumb\ file\ name.jpg</span></span>
-<span id="cb23-2"><a href="essential-unixlinux-terminal-knowledge.html#cb23-2"></a><span class="st">&quot;dumb file name.jpg&quot;</span></span>
-<span id="cb23-3"><a href="essential-unixlinux-terminal-knowledge.html#cb23-3"></a><span class="st">&#39;dumb file name.jpg&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb23-1"><a href="essential-unixlinux-terminal-knowledge.html#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dumb\ file\ name.jpg</span></span>
+<span id="cb23-2"><a href="essential-unixlinux-terminal-knowledge.html#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;dumb file name.jpg&quot;</span></span>
+<span id="cb23-3"><a href="essential-unixlinux-terminal-knowledge.html#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;dumb file name.jpg&#39;</span></span></code></pre></div>
 <p>To make your life easier, however, the bottom line is that you should name your files
 on a Unix system using only upper- and lowercase letters (Unix file systems are
 case-sensitive), numerals, and the following three punctuation characters: <code>.</code>, <code>-</code>, and <code>_</code>.
@@ -894,7 +969,7 @@ Though you can use other punctuation characters, they often require special trea
 is better to avoid them altogether.</p>
 </div>
 </div>
-<div id="the-anatomy-of-a-unix-command" class="section level2">
+<div id="the-anatomy-of-a-unix-command" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> The anatomy of a Unix command</h2>
 <p>Nearly every Unix command that you might invoke follows a certain pattern. First comes
 the <code>command</code> itself. This is the word that tells the system the name of the command
@@ -914,24 +989,25 @@ command line might including a command and a subcommand, like <code>samtools vie
 <code>samtools</code> (for example), and then samtools interprets the next token (<code>view</code>) to
 know that it needs to run the <code>view</code> routine, and interpret all following
 options in that context.</p>
-<p>We will now break down each element in “<code>command</code> <em>options</em> <em>arguments</em>”.</p>
-<div id="anatomy-command" class="section level3">
+<p>We will now break down each element in</p>
+<p><code>command</code> <em>options</em> <em>arguments</em>.</p>
+<div id="anatomy-command" class="section level3" number="4.3.1">
 <h3><span class="header-section-number">4.3.1</span> The <code>command</code></h3>
 <p>When you type a command at the Unix prompt, whether it is a command like <code>ls</code> or
-one like <code>samtools</code> (Section <a href="#samtools"><strong>??</strong></a>), the Unix system has to search around
+one like <code>samtools</code> (Section <a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#samtools">19.4</a>), the Unix system has to search around
 the filesystem for a file that matches the command name and which provides the actual
 instructions (the computer code, if you will) for what the command will actually do.
 It cannot be stressed enough how important it is to
 understand where and how the bash shell searches for these command files. Understanding this
 well, and knowing how to add directories that the shell searches for executable
 commands will alleviate a lot of frustration that often arises with Unix.</p>
-<p>In brief, all Unix shells (and the bash shell specifically) maintain what is called
-an <em>environment variable</em> called <code>PATH</code> that is a colon-separated list of pathnames
+<p>In brief, all Unix shells (and the bash shell specifically) maintain
+an <em>environment variable</em> called <code>PATH</code> that is a colon-separated list of the pathnames
 where the shell searches for commands. You can print the <code>PATH</code> variable using
 the <code>echo</code> command:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb24-1"><a href="essential-unixlinux-terminal-knowledge.html#cb24-1"></a><span class="bu">echo</span> <span class="va">$PATH</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb24-1"><a href="essential-unixlinux-terminal-knowledge.html#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$PATH</span></span></code></pre></div>
 <p>On a freshly installed system without many customizations the <code>PATH</code> might look like:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb25-1"><a href="essential-unixlinux-terminal-knowledge.html#cb25-1"></a><span class="ex">/usr</span>/bin:/bin:<span class="ex">/usr</span>/sbin:<span class="ex">/sbin</span></span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb25-1"><a href="essential-unixlinux-terminal-knowledge.html#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/usr/bin:/bin:/usr/sbin:/sbin</span></span></code></pre></div>
 <p>which is telling us that, when bash is searching for a command, it searches for a file
 of the same name as the command first in the directory <code>/usr/bin</code>. If it finds it there, then
 it uses the contents of that file to invoke the command. If it doesn’t find it there,
@@ -941,9 +1017,9 @@ then it returns the error <code>command not found</code>.</p>
 <p>When you install programs on your own computer system, quite often the installer will modify
 a system file that specifies the <code>PATH</code> variable upon startup. Thus after installing some
 programs that use the command line on a Mac system, the “default” <code>PATH</code> might look like:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb26-1"><a href="essential-unixlinux-terminal-knowledge.html#cb26-1"></a><span class="ex">/usr/local</span>/bin:<span class="ex">/usr</span>/bin:/bin:<span class="ex">/usr</span>/sbin:/sbin:<span class="ex">/opt/X11</span>/bin:<span class="ex">/Library/TeX/texbin</span></span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb26-1"><a href="essential-unixlinux-terminal-knowledge.html#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/TeX/texbin</span></span></code></pre></div>
 </div>
-<div id="the-options" class="section level3">
+<div id="the-options" class="section level3" number="4.3.2">
 <h3><span class="header-section-number">4.3.2</span> The <em>options</em></h3>
 <p>Sometimes these are called flags, and they provide a convenient way of
 telling a Unix command how to operate. We have already seen a few of them,
@@ -954,31 +1030,31 @@ Thus, the <code>tar</code> command takes the single character options <code>-x</
 an option named like <code>--check-links</code>. Some utilities also have two different names—a single-letter
 name and a long name—for many options.
 For example, the <code>bcftools view</code> program uses either <code>-a</code> or <code>--trim-alt-alleles</code> to invoke the option
-that trims alternate alleles not seen in a given subset of individuals. Other tools, like BEAGLE, are perfectly
+that trims alternate alleles not seen in a given subset of individuals. Other tools, like BEAGLE, are perfectly content to
 have options that are named with multiple letters following just a single dash.</p>
 <p>Sometimes options take parameter values, like <code>bcftools view -g het</code>. In that case, <code>het</code> is
 a parameter value. Sometimes the parameter values are added to the option with an equals-sign.</p>
 <p>With some unix utilities’ single-letter options can be bunged together
 following a single dash, like, <code>tar -xvf</code> being synonymous with <code>tar -x -v -f</code>. This
 is not universal, and it is not recommended to expect it.</p>
-<p>Holy Cow! This is not terribly standardized, and probably won’t make sense till
+<p>Holy Cow! This is not terribly standardized, and probably won’t make sense until
 you really get in there and starting playing around in Unix…</p>
 </div>
-<div id="arguments" class="section level3">
+<div id="arguments" class="section level3" number="4.3.3">
 <h3><span class="header-section-number">4.3.3</span> Arguments</h3>
 <p>These are often file names, or other things that are not preceded by an option flag.
 For example, in the <code>ls</code> command:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb27-1"><a href="essential-unixlinux-terminal-knowledge.html#cb27-1"></a><span class="fu">ls</span> -lrt dir3</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb27-1"><a href="essential-unixlinux-terminal-knowledge.html#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-lrt</span> dir3</span></code></pre></div>
 <p><code>-lrt</code> is giving <code>ls</code> the options <code>-l</code>, <code>-r</code>, and <code>-t</code> and <code>dir3</code> is the <em>argument</em>—the
 name of the directory whose contents you should list.</p>
 </div>
-<div id="getting-information-about-unix-commands" class="section level3">
+<div id="getting-information-about-unix-commands" class="section level3" number="4.3.4">
 <h3><span class="header-section-number">4.3.4</span> Getting information about Unix commands</h3>
 <p>Zheesh! The above looks like a horrible mish-mash. How do we find out
 how to use/invoke different commands and programs in Unix? Well, most
 programs are documented, and you have to learn how to read the documentation.</p>
-<p>If a utility is properly installed, you should be able to find its manual page with
-the <code>man</code> command. For example, <code>man ls</code> or <code>man tar</code>. These “man-pages”, as the
+<p>If a Unix utility is properly installed, you should be able to find its manual page with
+the <code>man</code> command. For example, <code>man ls</code> or <code>man tar</code>. These “man-pages,” as the
 results are called, have a fairly uniform format. They start with a summary of what the
 utility does, then then show how it is invoked and what the possible options are by
 showing a skeleton in the form:<br />
@@ -986,31 +1062,34 @@ showing a skeleton in the form:<br />
 and usually square brackets are put around things that are not required. This format
 can get quite ugly and hard to parse for an old human brain, like mine, but stick with it.</p>
 <p>If you don’t have a man-page for a program, you might try invoking the program with
-the <code>--help</code> option, or maybe with no option at all.</p>
+the <code>--help</code> option, or maybe with no option at all. Sometimes, that returns a textual
+explanation of how the program should be invoked, and the options that are avaiable.</p>
 </div>
 </div>
-<div id="handling-manipulating-and-viewing-files-and-streams" class="section level2">
+<div id="handling-manipulating-and-viewing-files-and-streams" class="section level2" number="4.4">
 <h2><span class="header-section-number">4.4</span> Handling, Manipulating, and Viewing files and streams</h2>
 <p>In Unix, there are two main types of files: <em>regular files</em> which are things like text files,
 figures, etc.—Anything that holds data of some sort. And then there are “special” files, which
 include <em>directories</em> which you’ve already seen, and <em>symbolic links</em> which we will talk about later.</p>
-<div id="creating-new-directories" class="section level3">
+<div id="creating-new-directories" class="section level3" number="4.4.1">
 <h3><span class="header-section-number">4.4.1</span> Creating new directories</h3>
 <p>You can make a new directory with:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb28-1"><a href="essential-unixlinux-terminal-knowledge.html#cb28-1"></a><span class="fu">mkdir</span> path</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb28-1"><a href="essential-unixlinux-terminal-knowledge.html#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> path</span></code></pre></div>
 <p>where <code>path</code> is a path specification (either absolute or relative). Note that if you
 want to make a directory within a subdirectory that does currently not exist, for example:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb29-1"><a href="essential-unixlinux-terminal-knowledge.html#cb29-1"></a><span class="fu">mkdir</span> new-dir/under-new-dir</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb29-1"><a href="essential-unixlinux-terminal-knowledge.html#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> new-dir/under-new-dir</span></code></pre></div>
 <p>when <code>new-dir</code> does not already exist, then you have to either create <code>new-dir</code> first, like:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb30-1"><a href="essential-unixlinux-terminal-knowledge.html#cb30-1"></a><span class="fu">mkdir</span> new-dir</span>
-<span id="cb30-2"><a href="essential-unixlinux-terminal-knowledge.html#cb30-2"></a><span class="ex">mdkir</span> new-dir/under-new-dir</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb30-1"><a href="essential-unixlinux-terminal-knowledge.html#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> new-dir</span>
+<span id="cb30-2"><a href="essential-unixlinux-terminal-knowledge.html#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mdkir</span> new-dir/under-new-dir</span></code></pre></div>
 <p>or you have to use the <code>-p</code> option of <code>mkdir</code>, which creates all necessary parent directories
 as well, like:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb31-1"><a href="essential-unixlinux-terminal-knowledge.html#cb31-1"></a><span class="fu">mkdir</span> -p new-dir/under-new-dir</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb31-1"><a href="essential-unixlinux-terminal-knowledge.html#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> new-dir/under-new-dir</span></code></pre></div>
 <p>If there is already a file (regular or directory) with the same path specifiation as a directory you are
-trying to create, you will get an error from <code>mkdir</code>.</p>
+trying to create, you will get an error from <code>mkdir</code> (unless you are using the <code>-p</code> option,
+in which case <code>mkdir</code> doesn’t do anything, but neither does it complain about the fact that a
+directory already exists where you wanted to make one).</p>
 </div>
-<div id="fundamental-file-handling-commands" class="section level3">
+<div id="fundamental-file-handling-commands" class="section level3" number="4.4.2">
 <h3><span class="header-section-number">4.4.2</span> Fundamental file-handling commands</h3>
 <p>For the day-to-day business of moving, copying, or removing files in the file system,
 the three main Unix commands are:</p>
@@ -1020,7 +1099,7 @@ the three main Unix commands are:</p>
 <li><code>rm</code> for removing files and directories</li>
 </ul>
 <p>These obviously do different things, but their syntax is somewhat similar.</p>
-<div id="mv" class="section level4">
+<div id="mv" class="section level4" number="4.4.2.1">
 <h4><span class="header-section-number">4.4.2.1</span> <code>mv</code></h4>
 <p><code>mv</code> can be invoked with just two arguments like:</p>
 <pre><code>mv this there</code></pre>
@@ -1050,29 +1129,30 @@ In all cases, whatever used to exist at path <code>this</code> will no longer be
 <p>And <code>mv</code> can be invoked with multiple arguments, in which case the last one must be a directory
 <em>that already exists</em> that receives all the earlier arguments inside it. So, if you already have
 a directory named <code>dest_dir</code> then you can move a lot of things into it like:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb33-1"><a href="essential-unixlinux-terminal-knowledge.html#cb33-1"></a><span class="fu">mv</span> file1 file2 dir1 dir2 dest_dir</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb33-1"><a href="essential-unixlinux-terminal-knowledge.html#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> file1 file2 dir1 dir2 dest_dir</span></code></pre></div>
 <p>You can also write that as as</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb34-1"><a href="essential-unixlinux-terminal-knowledge.html#cb34-1"></a><span class="fu">mv</span> file1 file2 dir1 dir2 dest_dir/</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb34-1"><a href="essential-unixlinux-terminal-knowledge.html#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> file1 file2 dir1 dir2 dest_dir/</span></code></pre></div>
 <p>which makes its meaning a little more clear, but there is no requirement that the
 final argument have a trailing <code>/</code>.</p>
 <p>Note, if any files in <code>dest_dir</code> have the same name as the files you are moving into
 <code>dest_dir</code> they <em>will</em> get overwritten.</p>
-<p>So, you have gotta be careful not to overwrite stuff that you don’t want to overwrite.</p>
+<p>So, you have must be careful not to overwrite files that you don’t want to overwrite.
+Using <code>mv</code> can be dangerous in that way.</p>
 </div>
-<div id="cp" class="section level4">
+<div id="cp" class="section level4" number="4.4.2.2">
 <h4><span class="header-section-number">4.4.2.2</span> <code>cp</code></h4>
 <p>This works much the same way as <code>mv</code> with two different flavors:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb35-1"><a href="essential-unixlinux-terminal-knowledge.html#cb35-1"></a><span class="fu">cp</span> this there</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb35-1"><a href="essential-unixlinux-terminal-knowledge.html#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> this there</span></code></pre></div>
 <p>and</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb36-1"><a href="essential-unixlinux-terminal-knowledge.html#cb36-1"></a><span class="fu">cp</span> file1 file2 dest_dir</span>
-<span id="cb36-2"><a href="essential-unixlinux-terminal-knowledge.html#cb36-2"></a><span class="co"># or</span></span>
-<span id="cb36-3"><a href="essential-unixlinux-terminal-knowledge.html#cb36-3"></a><span class="fu">cp</span> file1 file2 dest_dir/</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb36-1"><a href="essential-unixlinux-terminal-knowledge.html#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> file1 file2 dest_dir</span>
+<span id="cb36-2"><a href="essential-unixlinux-terminal-knowledge.html#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb36-3"><a href="essential-unixlinux-terminal-knowledge.html#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> file1 file2 dest_dir/</span></code></pre></div>
 <p>The result is very much like that of <code>mv</code>, but instead of moving the file
 from one place to another (an operation that can actually be done without moving the
 data within the file to a different place on the hard drive), the <code>cp</code> command actually
 makes a full copy of files. Note that, if the files are large, this can take a long time.</p>
 </div>
-<div id="rm" class="section level4">
+<div id="rm" class="section level4" number="4.4.2.3">
 <h4><span class="header-section-number">4.4.2.3</span> <code>rm</code></h4>
 <p>Finally we get to the very spooky <code>rm</code> command, which is short for “remove.” If you
 say “rm myfile.txt” the OS will remove that file from your hard drive’s directory. The data
@@ -1086,17 +1166,19 @@ to remove all the files in a directory with a <code>.jpg</code> extension, you w
 within that directory. However, it’s a disaster to accidentally remove a number of files you
 might not have wanted to. So, especially as you are getting familiar with Unix, it is
 worth it to experiment with your globbing using <code>ls</code> first, to see what the results are,
-and only when you are convinced that you won’t remove any files you really want should you
-end up using <code>rm</code> to remove those files.</p>
+and, only when you are convinced that you won’t remove any files that you do not
+want to trash, should you
+then use <code>rm</code> to remove those files.</p>
 </div>
 </div>
-<div id="viewing-files" class="section level3">
+<div id="viewing-files" class="section level3" number="4.4.3">
 <h3><span class="header-section-number">4.4.3</span> “Viewing” Files</h3>
-<p>In a typical GUI-based environment, when you interact with files on your computer,
+<p>When using a Graphical User Interface, or GUI,
+when you interact with files on your computer,
 you typically open the files with some application. For example, you open Word files
 with Microsoft Word. When working on the Unix shell, that same paradigm does not
 really exist. Rather, (apart from a few cases like the text editors, <code>nano</code>, <code>vim</code> and
-<code>emacs</code>, instead of opening a file and letting the user interact with it the shell is
+<code>emacs</code>) instead of opening a file and letting the user interact with it, the shell is
 much happier just streaming the contents of the file to the terminal.</p>
 <p>The most basic of such commands is the <code>cat</code> command, which <em>catenates</em> the contents
 of a file into a very special <em>data stream</em> called <em>stdout</em>, which is short
@@ -1112,26 +1194,27 @@ you need to stop the command from continuing to spew stuff across your screen, y
 shell.” Usually that will stop it.</p>
 
 <div class="rmdtip">
-<strong>A note regarding terminals:</strong> On a Mac, the Terminal app is quite fast at spewing text
+<strong>A note regarding terminals:</strong> On a Mac, both the Terminal app and the application
+iTerm2 are quite fast at spewing text
 across the screen. Megabytes of text or binary gibberish can flash by in seconds flat. This
-is not the case with the terminal window within RStudio, which can by abysmally slow, and usually
-doesn’t store many lines of output.
+is not the case with the terminal window within RStudio, which can by abysmally slow, and
+usually doesn’t store many lines of output.
 </div>
-
 <p>Sometimes you want to just look at the top of a file. The <code>head</code> command
 shows you the first 10 lines of a file. That is valuable. The <code>less</code> command
 shows a file one screenful at a time. You can hit the space bar to see the next screenful,
 and you can hit <code>q</code> to quit viewing the file.</p>
 <p>Try navigating to a file and using <code>cat</code>, <code>head</code>, and <code>less</code> on it.</p>
 <p>One particularly cool thing about <code>cat</code> is that if you say</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb37-1"><a href="essential-unixlinux-terminal-knowledge.html#cb37-1"></a><span class="fu">cat</span> file1 file2</span></code></pre></div>
-<p>it will catenate the contents of both files, in order, to <em>stdout</em>.</p>
-<p>Now, one Big Important Unix fact is that many programs written to run in the
+<div class="sourceCode" id="cb37"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb37-1"><a href="essential-unixlinux-terminal-knowledge.html#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> file1 file2</span></code></pre></div>
+<p>it will catenate the contents of both files, in the order they
+are listed on the command line, to <em>stdout</em>.</p>
+<p>Now, one <strong>Big Important Unix Fact</strong> is that many programs written to run in the
 Unix shell behave in the same way regarding their output: they write their
 output to <em>stdout</em>. We have already seen this with <code>ls</code>: its output just
 gets written to the screen, which is where <em>stdout</em> goes by default.</p>
 </div>
-<div id="redirecting-standard-output-and" class="section level3">
+<div id="redirecting-standard-output-and" class="section level3" number="4.4.4">
 <h3><span class="header-section-number">4.4.4</span> Redirecting standard output: <code>&gt;</code> and <code>&gt;&gt;</code></h3>
 <p>Unix starts to get really fun when you realize that you can “redirect” the
 contents of <em>stdout</em> from any command (or group of commands…see the next chapter!)
@@ -1139,21 +1222,21 @@ to a file. To do that, you merely follow the command (and all its options and ar
 with <code>&gt; path</code> where <code>path</code> is the path specifying the file into which you
 wish to redirect <em>stdout</em>.</p>
 <p>Witness, try this:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb38-1"><a href="essential-unixlinux-terminal-knowledge.html#cb38-1"></a><span class="co"># echo three lines of text to a file in the /tmp directory</span></span>
-<span id="cb38-2"><a href="essential-unixlinux-terminal-knowledge.html#cb38-2"></a><span class="bu">echo</span> <span class="st">&quot;bing</span></span>
-<span id="cb38-3"><a href="essential-unixlinux-terminal-knowledge.html#cb38-3"></a><span class="st">bong</span></span>
-<span id="cb38-4"><a href="essential-unixlinux-terminal-knowledge.html#cb38-4"></a><span class="st">boing&quot;</span> <span class="op">&gt;</span> /tmp/file1</span>
-<span id="cb38-5"><a href="essential-unixlinux-terminal-knowledge.html#cb38-5"></a></span>
-<span id="cb38-6"><a href="essential-unixlinux-terminal-knowledge.html#cb38-6"></a><span class="co"># echo three more lines of text to another file</span></span>
-<span id="cb38-7"><a href="essential-unixlinux-terminal-knowledge.html#cb38-7"></a><span class="bu">echo</span> <span class="st">&quot;foo</span></span>
-<span id="cb38-8"><a href="essential-unixlinux-terminal-knowledge.html#cb38-8"></a><span class="st">bar</span></span>
-<span id="cb38-9"><a href="essential-unixlinux-terminal-knowledge.html#cb38-9"></a><span class="st">baz&quot;</span> <span class="op">&gt;</span> /tmp/file2</span>
-<span id="cb38-10"><a href="essential-unixlinux-terminal-knowledge.html#cb38-10"></a></span>
-<span id="cb38-11"><a href="essential-unixlinux-terminal-knowledge.html#cb38-11"></a><span class="co"># now view the contents of the first file</span></span>
-<span id="cb38-12"><a href="essential-unixlinux-terminal-knowledge.html#cb38-12"></a><span class="fu">cat</span> /tmp/file1</span>
-<span id="cb38-13"><a href="essential-unixlinux-terminal-knowledge.html#cb38-13"></a></span>
-<span id="cb38-14"><a href="essential-unixlinux-terminal-knowledge.html#cb38-14"></a><span class="co"># and the second file:</span></span>
-<span id="cb38-15"><a href="essential-unixlinux-terminal-knowledge.html#cb38-15"></a><span class="fu">cat</span> /tmp/file2</span></code></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb38-1"><a href="essential-unixlinux-terminal-knowledge.html#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># echo three lines of text to a file in the /tmp directory</span></span>
+<span id="cb38-2"><a href="essential-unixlinux-terminal-knowledge.html#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;bing</span></span>
+<span id="cb38-3"><a href="essential-unixlinux-terminal-knowledge.html#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="st">bong</span></span>
+<span id="cb38-4"><a href="essential-unixlinux-terminal-knowledge.html#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="st">boing&quot;</span> <span class="op">&gt;</span> /tmp/file1</span>
+<span id="cb38-5"><a href="essential-unixlinux-terminal-knowledge.html#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="essential-unixlinux-terminal-knowledge.html#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co"># echo three more lines of text to another file</span></span>
+<span id="cb38-7"><a href="essential-unixlinux-terminal-knowledge.html#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;foo</span></span>
+<span id="cb38-8"><a href="essential-unixlinux-terminal-knowledge.html#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="st">bar</span></span>
+<span id="cb38-9"><a href="essential-unixlinux-terminal-knowledge.html#cb38-9" aria-hidden="true" tabindex="-1"></a><span class="st">baz&quot;</span> <span class="op">&gt;</span> /tmp/file2</span>
+<span id="cb38-10"><a href="essential-unixlinux-terminal-knowledge.html#cb38-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-11"><a href="essential-unixlinux-terminal-knowledge.html#cb38-11" aria-hidden="true" tabindex="-1"></a><span class="co"># now view the contents of the first file</span></span>
+<span id="cb38-12"><a href="essential-unixlinux-terminal-knowledge.html#cb38-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /tmp/file1</span>
+<span id="cb38-13"><a href="essential-unixlinux-terminal-knowledge.html#cb38-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-14"><a href="essential-unixlinux-terminal-knowledge.html#cb38-14" aria-hidden="true" tabindex="-1"></a><span class="co"># and the second file:</span></span>
+<span id="cb38-15"><a href="essential-unixlinux-terminal-knowledge.html#cb38-15" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /tmp/file2</span></code></pre></div>
 <p>It is important to realize that when you redirect output into a file
 with <code>&gt;</code>, any contents that previously existed in that file will
 be deleted (wiped out!). So be careful about redirecting. Don’t
@@ -1162,14 +1245,14 @@ accidentally redirect output into a file that has valuable data in it.</p>
 it redirects output into it. Rather, <code>&gt;&gt; file</code> means “append <em>stdout</em> to the contents that already exist in <code>file</code>.” This can be very useful
 sometimes.</p>
 </div>
-<div id="stdin-and" class="section level3">
+<div id="stdin-and" class="section level3" number="4.4.5">
 <h3><span class="header-section-number">4.4.5</span> stdin, <code>&lt;</code> and <code>|</code></h3>
 <p>Not only do most Unix-based programs deliver output to standard output, but
 most utilities can also receive input from a file stream called <em>stdin</em> which
 is short for “standard input.”</p>
 <p>If you have data in a file that you want to send into standard input
 for a utility, you can use the <code>&lt;</code> like this:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb39-1"><a href="essential-unixlinux-terminal-knowledge.html#cb39-1"></a><span class="bu">command</span> <span class="op">&lt;</span> file</span></code></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb39-1"><a href="essential-unixlinux-terminal-knowledge.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="bu">command</span> <span class="op">&lt;</span> file</span></code></pre></div>
 <p>But, since most Unix utilities also let you specify the file as an argument,
 this is not used very much.</p>
 <p>However, what is used all the time in Unix, and it is one of the things
@@ -1178,8 +1261,8 @@ out of the command on the left and redirect it into <em>stdin</em> going into
 the command on the right of the pipe.</p>
 <p>For example, if I wanted to count the number of files and directories stored in my <code>git-repos</code>
 directory, I could do</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb40-1"><a href="essential-unixlinux-terminal-knowledge.html#cb40-1"></a><span class="ex">%</span> ls -dl Documents/git-repos/* <span class="kw">|</span> <span class="fu">wc</span> </span>
-<span id="cb40-2"><a href="essential-unixlinux-terminal-knowledge.html#cb40-2"></a>     <span class="ex">174</span>    1566   14657</span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb40-1"><a href="essential-unixlinux-terminal-knowledge.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls <span class="at">-dl</span> Documents/git-repos/<span class="pp">*</span> <span class="kw">|</span> <span class="fu">wc</span> </span>
+<span id="cb40-2"><a href="essential-unixlinux-terminal-knowledge.html#cb40-2" aria-hidden="true" tabindex="-1"></a>     <span class="ex">174</span>    1566   14657</span></code></pre></div>
 <p>which pipes the output of <code>ls -dl</code> (one line per file) into the <em>stdin</em> for the <code>wc</code> command, which
 counts the number of lines, words, and letters sent to its standard input. So, the output tells
 me that there are 174 files and directories in my directory <code>Documents/git-repos</code>.</p>
@@ -1189,35 +1272,35 @@ making “Unix pipelines:” the data are like streams of water coming into
 or out of different commands, and the pipes hook up all those streams into
 a pipeline.</p>
 </div>
-<div id="stderr" class="section level3">
+<div id="stderr" class="section level3" number="4.4.6">
 <h3><span class="header-section-number">4.4.6</span> stderr</h3>
 <p>While output from Unix commands is often written to <em>stdout</em>, if anything goes wrong with
 a program, then messages about that get written to a different stream called <em>stderr</em>, which, you
-guessed it! is short for “standard error”. By default, both <em>stdout</em> and <em>stderr</em> get written
+guessed it! is short for “standard error.” By default, both <em>stdout</em> and <em>stderr</em> get written
 to the terminal, which is why it can be hard for beginners to think of them as separate streams.<br />
 But, indeed, they are. Redirecting <em>stdout</em> with <code>&gt;</code>, that does <strong>not</strong> redirect <em>stderr</em>.</p>
 <p>For example. See what happens when we ask <code>ls</code> to list a file that does not exist:</p>
-<div class="sourceCode" id="cb41"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb41-1"><a href="essential-unixlinux-terminal-knowledge.html#cb41-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ls file-not-here.txt </span>
-<span id="cb41-2"><a href="essential-unixlinux-terminal-knowledge.html#cb41-2"></a><span class="ex">ls</span>: file-not-here.txt: No such file or directory</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb41-1"><a href="essential-unixlinux-terminal-knowledge.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ls file-not-here.txt </span>
+<span id="cb41-2"><a href="essential-unixlinux-terminal-knowledge.html#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ls:</span> file-not-here.txt: No such file or directory</span></code></pre></div>
 <p>The error message comes back to the screen. If you redirect the output
 it still comes back to the screen!</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb42-1"><a href="essential-unixlinux-terminal-knowledge.html#cb42-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ls file-not-here.txt <span class="op">&gt;</span> out.txt </span>
-<span id="cb42-2"><a href="essential-unixlinux-terminal-knowledge.html#cb42-2"></a><span class="ex">ls</span>: file-not-here.txt: No such file or directory</span></code></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb42-1"><a href="essential-unixlinux-terminal-knowledge.html#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ls file-not-here.txt <span class="op">&gt;</span> out.txt </span>
+<span id="cb42-2"><a href="essential-unixlinux-terminal-knowledge.html#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ls:</span> file-not-here.txt: No such file or directory</span></code></pre></div>
 <p>If you want to redirect <em>stderr</em>, then you need to specify which stream
 it is. On all Unix systems, <em>stderr</em> is stream #2, so the <code>2&gt;</code> syntax can be
 used:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb43-1"><a href="essential-unixlinux-terminal-knowledge.html#cb43-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ls file-not-here.txt <span class="op">2&gt;</span> out.txt </span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb43-1"><a href="essential-unixlinux-terminal-knowledge.html#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ls file-not-here.txt <span class="dv">2</span><span class="op">&gt;</span> out.txt </span></code></pre></div>
 <p>Then there is no output of <em>stderr</em> to the terminal, and when you <code>cat</code> the output
 file, you see that it went there!</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb44-1"><a href="essential-unixlinux-terminal-knowledge.html#cb44-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> cat out.txt </span>
-<span id="cb44-2"><a href="essential-unixlinux-terminal-knowledge.html#cb44-2"></a><span class="ex">ls</span>: file-not-here.txt: No such file or directory</span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb44-1"><a href="essential-unixlinux-terminal-knowledge.html#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> cat out.txt </span>
+<span id="cb44-2"><a href="essential-unixlinux-terminal-knowledge.html#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ls:</span> file-not-here.txt: No such file or directory</span></code></pre></div>
 <p>Doing bioinformatics, you will find that there will be failures of various programs.
 It is essential when you write bioinformatic pipelines to redirect <em>stderr</em> to a
 file so that you can go back, after the fact, to sleuth out why the failure occurred.
 Additionally, some bioinformatic programs write things like progress messages to
 <em>stderr</em> so it is important to know how to redirect those as well.</p>
 </div>
-<div id="symbolic-links" class="section level3">
+<div id="symbolic-links" class="section level3" number="4.4.7">
 <h3><span class="header-section-number">4.4.7</span> Symbolic links</h3>
 <p>Besides regular files and directories, a third type of file in Unix is called a
 <em>symbolic link</em>. It is a special type of file whose contents are just an
@@ -1226,11 +1309,11 @@ as “shortcuts” to different locations in your file system. There are many
 useful applications of symbolic links.</p>
 <p>Symbolic links are made using the <code>ln</code> command with the <code>-s</code> option. For example,
 if I did this in my home directory:</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb45-1"><a href="essential-unixlinux-terminal-knowledge.html#cb45-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ln -s /Users/eriq/Documents/git-repos/srsStuff srs</span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb45-1"><a href="essential-unixlinux-terminal-knowledge.html#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ln <span class="at">-s</span> /Users/eriq/Documents/git-repos/srsStuff srs</span></code></pre></div>
 <p>then <code>srs</code> becomes a file whose full listing (from <code>ls -l srs</code>) looks like:</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb46-1"><a href="essential-unixlinux-terminal-knowledge.html#cb46-1"></a><span class="ex">lrwxrwxr-x</span>  1 eriq  staff    40B Jan  9 19:24 srs@ -<span class="op">&gt;</span> /Users/eriq/Documents/git-repos/srsStuff</span></code></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb46-1"><a href="essential-unixlinux-terminal-knowledge.html#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="ex">lrwxrwxr-x</span>  1 eriq  staff    40B Jan  9 19:24 srs@ <span class="at">-</span><span class="op">&gt;</span> /Users/eriq/Documents/git-repos/srsStuff</span></code></pre></div>
 </div>
-<div id="file-permissions" class="section level3">
+<div id="file-perm" class="section level3" number="4.4.8">
 <h3><span class="header-section-number">4.4.8</span> File Permissions</h3>
 <p>Unix systems often host many different users. Some users might belong to the
 same research group, and might like to be able to read the files (and/or use
@@ -1255,7 +1338,7 @@ users group, and for all other users, respectively.</li>
 <p>Permissions can be changed with the <code>chmod</code> command. We will talk in class about
 how to use it with the octal representation of permissions.</p>
 </div>
-<div id="editing-text-files-at-the-terminal" class="section level3">
+<div id="editing-text-files-at-the-terminal" class="section level3" number="4.4.9">
 <h3><span class="header-section-number">4.4.9</span> Editing text files at the terminal</h3>
 <p>Sometimes you might need to edit text files at the command line.</p>
 <p>The easiest text editor to use on the command line is <code>nano</code>.
@@ -1263,7 +1346,7 @@ Try typing <code>nano a-file.txt</code> and type a few things. It is
 pretty self explanatory.</p>
 </div>
 </div>
-<div id="unix-env" class="section level2">
+<div id="unix-env" class="section level2" number="4.5">
 <h2><span class="header-section-number">4.5</span> Customizing your Environment</h2>
 <p>Previously we saw how to modify your command prompt to tell you what the current
 working directory is (remember <code>PS1='[\W]--% '</code>). The limitation of giving that
@@ -1285,22 +1368,22 @@ for customization in here, don’t bother, just get them straight out of <code>~
 </ol>
 <p>We take care of #2, by creating the file <code>~/.bash_profile</code> to have the following
 lines in it:</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb47-1"><a href="essential-unixlinux-terminal-knowledge.html#cb47-1"></a></span>
-<span id="cb47-2"><a href="essential-unixlinux-terminal-knowledge.html#cb47-2"></a><span class="kw">if</span><span class="bu"> [</span> <span class="ot">-f</span> ~/.bashrc<span class="bu"> ]</span>; <span class="kw">then</span></span>
-<span id="cb47-3"><a href="essential-unixlinux-terminal-knowledge.html#cb47-3"></a>    <span class="bu">source</span> ~/.bashrc</span>
-<span id="cb47-4"><a href="essential-unixlinux-terminal-knowledge.html#cb47-4"></a><span class="kw">fi</span></span></code></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb47-1"><a href="essential-unixlinux-terminal-knowledge.html#cb47-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-2"><a href="essential-unixlinux-terminal-knowledge.html#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="ot">-f</span> ~/.bashrc <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb47-3"><a href="essential-unixlinux-terminal-knowledge.html#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="bu">source</span> ~/.bashrc</span>
+<span id="cb47-4"><a href="essential-unixlinux-terminal-knowledge.html#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span></code></pre></div>
 <p>Taking care of #1 is now just a matter of writing commands into <code>~/.bashrc</code>. In the following
 are some recommended customization.</p>
-<div id="appearances-matter" class="section level3">
+<div id="appearances-matter" class="section level3" number="4.5.1">
 <h3><span class="header-section-number">4.5.1</span> Appearances matter</h3>
 <p>Some customization just change the way your shell looks or what type of output
 is given from different commands. Here are some lines to add to your <code>~/.bashrc</code>
 along with some discussion of each.</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb48-1"><a href="essential-unixlinux-terminal-knowledge.html#cb48-1"></a><span class="bu">export</span> <span class="va">PS1=</span><span class="st">&#39;[\W]--% &#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb48-1"><a href="essential-unixlinux-terminal-knowledge.html#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PS1=</span><span class="st">&#39;[\W]--% &#39;</span></span></code></pre></div>
 <p>This gives a tidier and more informative command prompt. The <code>export</code> command before
 it tells the system to pass the value of this <em>environment variable</em>, <code>PS1</code>, along
 to any other shells that get spawned by the current one.</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb49-1"><a href="essential-unixlinux-terminal-knowledge.html#cb49-1"></a><span class="bu">alias</span> ls=<span class="st">&#39;ls -GFh&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb49-1"><a href="essential-unixlinux-terminal-knowledge.html#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="bu">alias</span> ls=<span class="st">&#39;ls -GFh&#39;</span></span></code></pre></div>
 <p>This makes it so that each time you invoke the <code>ls</code> command, you do so with the
 options <code>-G</code>, <code>-F</code>, and <code>-h</code>. To find out on your own what those options do, you can
 type <code>man ls</code> at the command line and read the output, but briefly: <code>-G</code> causes directories and
@@ -1309,7 +1392,7 @@ directory names, and other characters to be printed at the end of the names of d
 file types, and <code>-h</code> causes file sizes to be printed in an easily human-readable form when
 using the <code>-l</code> option.</p>
 </div>
-<div id="where-are-my-programscommands-at" class="section level3">
+<div id="where-are-my-programscommands-at" class="section level3" number="4.5.2">
 <h3><span class="header-section-number">4.5.2</span> Where are my programs/commands at?!</h3>
 <p>We saw in Section <a href="essential-unixlinux-terminal-knowledge.html#anatomy-command">4.3.1</a> that bash searches the directories listed in the
 <code>PATH</code> variable to find commands and executables. You can modify the PATH variable to include
@@ -1317,10 +1400,10 @@ directories where you have installed different programs. In doing so, you want t
 that you don’t lose any of the other directories in <code>PATH</code>, so there is a certain way to
 go about redefining <code>PATH</code>. If you want to add the path <code>/a-new/program/directory</code> to your
 PATH variable you do it like this:</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb50-1"><a href="essential-unixlinux-terminal-knowledge.html#cb50-1"></a><span class="va">PATH=$PATH</span>:/a-new/program/directory</span></code></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb50-1"><a href="essential-unixlinux-terminal-knowledge.html#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="va">PATH=$PATH</span>:/a-new/program/directory</span></code></pre></div>
 </div>
 </div>
-<div id="a-few-more-important-keystrokes" class="section level2">
+<div id="a-few-more-important-keystrokes" class="section level2" number="4.6">
 <h2><span class="header-section-number">4.6</span> A Few More Important Keystrokes</h2>
 <p>If a command “gets stuck” or is running longer than it should be, you can usually
 kill/quit it by doing <code>cntrl-c</code>.</p>
@@ -1340,7 +1423,7 @@ This means that any text following a <code>#</code> (unless it is backslash-esca
 until the next line ending,
 will be ignored by the shell.</p>
 </div>
-<div id="a-short-list-of-additional-useful-commands." class="section level2">
+<div id="a-short-list-of-additional-useful-commands." class="section level2" number="4.7">
 <h2><span class="header-section-number">4.7</span> A short list of additional useful commands.</h2>
 <p>Everyone should be familiar with the following commands, and the
 options that follow them on each line below. One might even think of
@@ -1364,9 +1447,9 @@ scanning the manual page for each of these:</p>
 <li><code>grep</code></li>
 </ul>
 </div>
-<div id="two-important-computing-concepts" class="section level2">
+<div id="two-important-computing-concepts" class="section level2" number="4.8">
 <h2><span class="header-section-number">4.8</span> Two important computing concepts</h2>
-<div id="compression" class="section level3">
+<div id="compression" class="section level3" number="4.8.1">
 <h3><span class="header-section-number">4.8.1</span> Compression</h3>
 <p>Most file storage types (like text files) are a bit wasteful in terms of
 file space: every character in a text file takes the same number of bytes to
@@ -1388,7 +1471,7 @@ it is possible to <em>index</em> the contents of the file so that certain parts 
 accessed without decompressing the whole thing. We will encounter indexed compressed files a
 lot when we start dealing with BAM and vcf.gz files.</p>
 </div>
-<div id="hashing" class="section level3">
+<div id="hashing" class="section level3" number="4.8.2">
 <h3><span class="header-section-number">4.8.2</span> Hashing</h3>
 <p>The final topic we will cover here is the topic of hashing, an in particular
 the idea of “fingerprinting” files on ones computer. This process is central
@@ -1408,22 +1491,22 @@ as a demonstration, I store the recursive listing of my <code>git-repos</code> d
 a file and I hash it. Then I add just a single line ending to the end
 of the file, and hash that, to note that the two hashes are not at all similar
 even though the two files differ by only one character:</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb51-1"><a href="essential-unixlinux-terminal-knowledge.html#cb51-1"></a>[<span class="ex">~</span>]<span class="ex">--%</span> ls -R Documents/git-repos/* <span class="op">&gt;</span> /tmp/gr-list.txt </span>
-<span id="cb51-2"><a href="essential-unixlinux-terminal-knowledge.html#cb51-2"></a>[<span class="ex">~</span>]<span class="ex">--%</span> <span class="co"># how many lines is that?</span></span>
-<span id="cb51-3"><a href="essential-unixlinux-terminal-knowledge.html#cb51-3"></a>[<span class="ex">~</span>]<span class="ex">--%</span> wc /tmp/gr-list.txt </span>
-<span id="cb51-4"><a href="essential-unixlinux-terminal-knowledge.html#cb51-4"></a>   <span class="ex">93096</span>   88177 2310967 /tmp/gr-list.txt</span>
-<span id="cb51-5"><a href="essential-unixlinux-terminal-knowledge.html#cb51-5"></a>[<span class="ex">~</span>]<span class="ex">--%</span> shasum /tmp/gr-list.txt </span>
-<span id="cb51-6"><a href="essential-unixlinux-terminal-knowledge.html#cb51-6"></a><span class="ex">1396f2fec4eebdee079830e1eff9e3a64ba5588c</span>  /tmp/gr-list.txt</span>
-<span id="cb51-7"><a href="essential-unixlinux-terminal-knowledge.html#cb51-7"></a>[<span class="ex">~</span>]<span class="ex">--%</span> <span class="co"># now add a line ending to the end</span></span>
-<span id="cb51-8"><a href="essential-unixlinux-terminal-knowledge.html#cb51-8"></a>[<span class="ex">~</span>]<span class="ex">--%</span> (cat /tmp/gr-list.txt<span class="kw">;</span> <span class="bu">echo</span>) <span class="op">&gt;</span> <span class="ex">/tmp/gr-list2.txt</span> </span>
-<span id="cb51-9"><a href="essential-unixlinux-terminal-knowledge.html#cb51-9"></a>[<span class="ex">~</span>]<span class="ex">--%</span> <span class="co"># hash both and compare</span></span>
-<span id="cb51-10"><a href="essential-unixlinux-terminal-knowledge.html#cb51-10"></a>[<span class="ex">~</span>]<span class="ex">--%</span> shasum /tmp/gr-list.txt /tmp/gr-list2.txt </span>
-<span id="cb51-11"><a href="essential-unixlinux-terminal-knowledge.html#cb51-11"></a><span class="ex">1396f2fec4eebdee079830e1eff9e3a64ba5588c</span>  /tmp/gr-list.txt</span>
-<span id="cb51-12"><a href="essential-unixlinux-terminal-knowledge.html#cb51-12"></a><span class="ex">23bff8776ff86e5ebbe39e11cc2f5e31c286ae91</span>  /tmp/gr-list2.txt</span>
-<span id="cb51-13"><a href="essential-unixlinux-terminal-knowledge.html#cb51-13"></a>[<span class="ex">~</span>]<span class="ex">--%</span> <span class="co"># whoa! cool.</span></span></code></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb51-1"><a href="essential-unixlinux-terminal-knowledge.html#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> ls <span class="at">-R</span> Documents/git-repos/<span class="pp">*</span> <span class="op">&gt;</span> /tmp/gr-list.txt </span>
+<span id="cb51-2"><a href="essential-unixlinux-terminal-knowledge.html#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> <span class="co"># how many lines is that?</span></span>
+<span id="cb51-3"><a href="essential-unixlinux-terminal-knowledge.html#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> wc /tmp/gr-list.txt </span>
+<span id="cb51-4"><a href="essential-unixlinux-terminal-knowledge.html#cb51-4" aria-hidden="true" tabindex="-1"></a>   <span class="ex">93096</span>   88177 2310967 /tmp/gr-list.txt</span>
+<span id="cb51-5"><a href="essential-unixlinux-terminal-knowledge.html#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> shasum /tmp/gr-list.txt </span>
+<span id="cb51-6"><a href="essential-unixlinux-terminal-knowledge.html#cb51-6" aria-hidden="true" tabindex="-1"></a><span class="ex">1396f2fec4eebdee079830e1eff9e3a64ba5588c</span>  /tmp/gr-list.txt</span>
+<span id="cb51-7"><a href="essential-unixlinux-terminal-knowledge.html#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> <span class="co"># now add a line ending to the end</span></span>
+<span id="cb51-8"><a href="essential-unixlinux-terminal-knowledge.html#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> <span class="er">(</span><span class="fu">cat</span> /tmp/gr-list.txt<span class="kw">;</span> <span class="bu">echo</span><span class="kw">)</span> <span class="op">&gt;</span> /tmp/gr-list2.txt </span>
+<span id="cb51-9"><a href="essential-unixlinux-terminal-knowledge.html#cb51-9" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> <span class="co"># hash both and compare</span></span>
+<span id="cb51-10"><a href="essential-unixlinux-terminal-knowledge.html#cb51-10" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> shasum /tmp/gr-list.txt /tmp/gr-list2.txt </span>
+<span id="cb51-11"><a href="essential-unixlinux-terminal-knowledge.html#cb51-11" aria-hidden="true" tabindex="-1"></a><span class="ex">1396f2fec4eebdee079830e1eff9e3a64ba5588c</span>  /tmp/gr-list.txt</span>
+<span id="cb51-12"><a href="essential-unixlinux-terminal-knowledge.html#cb51-12" aria-hidden="true" tabindex="-1"></a><span class="ex">23bff8776ff86e5ebbe39e11cc2f5e31c286ae91</span>  /tmp/gr-list2.txt</span>
+<span id="cb51-13"><a href="essential-unixlinux-terminal-knowledge.html#cb51-13" aria-hidden="true" tabindex="-1"></a><span class="ex">[~]--%</span> <span class="co"># whoa! cool.</span></span></code></pre></div>
 </div>
 </div>
-<div id="unix-quick-study-guide" class="section level2">
+<div id="unix-quick-study-guide" class="section level2" number="4.9">
 <h2><span class="header-section-number">4.9</span> Unix: Quick Study Guide</h2>
 <p>This is just a table with quick topics/commands/words in it. You should
 understand each and be able to tell a friend a lot about each one. Cite it
@@ -1551,7 +1634,6 @@ as <a href="essential-unixlinux-terminal-knowledge.html#tab:unix-chap-review">4.
     </div>
   </div>
 <script src="libs/gitbook/js/app.min.js"></script>
-<script src="libs/gitbook/js/lunr.js"></script>
 <script src="libs/gitbook/js/clipboard.min.js"></script>
 <script src="libs/gitbook/js/plugin-search.js"></script>
 <script src="libs/gitbook/js/plugin-sharing.js"></script>
@@ -1570,6 +1652,7 @@ gitbook.start({
 "weibo": false,
 "instapaper": false,
 "vk": false,
+"whatsapp": false,
 "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
 },
 "fontsettings": {
@@ -1590,6 +1673,10 @@ gitbook.start({
 "text": null
 },
 "download": ["eca-bioinf-handbook.pdf", "eca-bioinf-handbook.epub"],
+"search": {
+"engine": "fuse",
+"options": null
+},
 "toc": {
 "collapse": "section"
 }

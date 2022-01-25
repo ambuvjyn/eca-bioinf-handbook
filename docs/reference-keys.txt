@@ -51,7 +51,7 @@ redirecting-standard-output-and
 stdin-and
 stderr
 symbolic-links
-file-permissions
+file-perm
 editing-text-files-at-the-terminal
 unix-env
 appearances-matter
@@ -273,7 +273,7 @@ aligning-reads-with-bwa
 indexing-the-genome-for-alignment
 mapping-reads-with-bwa-mem
 hold-it-right-there-buddy-what-about-the-read-groups
-processing-alignment-output-with-samtools
+samtools
 samtools-subcommands
 samtools-view
 samtools-fixmate
