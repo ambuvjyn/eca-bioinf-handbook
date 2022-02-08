@@ -93,7 +93,9 @@ but using your own username.
 
 ## Transferring files to remote computers
 
-### `sftp` (via `lftp`)
+### `sftp` and several systems that use it
+
+
 
 Most Unix systems have a command called `scp`, which works like `cp`, but which is
 designed for copying files to and from
@@ -105,6 +107,7 @@ at CU Boulder).  Trying to use `scp` in such a context becomes an endless cycle 
 entering your password and checking your phone for a DUO push.  Fortunately, there are
 alternatives.
 
+#### Vanilla sftp
 The administrators of the SUMMIT supercomputer at CU Boulder recommend
 the `sftp` utility for transferring files from your laptop to the server.
 This works reasonably well.  The syntax for a CSU student or affiliate connecting to the server is
@@ -123,9 +126,54 @@ the utility for navigating directories on the server or upon your laptop.
 It must have been developed by troglodytes...consequently, I won't describe
 vanilla `sftp` further.
 
+#### Windows alternatives
+
 If you are on Windows, it looks like the makers of PuTTY also bring you
 [PSFTP](https://www.ssh.com/ssh/putty/putty-manuals/0.68/Chapter6.html#psftp) which
-might be useful for you for file transfer. Go for it!
+might be useful for you for file transfer. Even better, MobaXterm has native GUI file transfer
+capabilities. Go for it!
+
+#### A GUI solution for Mac or Windows
+
+When you are first getting started transfering files to a server, it might be easiest
+to use a graphical user interface.  There is a decently-supported (and freely available)
+application called FileZilla, that does this.  You can download the FileZilla client
+application appropriate for your operating system (note! you download and install this _on your 
+own laptop_ not the server) from [https://filezilla-project.org/download.php?type=client](https://filezilla-project.org/download.php?type=client).
+
+Once you install it, there are a few configurations to be done.  First, go to `Edit->Settings` and activate
+and give a master password to protect your passwords. This master password should be something that
+you will remember easily.  It does not have to be, and, really, should not be, the same as your Summit password.
+```{r filezilla-passwd, echo=FALSE, fig.align='center', dpi=100, fig.cap="Setting FileZilla's master password"}
+knitr::include_graphics("figs/filezilla-password.png", auto_pdf = TRUE)
+```
+
+Second, from `Edit->Settings` request 
+```{r filezilla-timeout, echo=FALSE, fig.align='center', dpi=100, fig.cap="Setting FileZilla's master password"}
+knitr::include_graphics("figs/filezilla-connection-timeout.png", auto_pdf = TRUE)
+```
+
+And finally, go to `File->Site Manager` and set up a connection to your remote machine.
+For SUMMIT, do like this:
+```{r filezilla-site, echo=FALSE, fig.align='center', dpi=100, fig.cap="Setting FileZilla's master password"}
+knitr::include_graphics("figs/filezilla-site.png", auto_pdf = TRUE)
+```
+After you hit OK and have established this site, you can do `File->Site Manager`, then choose
+your Summit connection in the left pane and hit "connect" to connect to Summit.  You may have to
+type in the "Master Password" that you gave to FileZilla.
+
+After connecting, you have two file-browser panes.  The one on your left is typically your
+local computer, and the one on the right is the server (remote computer).  You can change the
+local or remote directory by clicking in either the left or right pane, and 
+files and folders by dragging and dropping.  The setup looks like this:
+
+```{r filezilla-connected, echo=FALSE, fig.align='center', dpi=100, fig.cap="Setting FileZilla's master password"}
+knitr::include_graphics("figs/filezilla-connected.png", auto_pdf = TRUE)
+```
+
+
+
+#### lftp
 
 If you are on a Mac, you can install `lftp` (`brew install lftp`: note that I need to write
 a section about installing command line utilities via homebrew somewhere in this handbook).
@@ -362,27 +410,11 @@ a few new things.
 
 The first, and most important, issue to understand is that if you want
 to push new changes back to a repository that is on your GitHub account,
-GitHub needs to know that you have privileges to do so.  One way to
-do this is by making sure, when you initially clone the repository,
-that you do so whilst letting GitHub know that you are the user that
-"owns" your GitHub account.  This is done by inserting your GitHub
-username into your `git clone` request with the following syntax:  
-```
-git clone https://username@github.com/username/repository.git
-```
-For example, if I want to `clone` a repository whose URL is:
-```
-https://github.com/eriqande/alignment-play
-```
-I would issue this command:
-```
-git clone https://eriqande@github.com/eriqande/alignment-play
-```
-This clones the repository to my server, and makes
-a note of the fact that you did so as the GitHub user `eriqande`,
-so that if I try to push something back to that GitHub repository,
-it will ask me for me proper `eriqande` GitHub password.
-
+GitHub needs to know that you have privileges to do so.  Back in the days
+when you could make authenticated https connections to GitHub, there were some
+tricks to this.  But, since all your connections to GitHub must now be done with
+SSH, it has actually gotten a lot easier (but it involves setting up SSH keys,
+as described in the next section).
 
 #### Using git on the remote server
 
@@ -426,7 +458,7 @@ Aha! Be sure to read that and understand that the output tells you which
 files are tracked by git and Modified (blue M in RStudio) and which
 are untracked (Yellow ? in RStudio).  
 
-Of you wanted to see a report of the changes in the files relative
+If you wanted to see a report of the changes in the files relative
 to the currently committed version, you could use `git diff`, passing
 it the file name as an argument.  We will see an example of that below...
 
@@ -556,11 +588,16 @@ remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
 To https://eriqande@github.com/eriqande/alignment-play
    0c1707f..001e650  master -> master
 ```
-When pushing to a GitHub repository for the first
-time from your remote server you
-will be asked for your GitHub password.  Once you have successfully
-provided your password, if you set password caching up correctly, then
-you should not have to provide your password for subsequent pushes.
+In order to push to a GitHub repository from your remote server you will
+need to establish a public/private SSH key pair, and share the public key
+in the settings of your GitHub account.  The process for this is similar to
+what you have already done for accessing GitHub via git with your laptop:
+follow the directions for Linux systems at:
+[https://happygitwithr.com/ssh-keys.html](https://happygitwithr.com/ssh-keys.html).
+In order to copy your public key to GitHub, it will be easiest to 
+`cat ~/.ssh/id_ed25519.pub` to stdout and then copy it from your terminal to
+GitHub.
+
 
 Finally, if after pushing those changes to GitHub, we then pull them
 down to our laptop, and make more changes on top of them and push those
@@ -1096,7 +1133,7 @@ you are working on and can quickly switch between.
 At the same time.  When you are working on the shell of a remote machine
 and your network connection goes down, then, typically the bash session on
 your remote machine will be forcibly quit, killing any jobs that you might
-have been in the middle of (however, this is not the case of you submitted
+have been in the middle of (however, this is not the case if you submitted
 those jobs through a job scheduler like SLURM. Much more on that in the
 next chapter.). And, finally, in a traditional
 `ssh` session to a remote machine, when you close your laptop, or put it

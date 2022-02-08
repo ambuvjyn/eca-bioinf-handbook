@@ -1,6 +1,10 @@
 fig:file-hierarchy
 tab:unix-chap-review
 tab:metachars
+fig:filezilla-passwd
+fig:filezilla-timeout
+fig:filezilla-site
+fig:filezilla-connected
 fig:git-window
 fig:git-staged
 tab:minimal-tmux
@@ -103,7 +107,11 @@ hummingbird
 summit
 sedna
 transferring-files-to-remote-computers
-sftp-via-lftp
+sftp-and-several-systems-that-use-it
+vanilla-sftp
+windows-alternatives
+a-gui-solution-for-mac-or-windows
+lftp
 transferring-files-using-lftp
 git
 configuring-git-on-the-remote-server

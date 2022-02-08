@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-01-25" />
+<meta name="date" content="2022-02-07" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -269,7 +269,7 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="7.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#transferring-files-to-remote-computers"><i class="fa fa-check"></i><b>7.2</b> Transferring files to remote computers</a>
 <ul>
-<li class="chapter" data-level="7.2.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#sftp-via-lftp"><i class="fa fa-check"></i><b>7.2.1</b> <code>sftp</code> (via <code>lftp</code>)</a></li>
+<li class="chapter" data-level="7.2.1" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#sftp-and-several-systems-that-use-it"><i class="fa fa-check"></i><b>7.2.1</b> <code>sftp</code> and several systems that use it</a></li>
 <li class="chapter" data-level="7.2.2" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#git"><i class="fa fa-check"></i><b>7.2.2</b> git</a></li>
 <li class="chapter" data-level="7.2.3" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#globus"><i class="fa fa-check"></i><b>7.2.3</b> Globus</a></li>
 <li class="chapter" data-level="7.2.4" data-path="working-on-remote-servers.html"><a href="working-on-remote-servers.html#interfacing-with-the-cloud"><i class="fa fa-check"></i><b>7.2.4</b> Interfacing with “The Cloud”</a></li>
@@ -593,8 +593,8 @@ connected to it via the VPN, then <code>ssh</code> with, for example:</p>
 </div>
 <div id="transferring-files-to-remote-computers" class="section level2" number="7.2">
 <h2><span class="header-section-number">7.2</span> Transferring files to remote computers</h2>
-<div id="sftp-via-lftp" class="section level3" number="7.2.1">
-<h3><span class="header-section-number">7.2.1</span> <code>sftp</code> (via <code>lftp</code>)</h3>
+<div id="sftp-and-several-systems-that-use-it" class="section level3" number="7.2.1">
+<h3><span class="header-section-number">7.2.1</span> <code>sftp</code> and several systems that use it</h3>
 <p>Most Unix systems have a command called <code>scp</code>, which works like <code>cp</code>, but which is
 designed for copying files to and from
 remote servers using the SSH protocol for security. This works really well
@@ -604,6 +604,8 @@ an option (as far as I can tell) on new NSF-funded clusters that use 2-factor au
 at CU Boulder). Trying to use <code>scp</code> in such a context becomes an endless cycle of
 entering your password and checking your phone for a DUO push. Fortunately, there are
 alternatives.</p>
+<div id="vanilla-sftp" class="section level4" number="7.2.1.1">
+<h4><span class="header-section-number">7.2.1.1</span> Vanilla sftp</h4>
 <p>The administrators of the SUMMIT supercomputer at CU Boulder recommend
 the <code>sftp</code> utility for transferring files from your laptop to the server.
 This works reasonably well. The syntax for a CSU student or affiliate connecting to the server is</p>
@@ -619,9 +621,61 @@ because there is simply no good support for TAB completion within
 the utility for navigating directories on the server or upon your laptop.
 It must have been developed by troglodytes…consequently, I won’t describe
 vanilla <code>sftp</code> further.</p>
+</div>
+<div id="windows-alternatives" class="section level4" number="7.2.1.2">
+<h4><span class="header-section-number">7.2.1.2</span> Windows alternatives</h4>
 <p>If you are on Windows, it looks like the makers of PuTTY also bring you
 <a href="https://www.ssh.com/ssh/putty/putty-manuals/0.68/Chapter6.html#psftp">PSFTP</a> which
-might be useful for you for file transfer. Go for it!</p>
+might be useful for you for file transfer. Even better, MobaXterm has native GUI file transfer
+capabilities. Go for it!</p>
+</div>
+<div id="a-gui-solution-for-mac-or-windows" class="section level4" number="7.2.1.3">
+<h4><span class="header-section-number">7.2.1.3</span> A GUI solution for Mac or Windows</h4>
+<p>When you are first getting started transfering files to a server, it might be easiest
+to use a graphical user interface. There is a decently-supported (and freely available)
+application called FileZilla, that does this. You can download the FileZilla client
+application appropriate for your operating system (note! you download and install this <em>on your
+own laptop</em> not the server) from <a href="https://filezilla-project.org/download.php?type=client">https://filezilla-project.org/download.php?type=client</a>.</p>
+Once you install it, there are a few configurations to be done. First, go to <code>Edit-&gt;Settings</code> and activate
+and give a master password to protect your passwords. This master password should be something that
+you will remember easily. It does not have to be, and, really, should not be, the same as your Summit password.
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:filezilla-passwd"></span>
+<img src="figs/filezilla-password.png" alt="Setting FileZilla's master password" width="735" />
+<p class="caption">
+FIGURE 7.1: Setting FileZilla’s master password
+</p>
+</div>
+Second, from <code>Edit-&gt;Settings</code> request
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:filezilla-timeout"></span>
+<img src="figs/filezilla-connection-timeout.png" alt="Setting FileZilla's master password" width="735" />
+<p class="caption">
+FIGURE 7.2: Setting FileZilla’s master password
+</p>
+</div>
+And finally, go to <code>File-&gt;Site Manager</code> and set up a connection to your remote machine.
+For SUMMIT, do like this:
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:filezilla-site"></span>
+<img src="figs/filezilla-site.png" alt="Setting FileZilla's master password" width="1061" />
+<p class="caption">
+FIGURE 7.3: Setting FileZilla’s master password
+</p>
+</div>
+<p>After you hit OK and have established this site, you can do <code>File-&gt;Site Manager</code>, then choose
+your Summit connection in the left pane and hit “connect” to connect to Summit. You may have to
+type in the “Master Password” that you gave to FileZilla.</p>
+<p>After connecting, you have two file-browser panes. The one on your left is typically your
+local computer, and the one on the right is the server (remote computer). You can change the
+local or remote directory by clicking in either the left or right pane, and
+files and folders by dragging and dropping. The setup looks like this:</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:filezilla-connected"></span>
+<img src="figs/filezilla-connected.png" alt="Setting FileZilla's master password" width="1153" />
+<p class="caption">
+FIGURE 7.4: Setting FileZilla’s master password
+</p>
+</div>
+</div>
+<div id="lftp" class="section level4" number="7.2.1.4">
+<h4><span class="header-section-number">7.2.1.4</span> lftp</h4>
 <p>If you are on a Mac, you can install <code>lftp</code> (<code>brew install lftp</code>: note that I need to write
 a section about installing command line utilities via homebrew somewhere in this handbook).
 <code>lftp</code> provides the sort of TAB completion of paths that you, by now, will have come to
@@ -698,8 +752,9 @@ bash, but does not seem to support globbing (use <code>mrm</code> for that!) In 
 do a lot of things (like <code>cat</code> and <code>less</code>) on the server
 <em>as if you had a bash shell running on it</em> through an
 SSH connection. Just type those commands at the <code>lftp</code> prompt.</p>
-<div id="transferring-files-using-lftp" class="section level4" number="7.2.1.1">
-<h4><span class="header-section-number">7.2.1.1</span> Transferring files using <code>lftp</code></h4>
+</div>
+<div id="transferring-files-using-lftp" class="section level4" number="7.2.1.5">
+<h4><span class="header-section-number">7.2.1.5</span> Transferring files using <code>lftp</code></h4>
 <p>To this point, we haven’t even talked about our original goal with <code>lftp</code>, which
 was to <em>transfer files from our laptop to the server</em> or from <em>the server to our laptop</em>.
 The main <code>lftp</code> commands for those tasks are: <code>get</code>, <code>put</code>, <code>mget</code>, <code>mput</code>, and <code>mirror</code>—it is
@@ -828,11 +883,11 @@ GUI git interface you have become familiar with.</p>
 <p>Intead of having an RStudio Git panel that shows you files that are new or
 have been modified, etc., you use <code>git status</code> in your repo to give
 a text report of the same.</p>
-For example, imagine that Figure <a href="working-on-remote-servers.html#fig:git-window">7.1</a> shows an RStudio project Git window describing the status of files in the repository.
+For example, imagine that Figure <a href="working-on-remote-servers.html#fig:git-window">7.5</a> shows an RStudio project Git window describing the status of files in the repository.
 <div class="figure" style="text-align: center"><span style="display:block;" id="fig:git-window"></span>
 <img src="figs/git-window.png" alt="An example of what an RStudio git window might look like." width="482" />
 <p class="caption">
-FIGURE 7.1: An example of what an RStudio git window might look like.
+FIGURE 7.5: An example of what an RStudio git window might look like.
 </p>
 </div>
 <p>That view is merely showing you a graphical view of the output of
@@ -859,7 +914,7 @@ looks like this:</p>
 <p>Aha! Be sure to read that and understand that the output tells you which
 files are tracked by git and Modified (blue M in RStudio) and which
 are untracked (Yellow ? in RStudio).</p>
-<p>Of you wanted to see a report of the changes in the files relative
+<p>If you wanted to see a report of the changes in the files relative
 to the currently committed version, you could use <code>git diff</code>, passing
 it the file name as an argument. We will see an example of that below…</p>
 Now, recall, that in order to commit files to <code>git</code> you first must
@@ -867,11 +922,11 @@ Now, recall, that in order to commit files to <code>git</code> you first must
 the left of the file or directory in the Git window. For example,
 if we clicked the buttons for the <code>data/</code> directory, as well as for
 <code>.gitignore</code> and <code>002-homeologue-permutation-with-bedr.Rmd</code>, we would
-have staged them and it would look like Figure <a href="working-on-remote-servers.html#fig:git-staged">7.2</a>.
+have staged them and it would look like Figure <a href="working-on-remote-servers.html#fig:git-staged">7.6</a>.
 <div class="figure" style="text-align: center"><span style="display:block;" id="fig:git-staged"></span>
 <img src="figs/git-staged.png" alt="An example of what an RStudio git window might look like." width="483" />
 <p class="caption">
-FIGURE 7.2: An example of what an RStudio git window might look like.
+FIGURE 7.6: An example of what an RStudio git window might look like.
 </p>
 </div>
 <p>In order to do the equivalent operations with <code>git</code> on the command line
@@ -978,11 +1033,15 @@ is written as <code>[alignment-play]--%</code> which is telling us that we are i
 <span id="cb203-64"><a href="working-on-remote-servers.html#cb203-64" aria-hidden="true" tabindex="-1"></a><span class="ex">remote:</span> Resolving deltas: 100% <span class="er">(</span><span class="ex">2/2</span><span class="kw">)</span><span class="ex">,</span> completed with 2 local objects.</span>
 <span id="cb203-65"><a href="working-on-remote-servers.html#cb203-65" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> https://eriqande@github.com/eriqande/alignment-play</span>
 <span id="cb203-66"><a href="working-on-remote-servers.html#cb203-66" aria-hidden="true" tabindex="-1"></a>   <span class="ex">0c1707f..001e650</span>  master <span class="at">-</span><span class="op">&gt;</span> master</span></code></pre></div>
-<p>When pushing to a GitHub repository for the first
-time from your remote server you
-will be asked for your GitHub password. Once you have successfully
-provided your password, if you set password caching up correctly, then
-you should not have to provide your password for subsequent pushes.</p>
+<p>In order to push to a GitHub repository from your remote server you will
+need to establish a public/private SSH key pair, and share the public key
+in the settings of your GitHub account. The process for this is similar to
+what you have already done for accessing GitHub via git with your laptop:
+follow the directions for Linux systems at:
+<a href="https://happygitwithr.com/ssh-keys.html">https://happygitwithr.com/ssh-keys.html</a>.
+In order to copy your public key to GitHub, it will be easiest to
+<code>cat ~/.ssh/id_ed25519.pub</code> to stdout and then copy it from your terminal to
+GitHub.</p>
 <p>Finally, if after pushing those changes to GitHub, we then pull them
 down to our laptop, and make more changes on top of them and push those
 back to GitHub, we can retrieve from GitHub to the server those changes we
@@ -1437,7 +1496,7 @@ you are working on and can quickly switch between.</p>
 <p>At the same time. When you are working on the shell of a remote machine
 and your network connection goes down, then, typically the bash session on
 your remote machine will be forcibly quit, killing any jobs that you might
-have been in the middle of (however, this is not the case of you submitted
+have been in the middle of (however, this is not the case if you submitted
 those jobs through a job scheduler like SLURM. Much more on that in the
 next chapter.). And, finally, in a traditional
 <code>ssh</code> session to a remote machine, when you close your laptop, or put it
@@ -1774,25 +1833,25 @@ looks like a vertical separator, and would thus be a good key stroke
 to split a screen vertically, but why force ourselves to hit the shift key as well?).
 Likewise, <code>&lt;cntrl&gt;-b -</code> will split a window (or a pane) into two panes.</p>
 What do we mean by splitting a window into multiple panes? A picture is
-worth a thousand words. Figure <a href="working-on-remote-servers.html#fig:tmux-4-panes">7.3</a> shows a <code>tmux</code>
+worth a thousand words. Figure <a href="working-on-remote-servers.html#fig:tmux-4-panes">7.7</a> shows a <code>tmux</code>
 window with four panes. The two vertical ones on the left show a yaml
 file and a shell script being edited in <code>vim</code>, and the remaining two
 house shells for looking at files in two different directories.
 <div class="figure" style="text-align: center"><span style="display:block;" id="fig:tmux-4-panes"></span>
 <img src="figs/tmux-4-panes.png" alt="A tmux window with four panes." width="1107" />
 <p class="caption">
-FIGURE 7.3: A tmux window with four panes.
+FIGURE 7.7: A tmux window with four panes.
 </p>
 </div>
 <p>This provides almost endless opportunities for customizing the
 appearance of your terminal workspace on a remote machine for maximum
 efficiency. Of course, doing so requires you know a few more
 keystrokes for handling panes. These are summarized in Table <a href="working-on-remote-servers.html#tab:tmux-pane-strokes">7.2</a>.</p>
-<table style="width:94%;">
+<table style="width:96%;">
 <caption><span id="tab:tmux-pane-strokes">TABLE 7.2: </span> Important keystrokes within a <code>tmux</code> session for handling panes</caption>
 <colgroup>
 <col width="20%" />
-<col width="27%" />
+<col width="29%" />
 <col width="45%" />
 </colgroup>
 <thead>
@@ -1838,7 +1897,7 @@ focus to that pane.</td>
 </tr>
 <tr class="even">
 <td align="left">Y</td>
-<td align="left"><cntrl>-b [hjkl]</td>
+<td align="left"><code>&lt;cntrl&gt;-b [hjkl]</code></td>
 <td align="left">Resize the current pane, h =
 Left, j = Down, k = Up, l =
 Right. It takes a while to
@@ -1847,7 +1906,7 @@ move.</td>
 </tr>
 <tr class="odd">
 <td align="left">Y</td>
-<td align="left"><cntrl>-b z</td>
+<td align="left"><code>&lt;cntrl&gt;-b z</code></td>
 <td align="left">Zoom current pane to full
 size. <code>&lt;cntrl&gt;-b z</code> again
 restores it to original size.</td>
@@ -1911,11 +1970,11 @@ But customized to your own account name. What that does when you open a <code>su
 you need to add to the password manager an account (call it <code>summit</code>) and store your summit
 password in that manager. Then, in your summit-tmux profile, set a trigger (Profile-&gt;Advanced-&gt;Triggers (Edit))
 which looks for the regular expression <code>^Password:</code>, does the action “Open Password Manager,” and does so
-instantly. Figure <a href="working-on-remote-servers.html#fig:iterm-trigger">7.4</a> is a screen shot of what that setup looks like in my SUMMIT profile:
+instantly. Figure <a href="working-on-remote-servers.html#fig:iterm-trigger">7.8</a> is a screen shot of what that setup looks like in my SUMMIT profile:
 <div class="figure"><span style="display:block;" id="fig:iterm-trigger"></span>
 <img src="figs/iterm-pw-trigger.png" alt="How to set a trigger to open the password manager in iTerm to be able to pass in your password.  This is telling iTerm to open the Password Manager whenever it finds `Password:` at the beginning of a line in the terminal." width="923" />
 <p class="caption">
-FIGURE 7.4: How to set a trigger to open the password manager in iTerm to be able to pass in your password. This is telling iTerm to open the Password Manager whenever it finds <code>Password:</code> at the beginning of a line in the terminal.
+FIGURE 7.8: How to set a trigger to open the password manager in iTerm to be able to pass in your password. This is telling iTerm to open the Password Manager whenever it finds <code>Password:</code> at the beginning of a line in the terminal.
 </p>
 </div>
 <p>If you are a Mac user, spend a weekend getting to know iTerm2. It will be time well spent.</p>
