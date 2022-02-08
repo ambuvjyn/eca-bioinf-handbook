@@ -391,13 +391,12 @@ command line on the server:
 ```sh
 git config --global user.name "Eric C. Anderson (From Summit)"
 git config --global user.email eriq@rams.colostate.edu
-git config --global credential.helper cache
 git config --global core.editor nano
 ```
 
-In all actuality, I would set my editor to be `vim` or `emacs`, because those are
+In all actuality, I tend to set my editor to be `vim` or `emacs`, because those are
 more powerful editors and I am familiar with then; however, if you are new to Unix,
-then `nano` is an easy-to-use editor.
+then `nano` is an easy-to-use editor, and one is less likely to get "stuck" inside of it, as can happen in `vim`. 
 
 You should set configurations on your server appropriate to yourself
 (i.e., with your name and email and preferred text editor). Once these configurations are set, you are ready to start cloning

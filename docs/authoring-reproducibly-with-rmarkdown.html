@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-02-07" />
+<meta name="date" content="2022-02-08" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -571,11 +571,11 @@ choosing BetterBibTex, and then selecting “Export” button. That yields a pag
 that gives you a place to omit certain reference fields. You life will be easier
 if you omit fields that are often long, or which are not needed for citation. I recommend
 filling that field with:</p>
-<div class="sourceCode" id="cb403"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb403-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb403-1" aria-hidden="true" tabindex="-1"></a>abstract,copyright,file,pmid</span></code></pre></div>
+<div class="sourceCode" id="cb400"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb400-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb400-1" aria-hidden="true" tabindex="-1"></a>abstract,copyright,file,pmid</span></code></pre></div>
 <p>And, you probably should restart Zotero after doing that.</p></li>
 <li><p>Install the R package <code>citr</code>. It is on CRAN, but it is probably best
 to first try the latest development version. Install it from within R using:</p>
-<div class="sourceCode" id="cb404"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb404-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb404-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;crsh/citr&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb401"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb401-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb401-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;crsh/citr&quot;</span>)</span></code></pre></div>
 <p>For more information about this package check out <a href="https://github.com/crsh/citr">https://github.com/crsh/citr</a>.</p></li>
 <li><p>Once that package is installed. Quit and re-open RStudio. Now, if you go to the
 “Addins” menu (right under the name panel at the top of the RStudio window) you will
@@ -604,12 +604,12 @@ so you can edit references.bib to put titles in sentence case. Probably want to 
 <p>Whoa! Bookdown has figured out how to do references to sections and tables and things in a reasonable
 way that just isn’t there for the vanilla Rmarkdown. But you can use the bookdown syntax for a non-book
 too. Just put something like this in the YAML:</p>
-<div class="sourceCode" id="cb405"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb405-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-1" aria-hidden="true" tabindex="-1"></a><span class="fu">output</span><span class="kw">:</span></span>
-<span id="cb405-2"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-2" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:word_document2</span><span class="kw">:</span><span class="at"> default</span></span>
-<span id="cb405-3"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-3" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:pdf_document2</span><span class="kw">:</span></span>
-<span id="cb405-4"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">number_sections</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb405-5"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-5" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:html_document2</span><span class="kw">:</span></span>
-<span id="cb405-6"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">df_print</span><span class="kw">:</span><span class="at"> paged</span></span></code></pre></div>
+<div class="sourceCode" id="cb402"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb402-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb402-1" aria-hidden="true" tabindex="-1"></a><span class="fu">output</span><span class="kw">:</span></span>
+<span id="cb402-2"><a href="authoring-reproducibly-with-rmarkdown.html#cb402-2" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:word_document2</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb402-3"><a href="authoring-reproducibly-with-rmarkdown.html#cb402-3" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:pdf_document2</span><span class="kw">:</span></span>
+<span id="cb402-4"><a href="authoring-reproducibly-with-rmarkdown.html#cb402-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">number_sections</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
+<span id="cb402-5"><a href="authoring-reproducibly-with-rmarkdown.html#cb402-5" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:html_document2</span><span class="kw">:</span></span>
+<span id="cb402-6"><a href="authoring-reproducibly-with-rmarkdown.html#cb402-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">df_print</span><span class="kw">:</span><span class="at"> paged</span></span></code></pre></div>
 </div>
 <div id="google-docs" class="section level2" number="13.4">
 <h2><span class="header-section-number">13.4</span> Google Docs</h2>
