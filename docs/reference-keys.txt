@@ -135,6 +135,7 @@ installing-software-on-an-hpcc
 modules
 miniconda
 installing-or-updating-miniconda
+installing-mamba
 installing-software-into-a-bioinformatics-environment
 uninstalling-miniconda-and-its-associated-environments
 what-is-miniconda-doing

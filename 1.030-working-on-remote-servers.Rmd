@@ -609,6 +609,101 @@ server we simply issue the command:
 
 ### Globus
 
+Globus is a file transfer system for high performance computing that was
+developed long ago by a group at the University of Chicago.  If you work at
+an institution that has a subscription to the Globus system (as is the case with
+Colorado State University!), then it is quite easy to use it.
+
+In the Globus model, files get transferred between different "endpoints." Which are
+typically file servers on large university computing systems.  You as a user are entitled
+to initiate transfers between the endpoints to which you have access rights.  You can
+initiate these transfers using a web interface through your web browser.  This makes
+is incredibly convenient, especially if you want to transfer large files between
+different computing clusters that are endpoints on the Globus network.
+
+Addtionally, Globus provides a small software application that can turn your own
+laptop or your desktop workstation into a Globus endpoint, allowing you to initiate
+data transfers between your laptop/desktop and the cluster.  Globus is a well-tested
+and robust system, so, since it is offered for Colorado State University students and
+faculty, it is well worth using.  
+
+The steps to using it are:
+
+1. Sign in to Globus as a Colorado State Affiliate by going to
+[https://www.globus.org/app/login](https://www.globus.org/app/login), and finding
+Colorado State University in the dropdown menu, and hitting continue.
+```{r globus1, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus1.png", auto_pdf = TRUE)
+```
+When you do that the first time, you might need to agree to using CILogin.  Do so.
+2. You are then taken to a page to authenticate with CSU---it is the familiar eID login.
+Login to it.  For me it looks like this:
+```{r globus2, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus2.png", auto_pdf = TRUE)
+```
+3. After authenticating, you might be taken to a page that looks like this:
+```{r globus3, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus3.png", auto_pdf = TRUE)
+```
+To be honest, I don't know what this is about.  I think it is Globus pitching its paid
+options.  Whatever....You don't need it.  
+4. Instead, proceed directly to [https://app.globus.org/file-manager](https://app.globus.org/file-manager) which looks like
+this:
+```{r globus4, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus4.png", auto_pdf = TRUE)
+```
+Search for `CU Boulder Research Computing` in the right hand box.  When you find it and
+select it, you should see your home directory on SUMMIT in it, like this:
+```{r globus5, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus5.png", auto_pdf = TRUE)
+```
+5. For the next step, you want to create an endpoint on your own laptop.  Choose the
+"Endpoints" in the left menu (see red arrow in picture above).  When you do that you
+can find the "Create a personal endpoint" link:
+```{r globus6, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus6.png", auto_pdf = TRUE)
+```
+After clicking that, click the link to download "Globus Personal Connect" for your
+operating system.
+6. After downloading it, install "Globus Personal Connect".
+7. After installing it, open "Globus Personal Connect".  If you haven't used it before,
+it should ask you to log in:
+```{r globus7, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus7.png", auto_pdf = TRUE)
+```
+8. After clicking log-in enter a name by which you would like to call your endpoint, and then
+choose "Allow"
+```{r globus8, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus8.png", auto_pdf = TRUE)
+```
+9. Only one more screen to go.  Fill in some more names that are appropriate to your
+laptop/desktop and choose "Save".  (Don't put in the names I have used...) You probably
+do not want to choose the High Assurance option, as that requires an extra round of
+work for the sys admins...
+```{r globus9, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus9.png", auto_pdf = TRUE)
+```
+
+10.  Yay! You are done.  Now, on a mac, you can find the Globus icon in the menu bar
+and use that to start a web transfer session:
+```{r globus10, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus10.png", auto_pdf = TRUE)
+```
+
+11. And when you get that web page, your laptop will be the left endpoint and you can
+search for "CU Boulder Research Computing" in the right endpoint box.
+```{r globus11, echo=FALSE, fig.align='center', dpi=120}
+knitr::include_graphics("figs/globus11.png", auto_pdf = TRUE)
+```
+
+Now copying things from one to another is as easy as highlighting files from your
+desired source endpoint (left or right) and then hitting the "Start" button for that
+source endpoint.
+
+
+
+
+
 ### Interfacing with "The Cloud"
 
 Increasingly, data scientists and tech companies alike are keeping their
@@ -1864,9 +1959,31 @@ with `wget` and then running the Miniconda installer, like this:
     ./Miniconda3-latest-Linux-x86_64.sh 
     ```
 That launches the Miniconda installer (it is a shell script). Follow the prompts and agree
-to the license and to the default install location and to initialize conda.
+to the license. Typically you would agree with the default install location; **however,
+the default install location is in the home directory, and you could quickly fill that up on
+SUMMIT.  So, set the install location to you projects directory**.  After that, be sure
+to agree to initialize conda.
 At the end, it tells you to log out of your shell and log back in for changes to take
 effect.  It turns out that it suffices to do `cd ~; source .bash_profile`
+
+So, in summary, for SUMMIT users, after running the shell code in the above
+code block, you should:
+
+1. Press Enter to review the license agreement
+2. Hit the space bar to page through the agreement.
+3. At the end of the agreement, type yes to agree to it
+4. Next you are told where miniconda will be installed, but on SUMMIT, you
+**do not** want to install it in the default location in your home directory.
+Instead, enter the location where you want it, namely,
+`/projects/your_csu_id@colostate.edu/miniconda3`. Where you have changed
+`your_csu_id` to be your CSU eID.  When you type that in, you
+_do not_ have to put a backslash before the `@`.
+5. When asked if you wish the installer to run conda init, answer yes.
+
+After that, you can logoff and log back on again, or, easier yet, you can just
+type `bash` and that will initialize conda (by reading from your `.bashrc` which
+the conda installer has modified).  In the future, when you log in to a fresh shell
+you should not have to type bash to get conda initialized.
 
 Once you complete the above, your command prompt should have been changed to something that looks like:
 ```sh
@@ -1874,6 +1991,20 @@ Once you complete the above, your command prompt should have been changed to som
 ```
 The `(base)` is telling you that you are in Miniconda's _base_ environment.  Typically you want to keep the
 _base_ environment clean of installed software, so we will install software into a new environment.
+
+At the end of this, you can `cd` back to your home directory and delete the `~/conda_install` directory if you would like to. 
+
+#### Installing mamba
+
+After a fresh install of conda, it is worth it to also install its faster,
+fresher, younger cousin, `mamba` into your base environment.  `mamba` is a tool
+much like `conda`, and is a total replacement for it in some situations, and it is
+recommended for installing Snakemake, which we will use later in the course.  So,
+if you have a new or freshly updated conda install, go ahead and do:
+```sh
+conda install mamba -n base -c conda-forge
+```
+
 
 #### Installing software into a bioinformatics environment
 
@@ -1883,9 +2014,15 @@ use extensively in the next few weeks: `bwa`, `samtools`, and `bcftools`.  We wi
 install these programs into a conda environment that we will name `bioinf` (short
 for "bioinformatics").  It takes just a single command:
 ```sh
-conda create -n bioinf -c bioconda bwa samtools bcftools
+conda create -n bioinf -c bioconda bcftools bwa samtools
 ```
-That should only take a few seconds.
+That should only take a few minutes, at most.
+
+Note that if you installed `mamba` you could have done:
+```sh
+mamba create -n bioinf -c bioconda bcftools bwa samtools
+```
+and gotten the same result.  Just do it one way, though!
 
 To test that we got the programs we must _activate_ the `bioinf` environment, and then issue
 the commands, `bwa`, `samtools`, and `bcftools`.  Each of those should spit back some help
@@ -1955,6 +2092,9 @@ install location, use a location in your project directory. For example, for me,
 `/projects/eriq@colostate.edu/miniconda3`.
 
 Then, recreate the `bioinf` environment described above.
+
+ssh -t eriq@colostate.edu@login11.rc.colorado.edu "/projects/eriq@colostate.edu/miniconda3/bin/tmux -CC attach -t summit || /projects/eriq@colostate.edu/miniconda3/bin/tmux -CC new -s summit"
+
 
 If you are having fun making environments and you think that you might like to use R on
 the cluster, then you might want to make an environment with some bioinformatics software
