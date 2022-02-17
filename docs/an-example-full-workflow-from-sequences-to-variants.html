@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Chapter 28 Bioinformatic analysis on variant data | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</title>
+  <title>Chapter 27 An example full workflow from sequences to variants | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</title>
   <meta name="description" content="A book example for a Chapman &amp; Hall book." />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Chapter 28 Bioinformatic analysis on variant data | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
+  <meta property="og:title" content="Chapter 27 An example full workflow from sequences to variants | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="yihui/bookdown-crc" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Chapter 28 Bioinformatic analysis on variant data | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
+  <meta name="twitter:title" content="Chapter 27 An example full workflow from sequences to variants | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
   
   <meta name="twitter:description" content="A book example for a Chapman &amp; Hall book." />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="an-example-full-workflow-from-sequences-to-variants.html"/>
-<link rel="next" href="topics-in-pop-gen.html"/>
+<link rel="prev" href="whole-genome-alignment-strategies.html"/>
+<link rel="next" href="bioinformatic-analysis-on-variant-data.html"/>
 <script src="libs/header-attrs/header-attrs.js"></script>
 <script src="libs/jquery/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -532,26 +532,198 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="bioinformatic-analysis-on-variant-data" class="section level1" number="28">
-<h1><span class="header-section-number">Chapter 28</span> Bioinformatic analysis on variant data</h1>
-<p>Standard analyses like computing Fst and linkage disequilibrium, etc., from
-data, typically in a VCF file.</p>
-<p>Basically, we want to get comfortable with plink 2.0, bedtools, vcftools, etc.</p>
-<p>The key in all of this is to motivate every single thing we do here in terms of an
-application in conservation genomics. That is going to be key.</p>
-<p>This Part IV will be about standard bioinformatic tools for doing things
-with big variant data.</p>
+<div id="an-example-full-workflow-from-sequences-to-variants" class="section level1" number="27">
+<h1><span class="header-section-number">Chapter 27</span> An example full workflow from sequences to variants</h1>
+<p>The purpose of this chapter is to present an accessible example workflow
+showing all the steps of taking raw sequences in FASTQ files through to
+variants in VCF files. It assumes that some sort of reference genome is
+available already (be it a chromosome-level assembly or just a scaffold-level
+assembly). The workflow shown here is based on the
+GATK “Best Practices,” with some modifications to make the workflow
+reasonable for non-model organims that lack many of the genomic resources
+expected by the authors of the GATK “Best Practices” (like files of
+known variation in the species, etc.)</p>
+<p>As an example data set we have created a
+small version of a typical NGS data set.
+The original data set included 384 Chinook salmon from the Yukon River
+basin, sequenced across 4 lanes of an Illumina NovaSeq machine. To create
+the subsetted data set, we extracted just the reads that map to a small part
+(about 10 megabases from each of four chromosomes, and then a variety of
+shorter scaffolds)
+of the latest (as of 2022) reference genome (<a href="https://www.ncbi.nlm.nih.gov/assembly/GCF_018296145.1">Otsh_v2.0</a>).
+for Chinook salmon.</p>
+<p>Included in the data set is a reference genome that has been downsized similarly.</p>
+<p>Finally, the reads from different individuals were massaged to make it appear that some
+individuals were sequenced on multiple lanes or flow cells and so that some individuals
+underwent several different library preps. This is an important feature to ensure that
+we learn how to properly deal with sequencing of individual libraries across multiple
+lanes when marking PCR duplicates.</p>
+<p>The data set is available publicly as a .tar file at this link:
+<a href="https://drive.google.com/file/d/1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b/view?usp=sharing">https://drive.google.com/file/d/1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b/view?usp=sharing</a>. If you view that site on a browser you can choose to download the file.</p>
+<p>Downloading the file to a Linux server can be done using <code>wget</code> on the command line. Because the file
+is large, a little bit of extra trickery is required to download it. This (rather complex) command line
+should work:</p>
+<div class="sourceCode" id="cb645"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb645-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb645-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">--load-cookies</span> /tmp/cookies.txt <span class="st">&quot;https://docs.google.com/uc?export=download&amp;confirm=</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">--quiet</span> <span class="at">--save-cookies</span> /tmp/cookies.txt <span class="at">--keep-session-cookies</span> <span class="at">--no-check-certificate</span> <span class="st">&#39;https://docs.google.com/uc?export=download&amp;id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b&#39;</span> <span class="at">-O-</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-rn</span> <span class="st">&#39;s/.*confirm=([0-9A-Za-z_]+).*/\1\n/p&#39;</span><span class="va">)</span><span class="st">&amp;id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b&quot;</span> <span class="at">-O</span> non-model-wgs-example-data.tar <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/cookies.txt</span></code></pre></div>
+<p>Once the file <code>non-model-wgs-example-data.tar</code> is downloaded, that .tar archive can be untarred with</p>
+<div class="sourceCode" id="cb646"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb646-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb646-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xvf</span> non-model-wgs-example-data.tar</span></code></pre></div>
+<p>That will create the directory <code>non-model-wgs-example-data</code>, which contains all the files.</p>
+<p>The contents of that directory look like this (in a <code>tree</code> view):</p>
+<pre><code>non-model-wgs-example-data
+├── README.Rmd
+├── README.nb.html
+├── data
+│   └── messy_names
+│       └── fastqs
+│           ├── T199967_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199967_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199969_T2087_HTYYCBBXX_L002_R1_001.fastq.gz
+│           ├── T199969_T2087_HTYYCBBXX_L002_R2_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199970_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199970_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199970_T2094_HY75HDSX2_L004_R1_001.fastq.gz
+│           ├── T199970_T2094_HY75HDSX2_L004_R2_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L004_R1_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L004_R2_001.fastq.gz
+│           ├── T199971_T2099_HTYYCBBXX_L002_R1_001.fastq.gz
+│           ├── T199971_T2099_HTYYCBBXX_L002_R2_001.fastq.gz
+│           ├── T199972_T2087_HTYYCBBXX_L003_R1_001.fastq.gz
+│           ├── T199972_T2087_HTYYCBBXX_L003_R2_001.fastq.gz
+│           ├── T199972_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199972_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199972_T2094_HTYYCBBXX_L004_R1_001.fastq.gz
+│           ├── T199972_T2094_HTYYCBBXX_L004_R2_001.fastq.gz
+│           ├── T199972_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199972_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199974_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199974_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199974_T2094_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199974_T2094_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199974_T2099_HY75HDSX2_L001_R1_001.fastq.gz
+│           └── T199974_T2099_HY75HDSX2_L001_R2_001.fastq.gz
+├── fastq
+│   ├── s001---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199967_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s001---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199967_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s002---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s002---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s002---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s002---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s003---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s003---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s003---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s003---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s003---3_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199969_T2087_HTYYCBBXX_L002_R1_001.fastq.gz
+│   ├── s003---3_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199969_T2087_HTYYCBBXX_L002_R2_001.fastq.gz
+│   ├── s004---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199970_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s004---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199970_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s004---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199970_T2094_HY75HDSX2_L004_R1_001.fastq.gz
+│   ├── s004---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199970_T2094_HY75HDSX2_L004_R2_001.fastq.gz
+│   ├── s005---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s005---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s005---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L004_R1_001.fastq.gz
+│   ├── s005---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L004_R2_001.fastq.gz
+│   ├── s005---3_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199971_T2099_HTYYCBBXX_L002_R1_001.fastq.gz
+│   ├── s005---3_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199971_T2099_HTYYCBBXX_L002_R2_001.fastq.gz
+│   ├── s006---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s006---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s006---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2087_HTYYCBBXX_L003_R1_001.fastq.gz
+│   ├── s006---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2087_HTYYCBBXX_L003_R2_001.fastq.gz
+│   ├── s006---3_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s006---3_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s006---4_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2094_HTYYCBBXX_L004_R1_001.fastq.gz
+│   ├── s006---4_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199972_T2094_HTYYCBBXX_L004_R2_001.fastq.gz
+│   ├── s007---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s007---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s007---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s007---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s007---3_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s007---3_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s007---4_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s007---4_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s008---1_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199974_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s008---1_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199974_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s008---2_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199974_T2094_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s008---2_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199974_T2094_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s008---3_R1.fq.gz -&gt; ../data/messy_names/fastqs/T199974_T2099_HY75HDSX2_L001_R1_001.fastq.gz
+│   └── s008---3_R2.fq.gz -&gt; ../data/messy_names/fastqs/T199974_T2099_HY75HDSX2_L001_R2_001.fastq.gz
+├── resources
+│   └── genome.fasta
+├── samples.tsv
+└── units.tsv</code></pre>
 <ul>
-<li>Filtering</li>
-<li>Imputation</li>
-<li>LD, HWD, FST</li>
-<li>Etc.</li>
+<li>The README.* files give some background on how this data set was whittled out of the
+larger, complete data set.</li>
+<li>The directory <code>data/messy_names/fastqs</code>, contains all the FASTQ files as they might appear
+after downloading from the sequencing center. Characteristic of such files, they all
+have rather daunting names.</li>
+<li>The directory <code>fastq</code> at the top level of the directory contains symbolic
+links to the big files with messy names. These are there simply to provide
+students a simpler variety of names of files to deal with when doing the initial
+steps of a sequencing exercise. But, ultimately, we will explore ways of directly
+addressing the files with more complex names.</li>
+<li>The file <code>samples.tsv</code> just contains all the unique “tidy” sample names
+(like <code>s001</code>, <code>s002</code>, etc.) in a single column named <code>sample</code>.</li>
+<li>The file <code>units.tsv</code> contains crucial information about all the different pairs
+of FASTQ files. Each pair is considered a separate “unit” of one of the samples.<br />
+Some of the information in the file pertains to which flowcell and lane the sample-unit was
+sequenced on, as well as which library the sample-unit was prepared in.
+All of this relates to the “journey” that was taken by each little piece of DNA
+that was sequenced (Section <a href="alignment-of-sequence-data-to-a-reference-genome-and-associated-steps.html#read-journey">19.1</a>). It is worth having a look at the file.</li>
+<li>The file <code>resources/genome.fasta</code> contains the “genome” for this exercise.</li>
 </ul>
-<p>I will probably have a chapter on unix tools.</p>
-<p>Maybe another on R/Bioconductor tools.</p>
-<p>Gotta have a chapter about “Look at your data!” and Whoa! and diagnostics
-using radiator.</p>
+<p>For information about FASTQ and FASTA files see Sections <a href="bioinformatic-file-formats.html#fastq">17.2</a> and <a href="bioinformatic-file-formats.html#fasta">17.3</a>.</p>
+<div id="a-word-on-organizing-workflows" class="section level2" number="27.1">
+<h2><span class="header-section-number">27.1</span> A word on organizing workflows</h2>
+<p><code>results</code> and <code>resources</code> and <code>results/logs</code>.</p>
+</div>
+<div id="step-1a.-quality-checking-the-reads" class="section level2" number="27.2">
+<h2><span class="header-section-number">27.2</span> Step 1a. Quality Checking the Reads</h2>
+</div>
+<div id="step-1b.-trimming-the-reads" class="section level2" number="27.3">
+<h2><span class="header-section-number">27.3</span> Step 1b. Trimming the Reads</h2>
+</div>
+<div id="step-2.-mapping-each-unit-to-the-genome" class="section level2" number="27.4">
+<h2><span class="header-section-number">27.4</span> Step 2. Mapping each unit to the genome</h2>
+</div>
+<div id="step-3.-merging-bams-from-the-same-sample-library" class="section level2" number="27.5">
+<h2><span class="header-section-number">27.5</span> Step 3. Merging bams from the same sample + library</h2>
+</div>
+<div id="step-4.-marking-duplicates" class="section level2" number="27.6">
+<h2><span class="header-section-number">27.6</span> Step 4. Marking duplicates</h2>
+</div>
+<div id="step-5.-merging-dup-marked-bams-from-the-same-sample" class="section level2" number="27.7">
+<h2><span class="header-section-number">27.7</span> Step 5. Merging dup-marked bams from the same sample</h2>
+</div>
+<div id="step-6.-creating-a-gvcf-file-for-each-sample" class="section level2" number="27.8">
+<h2><span class="header-section-number">27.8</span> Step 6. Creating a gVCF file for each sample</h2>
+</div>
+<div id="step-7.-importing-the-gvcf-files-into-a-genomicsdatabase" class="section level2" number="27.9">
+<h2><span class="header-section-number">27.9</span> Step 7. Importing the gVCF files into a GenomicsDatabase</h2>
+</div>
+<div id="step8.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase" class="section level2" number="27.10">
+<h2><span class="header-section-number">27.10</span> Step8. Calling variants and creating VCF files from the GenomicsDatabase</h2>
+</div>
+<div id="step9.-filtering-variants" class="section level2" number="27.11">
+<h2><span class="header-section-number">27.11</span> Step9. Filtering variants</h2>
 
+</div>
 </div>
 
 
@@ -561,8 +733,8 @@ using radiator.</p>
           </div>
         </div>
       </div>
-<a href="an-example-full-workflow-from-sequences-to-variants.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="topics-in-pop-gen.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="whole-genome-alignment-strategies.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bioinformatic-analysis-on-variant-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook/js/app.min.js"></script>
@@ -593,11 +765,11 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/eriqande/eca-bioinf-handbook/edit/master/4.00-post-variant-intro.Rmd",
+"link": "https://github.com/eriqande/eca-bioinf-handbook/edit/master/3.12-an-example-full-WGS-workflow.Rmd",
 "text": "Edit"
 },
 "history": {
-"link": "https://github.com/eriqande/eca-bioinf-handbook/commits/master/4.00-post-variant-intro.Rmd",
+"link": "https://github.com/eriqande/eca-bioinf-handbook/commits/master/3.12-an-example-full-WGS-workflow.Rmd",
 "text": null
 },
 "view": {

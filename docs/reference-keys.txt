@@ -276,7 +276,7 @@ visualization-of-genomic-data
 sample-data
 genome-assembly
 alignment-of-sequence-data-to-a-reference-genome-and-associated-steps
-the-journey-of-each-dna-fragment-from-organism-to-sequencing-read
+read-journey
 read-groups
 aligning-reads-with-bwa
 indexing-the-genome-for-alignment
@@ -325,6 +325,18 @@ try-on-the-chinook-chromosomes
 explore-the-other-parameters-more
 repeat-masking-the-coho-genome
 multiz-maf2fasta
+an-example-full-workflow-from-sequences-to-variants
+a-word-on-organizing-workflows
+step-1a.-quality-checking-the-reads
+step-1b.-trimming-the-reads
+step-2.-mapping-each-unit-to-the-genome
+step-3.-merging-bams-from-the-same-sample-library
+step-4.-marking-duplicates
+step-5.-merging-dup-marked-bams-from-the-same-sample
+step-6.-creating-a-gvcf-file-for-each-sample
+step-7.-importing-the-gvcf-files-into-a-genomicsdatabase
+step8.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase
+step9.-filtering-variants
 bioinformatic-analysis-on-variant-data
 topics-in-pop-gen
 coalescent

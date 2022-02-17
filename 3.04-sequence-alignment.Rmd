@@ -43,7 +43,7 @@ BAM files for variant calling.   Finally, we wrap up this chapter with
 a description of the program `bedtools`, and how to use it to investigate the
 depth of reads aligning to different portions of the reference genome.  
 
-## The Journey of each DNA Fragment from Organism to Sequencing Read
+## The Journey of each DNA Fragment from Organism to Sequencing Read {#read-journey}
 
 In Section \@ref(get-seqs) we discussed one solution for downloading gzipped FASTQ
 files from a sequencing center.  This turns out to be the last step in a very long

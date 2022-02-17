@@ -1,0 +1,196 @@
+# An example full workflow from sequences to variants
+
+The purpose of this chapter is to present an accessible example workflow
+showing all the steps of taking raw sequences in FASTQ files through to
+variants in VCF files. It assumes that some sort of reference genome is
+available already (be it a chromosome-level assembly or just a scaffold-level
+assembly).  The workflow shown here is based on the
+GATK "Best Practices," with some modifications to make the workflow
+reasonable for non-model organims that lack many of the genomic resources
+expected by the authors of the GATK "Best Practices" (like files of
+known variation in the species, etc.)
+
+
+As an example data set we have created a
+small version of a typical NGS data set.
+The original data set included 384 Chinook salmon from the Yukon River
+basin, sequenced across 4 lanes of an Illumina NovaSeq machine.  To create
+the subsetted data set, we extracted just the reads that map to a small part
+(about 10 megabases from each of four chromosomes, and then a variety of
+shorter scaffolds)
+of the latest (as of 2022) reference genome ([Otsh_v2.0](https://www.ncbi.nlm.nih.gov/assembly/GCF_018296145.1)).
+for Chinook salmon.
+
+Included in the data set is a reference genome that has been downsized similarly.
+
+Finally, the reads from different individuals were massaged to make it appear that some
+individuals were sequenced on multiple lanes or flow cells and so that some individuals
+underwent several different library preps.  This is an important feature to ensure that
+we learn how to properly deal with sequencing of individual libraries across multiple
+lanes when marking PCR duplicates.
+
+The data set is available publicly as a .tar file at this link:
+[https://drive.google.com/file/d/1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b/view?usp=sharing](https://drive.google.com/file/d/1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b/view?usp=sharing).  If you view that site on a browser you can choose to download the file.
+
+
+Downloading the file to a Linux server can be done using `wget` on the command line.  Because the file
+is large, a little bit of extra trickery is required to download it.  This (rather complex) command line
+should work:
+```sh
+wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b" -O non-model-wgs-example-data.tar && rm -rf /tmp/cookies.txt
+```
+
+Once the file `non-model-wgs-example-data.tar` is downloaded, that .tar archive can be untarred with
+```sh
+tar -xvf non-model-wgs-example-data.tar
+```
+That will create the directory `non-model-wgs-example-data`, which contains all the files.
+
+The contents of that directory look like this (in a `tree` view):
+```
+non-model-wgs-example-data
+├── README.Rmd
+├── README.nb.html
+├── data
+│   └── messy_names
+│       └── fastqs
+│           ├── T199967_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199967_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199968_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199969_T2087_HTYYCBBXX_L002_R1_001.fastq.gz
+│           ├── T199969_T2087_HTYYCBBXX_L002_R2_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199969_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199970_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199970_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199970_T2094_HY75HDSX2_L004_R1_001.fastq.gz
+│           ├── T199970_T2094_HY75HDSX2_L004_R2_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L004_R1_001.fastq.gz
+│           ├── T199971_T2087_HY75HDSX2_L004_R2_001.fastq.gz
+│           ├── T199971_T2099_HTYYCBBXX_L002_R1_001.fastq.gz
+│           ├── T199971_T2099_HTYYCBBXX_L002_R2_001.fastq.gz
+│           ├── T199972_T2087_HTYYCBBXX_L003_R1_001.fastq.gz
+│           ├── T199972_T2087_HTYYCBBXX_L003_R2_001.fastq.gz
+│           ├── T199972_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199972_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199972_T2094_HTYYCBBXX_L004_R1_001.fastq.gz
+│           ├── T199972_T2094_HTYYCBBXX_L004_R2_001.fastq.gz
+│           ├── T199972_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199972_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199973_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L003_R1_001.fastq.gz
+│           ├── T199973_T2094_HY75HDSX2_L003_R2_001.fastq.gz
+│           ├── T199974_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199974_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199974_T2094_HY75HDSX2_L001_R1_001.fastq.gz
+│           ├── T199974_T2094_HY75HDSX2_L001_R2_001.fastq.gz
+│           ├── T199974_T2099_HY75HDSX2_L001_R1_001.fastq.gz
+│           └── T199974_T2099_HY75HDSX2_L001_R2_001.fastq.gz
+├── fastq
+│   ├── s001---1_R1.fq.gz -> ../data/messy_names/fastqs/T199967_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s001---1_R2.fq.gz -> ../data/messy_names/fastqs/T199967_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s002---1_R1.fq.gz -> ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s002---1_R2.fq.gz -> ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s002---2_R1.fq.gz -> ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s002---2_R2.fq.gz -> ../data/messy_names/fastqs/T199968_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s003---1_R1.fq.gz -> ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s003---1_R2.fq.gz -> ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s003---2_R1.fq.gz -> ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s003---2_R2.fq.gz -> ../data/messy_names/fastqs/T199969_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s003---3_R1.fq.gz -> ../data/messy_names/fastqs/T199969_T2087_HTYYCBBXX_L002_R1_001.fastq.gz
+│   ├── s003---3_R2.fq.gz -> ../data/messy_names/fastqs/T199969_T2087_HTYYCBBXX_L002_R2_001.fastq.gz
+│   ├── s004---1_R1.fq.gz -> ../data/messy_names/fastqs/T199970_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s004---1_R2.fq.gz -> ../data/messy_names/fastqs/T199970_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s004---2_R1.fq.gz -> ../data/messy_names/fastqs/T199970_T2094_HY75HDSX2_L004_R1_001.fastq.gz
+│   ├── s004---2_R2.fq.gz -> ../data/messy_names/fastqs/T199970_T2094_HY75HDSX2_L004_R2_001.fastq.gz
+│   ├── s005---1_R1.fq.gz -> ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s005---1_R2.fq.gz -> ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s005---2_R1.fq.gz -> ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L004_R1_001.fastq.gz
+│   ├── s005---2_R2.fq.gz -> ../data/messy_names/fastqs/T199971_T2087_HY75HDSX2_L004_R2_001.fastq.gz
+│   ├── s005---3_R1.fq.gz -> ../data/messy_names/fastqs/T199971_T2099_HTYYCBBXX_L002_R1_001.fastq.gz
+│   ├── s005---3_R2.fq.gz -> ../data/messy_names/fastqs/T199971_T2099_HTYYCBBXX_L002_R2_001.fastq.gz
+│   ├── s006---1_R1.fq.gz -> ../data/messy_names/fastqs/T199972_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s006---1_R2.fq.gz -> ../data/messy_names/fastqs/T199972_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s006---2_R1.fq.gz -> ../data/messy_names/fastqs/T199972_T2087_HTYYCBBXX_L003_R1_001.fastq.gz
+│   ├── s006---2_R2.fq.gz -> ../data/messy_names/fastqs/T199972_T2087_HTYYCBBXX_L003_R2_001.fastq.gz
+│   ├── s006---3_R1.fq.gz -> ../data/messy_names/fastqs/T199972_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s006---3_R2.fq.gz -> ../data/messy_names/fastqs/T199972_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s006---4_R1.fq.gz -> ../data/messy_names/fastqs/T199972_T2094_HTYYCBBXX_L004_R1_001.fastq.gz
+│   ├── s006---4_R2.fq.gz -> ../data/messy_names/fastqs/T199972_T2094_HTYYCBBXX_L004_R2_001.fastq.gz
+│   ├── s007---1_R1.fq.gz -> ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s007---1_R2.fq.gz -> ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s007---2_R1.fq.gz -> ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s007---2_R2.fq.gz -> ../data/messy_names/fastqs/T199973_T2087_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s007---3_R1.fq.gz -> ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L002_R1_001.fastq.gz
+│   ├── s007---3_R2.fq.gz -> ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L002_R2_001.fastq.gz
+│   ├── s007---4_R1.fq.gz -> ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L003_R1_001.fastq.gz
+│   ├── s007---4_R2.fq.gz -> ../data/messy_names/fastqs/T199973_T2094_HY75HDSX2_L003_R2_001.fastq.gz
+│   ├── s008---1_R1.fq.gz -> ../data/messy_names/fastqs/T199974_T2087_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s008---1_R2.fq.gz -> ../data/messy_names/fastqs/T199974_T2087_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s008---2_R1.fq.gz -> ../data/messy_names/fastqs/T199974_T2094_HY75HDSX2_L001_R1_001.fastq.gz
+│   ├── s008---2_R2.fq.gz -> ../data/messy_names/fastqs/T199974_T2094_HY75HDSX2_L001_R2_001.fastq.gz
+│   ├── s008---3_R1.fq.gz -> ../data/messy_names/fastqs/T199974_T2099_HY75HDSX2_L001_R1_001.fastq.gz
+│   └── s008---3_R2.fq.gz -> ../data/messy_names/fastqs/T199974_T2099_HY75HDSX2_L001_R2_001.fastq.gz
+├── resources
+│   └── genome.fasta
+├── samples.tsv
+└── units.tsv
+```
+
+* The README.* files give some background on how this data set was whittled out of the
+larger, complete data set.
+* The directory `data/messy_names/fastqs`, contains all the FASTQ files as they might appear
+after downloading from the sequencing center.  Characteristic of such files, they all
+have rather daunting names.
+* The directory `fastq` at the top level of the directory contains symbolic
+links to the big files with messy names.  These are there simply to provide
+students a simpler variety of names of files to deal with when doing the initial
+steps of a sequencing exercise.  But, ultimately, we will explore ways of directly
+addressing the files with more complex names.
+* The file `samples.tsv` just contains all the unique "tidy" sample names
+(like `s001`, `s002`, etc.) in a single column named `sample`.
+* The file `units.tsv` contains crucial information about all the different pairs
+of FASTQ files.  Each pair is considered a separate "unit" of one of the samples.  
+Some of the information in the file pertains to which flowcell and lane the sample-unit was
+sequenced on, as well as which library the sample-unit was prepared in.
+All of this relates to the "journey" that was taken by each little piece of DNA
+that was sequenced (Section \@ref(read-journey)).  It is worth having a look at the file.
+* The file `resources/genome.fasta` contains the "genome" for this exercise.
+
+For information about FASTQ and FASTA files see Sections \@ref(fastq) and \@ref(fasta).
+
+## A word on organizing workflows
+
+`results` and `resources` and `results/logs`.
+
+## Step 1a. Quality Checking the Reads
+
+## Step 1b. Trimming the Reads
+
+## Step 2. Mapping each unit to the genome
+
+## Step 3. Merging bams from the same sample + library
+
+## Step 4. Marking duplicates
+
+## Step 5. Merging dup-marked bams from the same sample
+
+## Step 6. Creating a gVCF file for each sample
+
+## Step 7. Importing the gVCF files into a GenomicsDatabase
+
+## Step8. Calling variants and creating VCF files from the GenomicsDatabase
+
+## Step9. Filtering variants

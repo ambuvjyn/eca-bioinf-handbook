@@ -22,7 +22,7 @@ formats, but I will do that in a separate chapter(s) later.
 ## Sequences
 
 
-## FASTQ
+## FASTQ {#fastq}
 
 The FASTQ format is the standard format for lightly-processed data
 coming off an Illumina machine.  If you are doing whole genome sequencing,
@@ -86,8 +86,8 @@ Lines 2 and 3 are self-explanatory, but we will expound upon lines 1 and 4 below
 
 ### Line 1: Illumina identifier lines {#illumina-ids}
 
-The identifier line can be just about any string that starts with an `@`, but, from Illumina data, today,
-you will typically see something like this:
+The identifier line can be just about any string that starts with an `@`, but, from Illumina data
+you might see something like this:
 ```
 @K00364:64:HTYYCBBXX:1:1108:4635:14133/1
 ```
@@ -105,6 +105,29 @@ HTYYCBBXX   : Unique flow cell identifier
 4635        : x-coordinate of the cluster within the tile
 14133       : y-coordinate of the cluster within the tile
 1           : Whether the sequence is from read 1 or read 2 
+```
+
+For Illumina data processed with versions 1.8+ of Casava, the identifier lines are a little
+different, like this:
+
+```
+@A00600:191:HY75HDSX2:1:2624:27480:35744 2:N:0:AAGACCGT+CAATCGAC
+```
+in which we have:
+```
+@           : mandatory character that starts the ID line
+A00600      : Unique sequencing machine ID 
+191         : Run number on instrument
+HY75HDSX2   : Unique flow cell identifier
+1           : Lane number
+2624        : Tile number (section of the lane)
+27480       : x-coordinate of the cluster within the tile
+35744       : y-coordinate of the cluster within the tile
+
+2                 : Whether the sequence is from read 1 or read 2 
+N                 : N if the sequence was not flagged as crappy by the maching, Y otherwise
+0                 : 0 when no control bits are turned on
+AAGACCGT+CAATCGAC : Index/barcode of the sample
 ```
 
 Question: For paired reads, do you expect the x- and y-coordinates for read 1 and read 2 to
