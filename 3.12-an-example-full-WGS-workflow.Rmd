@@ -6,7 +6,7 @@ variants in VCF files. It assumes that some sort of reference genome is
 available already (be it a chromosome-level assembly or just a scaffold-level
 assembly).  The workflow shown here is based on the
 GATK "Best Practices," with some modifications to make the workflow
-reasonable for non-model organims that lack many of the genomic resources
+reasonable for non-model organisms that lack many of the genomic resources
 expected by the authors of the GATK "Best Practices" (like files of
 known variation in the species, etc.)
 
@@ -19,9 +19,12 @@ the subsetted data set, we extracted just the reads that map to a small part
 (about 10 megabases from each of four chromosomes, and then a variety of
 shorter scaffolds)
 of the latest (as of 2022) reference genome ([Otsh_v2.0](https://www.ncbi.nlm.nih.gov/assembly/GCF_018296145.1)).
-for Chinook salmon.
+for Chinook salmon. And we included data from only 8 of the 384
+individual fish.
 
-Included in the data set is a reference genome that has been downsized similarly.
+Included in the data set is a reference genome that has been downsized similarly,
+to include only those portions of the genome from which we extracted the
+read from those 8 fish.
 
 Finally, the reads from different individuals were massaged to make it appear that some
 individuals were sequenced on multiple lanes or flow cells and so that some individuals
@@ -171,13 +174,507 @@ that was sequenced (Section \@ref(read-journey)).  It is worth having a look at 
 
 For information about FASTQ and FASTA files see Sections \@ref(fastq) and \@ref(fasta).
 
+## Let's have a look at the reference genome
+
+A number of people in the class had problems installing samtools on SUMMIT last
+week.  The reason for this appears to be that the conda package management system
+migrated  to a new version of the SSH library, but samtools looks for an older version
+of the libcrypto library (perhaps because it uses some of the hashing functions
+from that library).  This was a known problem when conda upgraded its SSH dependencies,
+but seems to have resurfaced with later versions of samtools.  However, it can be fixed by
+installing version 1.11 of samtools.
+
+### First off, make sure that you have added mamba to your base environment
+
+I was playing with a lot of things over the weekend, and it was clear that mamba was
+orders of magnitude faster than conda for installing environments. (It almost felt
+like conda merely stalled on some environments---that wouldn't make for fun classtime...just
+waiting for software to be installed).
+
+So, I am going to require that people use `mamba` from here on out.  First, test to see
+if you have mamba in your base conda environment: activate your base conda environment
+and see if you have mamba:
+```sh
+conda activate base
+mamba
+```
+If this gives you a screen full of syntax about how to use mamba, like:
+```sh
+usage: mamba [-h] [-V] command ...
+
+conda is a tool for managing and deploying applications, environments and packages.
+
+Options:
+
+positional arguments:
+  command
+    clean        Remove unused packages and caches.
+    compare      Compare packages between conda environments.
+    config       Modify configuration values in .condarc. This is modeled after the git config command. Writes to the user .condarc file (/home/eriq@colostate.edu/.condarc) by
+                 default.
+    create       Create a new conda environment from a list of specified packages.
+    help         Displays a list of available conda commands and their help strings.
+    info         Display information about current conda install.
+    init         Initialize conda for shell interaction. [Experimental]
+    install      Installs a list of packages into a specified conda environment.
+    list         List linked packages in a conda environment.
+    package      Low-level conda package utility. (EXPERIMENTAL)
+    remove       Remove a list of packages from a specified conda environment.
+    uninstall    Alias for conda remove.
+    run          Run an executable in a conda environment. [Experimental]
+    search       Search for packages and display associated information. The input is a MatchSpec, a query language for conda packages. See examples below.
+    update       Updates conda packages to the latest compatible version.
+    upgrade      Alias for conda update.
+    repoquery    Query repositories using mamba.
+```
+then you have mamba.
+
+If, instead, it tells you it doesn't know anything about the mamba command, then you
+need to install it.  Make sure that you install it into your base conda environment,
+using this command:
+```sh
+conda install mamba -n base -c conda-forge
+```
+
+Now, if you need to get a working samtools (version 1.11) into an environment called
+samtools, you can do this:
+```sh
+mamba create -n samtools -c bioconda samtools=1.11
+```
+To use samtools you then must activate the environment
+```sh
+conda activate samtools
+```
+
+### Indexing the reference genome
+
+Samtools has wonderful subcommand, `faidx` that indexes a fasta file.
+We can index our example reference genome by running this command from the
+top level of our `non-model-wgs-example-data` directory.
+```sh
+samtools faidx resources/genome.fasta
+```
+This creates the file `resources/genome.fasta.fai`.  The extension
+`.fai` stands for "faidx index."  Look at `resources/genome.fasta.fai`
+using the `less` viewer.  The first few lines look like:
+```
+  CM031199.1      14000000        122     60      61
+CM031200.1      12000000        14233578        60      61
+CM031201.1      10000000        26433700        60      61
+CM031202.1      6000000 36600489        60      61
+JAEPEU010001976.1       276     42700570        60      61
+JAEPEU010009262.1       333     42700932        60      61
+JAEPEU010007942.1       367     42701352        60      61
+JAEPEU010006675.1       416     42701807        60      61
+JAEPEU010003074.1       440     42702311        60      61
+```
+Each line gives information about a differet sequence in the referenc fasta
+file, listed in the order that the sequences appear in the fasta file.
+
+The five columns of each line hold this information:
+
+* **NAME**:	Name of this reference sequence
+* **LENGTH**:	Total length of this reference sequence, in bases
+* **OFFSET**:	Offset in the FASTA/FASTQ file of this sequence's first base
+* **LINEBASES**:	The number of bases on each line
+* **LINEWIDTH**:	The number of bytes in each line, including the newline
+
+This information can be used to rapidly find the parts of the file where
+any position in the genome is found, for example, if you wanted to find 
+the 100th base in sequence `JAEPEU010001976.1` you can see that you have
+to go `42700570` bytes from the start of the file to get to base 1 of
+``JAEPEU010001976.1`, and then you would have to go forward in the file
+for 99 bases.  59 bases forward would get you to the last base on the first
+line, then you have an additional byte to eat up (the line ending) and then 
+40 more bytes would put you at position 100.  So, you could reach
+the desired point in the fasta file by just going 
+`42700570 + 59 + 1 + 40` bytes forward in the file. This is the sort
+of thing that can be done very quickly by a computer.
+
+Fortunately you don't have to do this arithmetic in your head to
+find sequences at certain places in the reference genome. Rather, once
+you have indexed your FASTA file, you can use `samtools faidx` with any
+number of optional _genomic coordinates_, to extract those seqences.
+
+A genomic coordinate (or "range") of a sequence has the form:
+```
+chromosome_or_sequence_name:start_position-end_positions
+```
+For example:
+```
+CM031199.1:50151-50300
+```
+gives the genomic coordinates (or the "genome address") of the 150 base pair
+sequence whose first base is at position 50,151 in the genome, and whose
+last is at position 50,300.  When using `samtools faidx` bases are numbered
+so that the first one is `1`.  This is called _base-1_ indexing.  Other
+ways of addressing regions of genomes (like those used in BED files, use a
+different _base-0_ scheme.)
+
+You can think of _base-1_ schemes as those that give the address of each
+base starting from 1.  To understand a base-0 scheme in that light, it makes
+sense to think about addressing each SNP according to individual "pickets" that
+separate each base.  (Probably should draw a picture, but you can see it
+at this [UCSC genome browser blog site](https://genome-blog.soe.ucsc.edu/blog/2016/12/12/the-ucsc-genome-browser-coordinate-counting-systems/)).
+
+At any rate, if you want to get the 500 bases starting from 1,000,001 on the
+first two chromosomes in our example reference genome you would do:
+```sh
+samtools faidx resources/genome.fasta CM031199.1:1000001-1000500 CM031200.1:1000001-1000500
+```
+Note that if you find it difficult to keep track of all those zeroes, you are
+free to put commas into the numbers anywhere that is helpful, for example:
+```sh
+samtools faidx resources/genome.fasta CM031199.1:1,000,001-1,000,500 CM031200.1:1,000,001-1,000,500
+```
+
+So, if you ever need to extract a certain sequence from a genome, this is one way
+you can do it!
+
+
 ## A word on organizing workflows
 
-`results` and `resources` and `results/logs`.
+Now, before we start rolling along with our example bioinformatic workflow,
+let us take a moment and appreciate how clean and tidy our `non-model-wgs-example-data`
+directory is.  If I do ls on it I see this:
+```sh
+% ls
+data  fastq  README.nb.html  README.Rmd  resources  samples.tsv  units.tsv
+```
+That is all right!  There are only seven files or directories there and it
+is not a mess.  
+
+As we proceed with a bioinformatic pipeline/workflow, it will behoove us to
+keep things super nice and clean.  In fact I am going to recommend that nearly
+everything we do in our workflow should go inside a single directory called
+`results`.  
+
+In general, your workflow will involve several types of large files.  Some of those
+are just things like genomes (.fasta files), genomic features (.gff) files, or known
+variants, etc.  In general these sorts of things that you might download from a
+repository like GenBank should be placed into the `resources` directory, possibly
+in their own subdirectory within `resources`.  The other types of files are those that
+get produced when you run bioinformatic software to analyze your data---for example, trimmed
+versions of your fastqs after you have trimmed off the low quality bases, etc.  These latter
+types of files should all go into separate folders within a directory called `results`.
+The directory they go in should reflect what type of step in your bioinformatic process
+produced them, for example: `trimmed`, `mapped`, `variants`, etc. 
+
+Additionally, there should be a directory, `results/logs` where you should redirect `stderr` for
+each sample that is run in a certain process.  All this will become clear as we start
+working through our example.
+
 
 ## Step 1a. Quality Checking the Reads
 
+The first thing we are going to do is Quality Check our fastq files.  There is a standard
+piece of Java software called FASTQC that does a reasonably comprehensive job of this.
+We will focus on running it interactively for now (we will talk about dispatching
+jobs via SLURM later).  So, on the cluster, we will want to get a shell on a compute
+node.  If you want to, on SUMMIT, you can get an interactive shell with:
+```sh
+sinteractive
+```
+But, to be honest, `sinteractive` is a somewhat old-school shell function that uses
+screen to connect you to the interactive shell.  This causes some problems for TMUX.  So,
+I find a better way to get a shell from the oversubscriped interactive partition on
+SUMMIT to be:
+```sh
+srun --partition=shas-interactive -t 2:00:00 --pty /bin/bash
+```
+When you do this, and then reconnect to such a session with TMUX, your scrollback shouldn't
+be totally messed up (Thanks Caitlin for reminding me of this `sinteractive` atrocity!).
+I've checked with the sys-admins on SUMMIT and they say this is a perfectly acceptable
+way of getting an interactive shell on SUMMIT.  Also, the `-t 2:00:00` says
+"give me this interactive shell for 2 hours," which will give us more than
+enough time to get through a whole class session.
+
+
+The first thing we will need to do is get FASTQC using mamba.  Put it in its own
+environment named `fastqc`.
+```sh
+mamba create -n fastqc -c bioconda fastqc
+```
+Hooray for the wicked speed of mamba!
+
+Once this is set up, we can get the instructions for using fastqc like this:
+```sh
+conda activate fastqc
+fastqc --help
+```
+
+That is a fairly lengthy statement about the syntax of this program,
+so I won't copy it into the handbook, here,  But read through it and you
+shall find that it looks like if we want to just
+put all the fastq files on the command line
+then `fastqc` ought to gobble them right up and put the output in files that
+are named intelligently.  That sounds pretty convenient.  Let's test it out
+on a couple of the smallest files that we have (about 15 Mb each):
+```sh
+# make some directories to put the results in
+mkdir -p results/qc/fastqc results/logs/fastqc
+
+# now, try running fastqc on two small files:
+fastqc -o results/qc/fastqc --noextract fastq/s006---1_R1.fq.gz fastq/s006---1_R2.fq.gz
+```
+Note that fastqc spits out some output to tell you about the progress that it is making.
+It turns out that is going to both _stderr_ (the percent complete lines) and to
+_stdout_ (the "complete" lines).  So, we probably should capture both of those streams
+in the future.
+
+When it is done, look at the output in `results/qc/fastqc`.  See that there are files with
+pretty self-explanatory names.  For each FASTQ file there is an `.html` file that has
+a report file (with lots of pretty pictures) that can be opened in a web browser.  Note that
+you have to copy those to your laptop if you want to see them. You could, for example, 
+do that with Globus.  The other output for each FASTQ file is a `.zip` file of data
+that we will use later.
+
+That didn't take too long.  Let's try the whole schmeer!  We can do that easily with
+globbing.  Note the redirection of _stdout_ to a log file and the `2>&1` which means, "send
+_stderr_ to the same place _stdout_ is going to."
+
+```sh
+fastqc -o results/qc/fastqc --noextract fastq/*.fq.gz  > results/logs/fastqc/fastqc.log 2>&1
+```
+
+Note that if you want to see how much progress is being made on the file
+you can look at the bottom of the log file at `results/logs/fastqc/fastqc.log`
+using the `tail` command in another shell (opened for example with tmux, before you started
+the last command).  In fact, you can do one better than that by using `tail -f`.
+
+Since I had another shell going in tmux, I can do this with it:
+```sh
+tail -f results/logs/fastqc/fastqc.log
+```
+this continuously spits new output to the `fastqc.log` file to _stdout_.
+The whole thing should take about 5 to 10 minutes on an interactive shell
+on SUMMIT.
+
+### A Little Looking at the HTMLs
+
+Let's just go through a few of the different pieces of information
+in here.  It is relatively self-explanatory.  I do want to call out the
+adapter content pane, and show that it found some instances of the
+Illumina Universal Adapter.  These are refer to Illumina's TruSeq Version 3
+adapters.  So, we see that some of the reads include sequence from the
+adapters.  Cool. We will come back to that.
+
+### Summarizing output from a lot of different files with MultiQC
+
+As you probably noticed if you tried to open all the html reports for every 
+FASTQ file, it is a bit laborious to look at every report...and this is just
+for a small number of files.  Imagine if you had to do that for 768 different
+FASTQ files!
+
+A good solution for summarizing such outputs is the Java-based program, MultiQC.
+This program offers an insightful system for summarizing log files and outputs from
+a wide range of different bioinformatics programs.  It is capable of summarizing much
+more than just fastqc files, but that is how we will first use it.
+
+Let's get it and put it in a conda environment called multiqc.
+```sh
+mamba create -n multiqc -c bioconda multiqc
+```
+Once that is done (and if you use `conda` instead of `mamba` it might
+never be done) you can activate the environment and get some information
+about how to use multiqc with:
+```sh
+conda activate multiqc
+multiqc --help 
+```
+Reading the program syntax, it seems like we should be able to
+point it to the `results/qc/fastqc` directory and tell it to put its output
+into a `results/qc/multiqc` directory like this:
+```sh
+multiqc -v -o results/qc/multiqc results/qc/fastqc
+```
+Note that the command line above is using the `-v` option, which gives us
+_verbose_ output.  This is kind of fun because it shows us all the different kinds of
+output file types that MultiQC can parse---a whole boatload of them.  All we have
+now our fastqc files.   But we can see the summary report by downloading
+`results/qc/multiqc/multiqc_report.html` and opening it in your browser.  Super cool!
+
 ## Step 1b. Trimming the Reads
+
+The fastqc reports showed that most of the sequences we have are of pretty good quality,
+but, as expected, the quality drops off a bit later in the read.  Also, we saw that there
+were some adapter sequences stuck into 1 to 3% of the reads.  We can use the
+tool TrimmoMatic to:
+
+1. Trim off parts of reads that are of low quality.
+2. Chuck out entire reads that are of low quality.
+3. Remove adapter sequences that are improperly inserted into our reads.
+
+To use it, we will have to get it.  If you don't have it in a conda environment
+yet, you know the drill:
+```sh
+mamba create -n trimmo -c bioconda trimmomatic
+```
+Once that is installed you can get a terse and somewhat cryptic message about how
+to run the program like this:
+```sh
+conda activate trimmo
+trimmomatic
+```
+Which tells us this:
+```
+Usage:
+       PE [-version] \
+          [-threads <threads>] \
+          [-phred33|-phred64] \
+          [-trimlog <trimLogFile>] \
+          [-summary <statsSummaryFile>] \
+          [-quiet] \
+          [-validatePairs] \
+          [-basein <inputBase> | <inputFile1> <inputFile2>] \
+          [-baseout <outputBase> | <outputFile1P> <outputFile1U> <outputFile2P> <outputFile2U>] \
+          <trimmer1>...
+   or:
+       SE [-version] \
+          [-threads <threads>] \
+          [-phred33|-phred64] \
+          [-trimlog <trimLogFile>] \
+          [-summary <statsSummaryFile>] \
+          [-quiet] \
+          <inputFile> <outputFile> \
+          <trimmer1>...
+   or:
+       -version
+```
+Where I have added backslash-line-endings to make it a little easier to read.
+
+Aha! We can run this dude in paired end mode (PE) or in single end mode (SE).
+Since we have paired-end data, we will run it in paired-end mode.
+
+Full details of the syntax and the methodology can be found in the PDF Trimmomatic
+manual at [http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf](http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf).  This link
+seems to not work very well sometimes...
+
+We will be running it on a single thread for now so the really relevant syntax is:
+```sh
+       PE \
+          [-basein <inputBase> | <inputFile1> <inputFile2>] \
+          [-baseout <outputBase> | <outputFile1P> <outputFile1U> <outputFile2P> <outputFile2U>] \
+          <trimmer1>...
+```
+This syntax message signifies that you can either give it a base file prefix
+for the input and output files, like `-basein fastq/s001-1  -baseout results/trimmed/s001-1`,
+or you can explicitly give it the names of the input and output files.  I tend to think that
+the latter is a better way to do it (always good to be explicit). 
+
+So, for example, with our tidy named files in the fastq directory, the first
+two lines there might look like:
+```sh
+trimmomatic PE \
+  fastq/s001---1_R1.fq.gz  fastq/s001---1_R2.fq.gz   \
+  results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R1_unpaired.fq.gz  \
+  results/trimmed/s001---1_R2.fq.gz  results/trimmed/s001---1_R2_unpaired.fq.gz 
+```
+So, the two input files are read 1 and read2, and the four output files are in this order:
+
+1. Read 1 successfully trimmed.
+2. Read 1 that is no longer paired (because, for example, its mate was tossed out)
+3. Read 2 successfully trimmed
+4. Read 2 that is no longer paired.
+
+The reads that you will use downstream, for mapping, will be the successfully 
+trimmed ones.
+
+Now, the more complex part of the command line syntax is the innocouous looking
+`<trimmer1>...`.  That seemingly simple word belies the opportunity to specify all the
+different types of read trimming modules and their parameters 
+(and the order in which they will be applied) that you want to use.  Once again, the
+PDF manual is the place to go, but a good place to start will be:
+```sh
+# get path to trimmomatic to find the path to the adapter files.
+# It seems to look for them in a standard /usr/local/share location,
+# which is not where they are if conda installed.
+trim_path=$(which trimmomatic)
+trim_dir=$(dirname $trim_path)
+adapter_fasta=$trim_dir/../share/trimmomatic/adapters/TruSeq3-PE-2.fa
+
+# make a results/trimmed directory to put the outputs into
+mkdir -p results/trimmed
+
+trimmomatic PE \
+  fastq/s001---1_R1.fq.gz  fastq/s001---1_R2.fq.gz   \
+  results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R1_unpaired.fq.gz \
+  results/trimmed/s001---1_R2.fq.gz  results/trimmed/s001---1_R2_unpaired.fq.gz  \
+  ILLUMINACLIP:${adapter_fasta}:2:30:10 \
+  LEADING:3 \
+  TRAILING:3 \
+  SLIDINGWINDOW:4:15 \
+  MINLEN:36
+```
+
+You can go ahead and evaluate those commands and see what happens when
+trimmomatic runs.  And while it is running, we can try to unpack those last few lines:
+
+* `ILLUMINACLIP:${adapter_fasta}:2:30:10`: This means remove Illumina adapters that match the
+sequences in the fasta file `TruSeq3-PE-2.fa` that is included with the Trimmomatic distribution.
+That file looks like this:
+```
+>PrefixPE/1
+TACACTCTTTCCCTACACGACGCTCTTCCGATCT
+>PrefixPE/2
+GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>PE1
+TACACTCTTTCCCTACACGACGCTCTTCCGATCT
+>PE1_rc
+AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTA
+>PE2
+GTGACTGGAGTTCAGACGTGTGCTCTTCCGATCT
+>PE2_rc
+AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
+```
+Those are the sequences (and the reverse complements) for the TruSeq version3 adapters.
+It is pretty fun to look around in your fastq files to find there sequences...(We could
+play around with that if you want).  This particular fasta file is set up to allow
+Trimmomatic to find spurious adapter sequences when they arrived in your reads by
+a few different things (see the Palindrome clipping section in the manual).
+* `LEADING:3`: Remove bases at the beginning of the read that have a
+Phred-scaled quality score less than 3.
+* `TRAILING:3`: Remove bases at the end of the read that have a
+Phred-scaled quality score less than 3.
+* `SLIDINGWINDOW:4:15`: Remove any bases within a sliding window of 4 bases that have an
+average Phred-scaled quality score of less than 15.
+* `MINLEN:36`: Toss out any reads that are only 36 bp long after the bad bases have been trimmed.
+
+
+### Cycling over all the files and trimming them
+
+Ultimately, we are going to have to cycle over the fastq files in some way, so,
+note that we could have written the above command line by defining a shell variable for the
+file prefix.  Lets clean this whole thing up with some shell variables, using
+`s002---1` as an example
+```sh
+# here is a variable to store all the trimmer directives:
+TRIMMER="ILLUMINACLIP:${adapter_fasta}:2:30:10 \
+  LEADING:3 \
+  TRAILING:3 \
+  SLIDINGWINDOW:4:15 \
+  MINLEN:36"
+
+
+# define a file prefix for s002---1
+FP=s002---1
+
+# now get the names of all the input files and output files
+# and store them in a shell variable.  Not the fun shell-fu here.
+INFILES=$(echo fastq/${FP}_{R1,R2}.fq.gz)
+OUTFILES=$(echo results/trimmed/${FP}_{R1,R2}{,_unpaired}.fq.gz)
+
+# make a Log file too
+LOG=results/logs/trimmomatic/$FP.log
+
+# you might want to try "echo $INFILES" and "echo $OUTFILES" 
+# and "echo $LOG" to see what those look like.
+
+# now that we have defined those variables, we can write our 
+# command line like this:
+trimmomatic PE $INFILES $OUTFILES $TRIMMER > $LOG 2>&1
+
+```
 
 ## Step 2. Mapping each unit to the genome
 

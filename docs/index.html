@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-02-17" />
+<meta name="date" content="2022-02-22" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -484,17 +484,29 @@ div.csl-indent {
 </ul></li>
 <li class="chapter" data-level="27" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html"><i class="fa fa-check"></i><b>27</b> An example full workflow from sequences to variants</a>
 <ul>
-<li class="chapter" data-level="27.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-word-on-organizing-workflows"><i class="fa fa-check"></i><b>27.1</b> A word on organizing workflows</a></li>
-<li class="chapter" data-level="27.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-1a.-quality-checking-the-reads"><i class="fa fa-check"></i><b>27.2</b> Step 1a. Quality Checking the Reads</a></li>
-<li class="chapter" data-level="27.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-1b.-trimming-the-reads"><i class="fa fa-check"></i><b>27.3</b> Step 1b. Trimming the Reads</a></li>
-<li class="chapter" data-level="27.4" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-2.-mapping-each-unit-to-the-genome"><i class="fa fa-check"></i><b>27.4</b> Step 2. Mapping each unit to the genome</a></li>
-<li class="chapter" data-level="27.5" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-merging-bams-from-the-same-sample-library"><i class="fa fa-check"></i><b>27.5</b> Step 3. Merging bams from the same sample + library</a></li>
-<li class="chapter" data-level="27.6" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-marking-duplicates"><i class="fa fa-check"></i><b>27.6</b> Step 4. Marking duplicates</a></li>
-<li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-merging-dup-marked-bams-from-the-same-sample"><i class="fa fa-check"></i><b>27.7</b> Step 5. Merging dup-marked bams from the same sample</a></li>
-<li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-creating-a-gvcf-file-for-each-sample"><i class="fa fa-check"></i><b>27.8</b> Step 6. Creating a gVCF file for each sample</a></li>
-<li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-7.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.9</b> Step 7. Importing the gVCF files into a GenomicsDatabase</a></li>
-<li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step8.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step8. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
-<li class="chapter" data-level="27.11" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step9.-filtering-variants"><i class="fa fa-check"></i><b>27.11</b> Step9. Filtering variants</a></li>
+<li class="chapter" data-level="27.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#lets-have-a-look-at-the-reference-genome"><i class="fa fa-check"></i><b>27.1</b> Let’s have a look at the reference genome</a>
+<ul>
+<li class="chapter" data-level="27.1.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#first-off-make-sure-that-you-have-added-mamba-to-your-base-environment"><i class="fa fa-check"></i><b>27.1.1</b> First off, make sure that you have added mamba to your base environment</a></li>
+<li class="chapter" data-level="27.1.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#indexing-the-reference-genome"><i class="fa fa-check"></i><b>27.1.2</b> Indexing the reference genome</a></li>
+</ul></li>
+<li class="chapter" data-level="27.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-word-on-organizing-workflows"><i class="fa fa-check"></i><b>27.2</b> A word on organizing workflows</a></li>
+<li class="chapter" data-level="27.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-1a.-quality-checking-the-reads"><i class="fa fa-check"></i><b>27.3</b> Step 1a. Quality Checking the Reads</a>
+<ul>
+<li class="chapter" data-level="27.3.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-little-looking-at-the-htmls"><i class="fa fa-check"></i><b>27.3.1</b> A Little Looking at the HTMLs</a></li>
+<li class="chapter" data-level="27.3.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#summarizing-output-from-a-lot-of-different-files-with-multiqc"><i class="fa fa-check"></i><b>27.3.2</b> Summarizing output from a lot of different files with MultiQC</a></li>
+</ul></li>
+<li class="chapter" data-level="27.4" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-1b.-trimming-the-reads"><i class="fa fa-check"></i><b>27.4</b> Step 1b. Trimming the Reads</a>
+<ul>
+<li class="chapter" data-level="27.4.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#cycling-over-all-the-files-and-trimming-them"><i class="fa fa-check"></i><b>27.4.1</b> Cycling over all the files and trimming them</a></li>
+</ul></li>
+<li class="chapter" data-level="27.5" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-2.-mapping-each-unit-to-the-genome"><i class="fa fa-check"></i><b>27.5</b> Step 2. Mapping each unit to the genome</a></li>
+<li class="chapter" data-level="27.6" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-merging-bams-from-the-same-sample-library"><i class="fa fa-check"></i><b>27.6</b> Step 3. Merging bams from the same sample + library</a></li>
+<li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-marking-duplicates"><i class="fa fa-check"></i><b>27.7</b> Step 4. Marking duplicates</a></li>
+<li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-merging-dup-marked-bams-from-the-same-sample"><i class="fa fa-check"></i><b>27.8</b> Step 5. Merging dup-marked bams from the same sample</a></li>
+<li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-creating-a-gvcf-file-for-each-sample"><i class="fa fa-check"></i><b>27.9</b> Step 6. Creating a gVCF file for each sample</a></li>
+<li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-7.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 7. Importing the gVCF files into a GenomicsDatabase</a></li>
+<li class="chapter" data-level="27.11" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step8.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.11</b> Step8. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
+<li class="chapter" data-level="27.12" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step9.-filtering-variants"><i class="fa fa-check"></i><b>27.12</b> Step9. Filtering variants</a></li>
 </ul></li>
 <li class="part"><span><b>IV Part IV: Analysis of Big Variant Data</b></span></li>
 <li class="chapter" data-level="28" data-path="bioinformatic-analysis-on-variant-data.html"><a href="bioinformatic-analysis-on-variant-data.html"><i class="fa fa-check"></i><b>28</b> Bioinformatic analysis on variant data</a></li>
@@ -535,7 +547,7 @@ div.csl-indent {
 <div id="header">
 <h1 class="title">Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</h1>
 <p class="author"><em>Eric C. Anderson</em></p>
-<p class="date"><em>2022-02-17</em></p>
+<p class="date"><em>2022-02-22</em></p>
 </div>
 <div id="preface" class="section level1 unnumbered">
 <h1>Preface</h1>

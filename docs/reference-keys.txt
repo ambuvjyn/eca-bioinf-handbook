@@ -326,9 +326,15 @@ explore-the-other-parameters-more
 repeat-masking-the-coho-genome
 multiz-maf2fasta
 an-example-full-workflow-from-sequences-to-variants
+lets-have-a-look-at-the-reference-genome
+first-off-make-sure-that-you-have-added-mamba-to-your-base-environment
+indexing-the-reference-genome
 a-word-on-organizing-workflows
 step-1a.-quality-checking-the-reads
+a-little-looking-at-the-htmls
+summarizing-output-from-a-lot-of-different-files-with-multiqc
 step-1b.-trimming-the-reads
+cycling-over-all-the-files-and-trimming-them
 step-2.-mapping-each-unit-to-the-genome
 step-3.-merging-bams-from-the-same-sample-library
 step-4.-marking-duplicates
