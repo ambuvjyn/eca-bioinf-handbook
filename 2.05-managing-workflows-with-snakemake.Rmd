@@ -1,4 +1,4 @@
-# Managing Workflows with Snakemake
+# Managing Workflows with Snakemake  {#snakemake-chap}
 
 In the preceding sections we have covered a few approaches for using RStudio 
 projects and RMarkdown to create reproducible research repositories with visually

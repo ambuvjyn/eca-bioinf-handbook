@@ -26,6 +26,9 @@ fig:genolike
 fig:single-geno-like-dag
 fig:plated-single-geno-like
 fig:full-geno-like-dag
+fig:full-dag
+fig:fastqc-multiqc-dag
+fig:trimmo-dag
 intro
 erics-notes-of-what-he-might-do
 table-of-topics
@@ -207,7 +210,7 @@ references
 zotero-and-rmarkdown
 bookdown
 google-docs
-managing-workflows-with-snakemake
+snakemake-chap
 a-simple-snakemake-example
 snakefile-1-a-simple-rule-to-trimmomcawesome-the-files-from-001
 snakefile-2-a-single-trimmomcawesome-rule-using-wildcards
@@ -326,6 +329,7 @@ explore-the-other-parameters-more
 repeat-masking-the-coho-genome
 multiz-maf2fasta
 an-example-full-workflow-from-sequences-to-variants
+an-overview-of-the-whole-workflow
 lets-have-a-look-at-the-reference-genome
 first-off-make-sure-that-you-have-added-mamba-to-your-base-environment
 indexing-the-reference-genome
@@ -335,6 +339,7 @@ a-little-looking-at-the-htmls
 summarizing-output-from-a-lot-of-different-files-with-multiqc
 step-1b.-trimming-the-reads
 cycling-over-all-the-files-and-trimming-them
+multiqc-your-trimmomatics-results
 step-2.-mapping-each-unit-to-the-genome
 step-3.-merging-bams-from-the-same-sample-library
 step-4.-marking-duplicates

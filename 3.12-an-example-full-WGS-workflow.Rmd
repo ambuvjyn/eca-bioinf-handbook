@@ -174,6 +174,29 @@ that was sequenced (Section \@ref(read-journey)).  It is worth having a look at 
 
 For information about FASTQ and FASTA files see Sections \@ref(fastq) and \@ref(fasta).
 
+## An overview of the whole workflow
+
+We provide here a simple(ish) flow diagram that shows the different steps/jobs in this
+workflow that have to be done.  The diagram is made from a Snakemake workflow (see Chapter 
+\@ref(#snakemake-chap)) that Eric has implemented for whole genome sequencing in
+non-model organisms.  The acyclic directed graph (DAG) output from Snakemake has been
+condensed with the function,`condense_dag()`, from one of Eric's R packages
+([SnakemakeDagR](https://github.com/eriqande/SnakemakeDagR)).  Each step/job is a separate
+box, and the arrows between the boxes show the dependence of output from the parent box
+(at the tail end of the arrow) as input for the child box (at the head end of the arrow).
+The numbers in the boxes and along the arrows show how many independent instances of each job
+must be run (for different samples, units, chromosomes, etc.)
+```{r full-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='A DAG showing all the separate steps or jobs (called "rules" in Snakemake terminology) that we will be exploring while working through the example WGS workflow in this chapter.'}
+knitr::include_graphics("figs/snakemake-dags/full-dag.svg", auto_pdf = TRUE)
+```
+
+
+Burn this DAG into your memory.  We will return to versions of it in each section below
+to give an indication of which part of the workflow we are tackling.
+
+
+
+
 ## Let's have a look at the reference genome
 
 A number of people in the class had problems installing samtools on SUMMIT last
@@ -367,7 +390,23 @@ working through our example.
 
 ## Step 1a. Quality Checking the Reads
 
-The first thing we are going to do is Quality Check our fastq files.  There is a standard
+The first thing we are going to do is Quality Check our fastq files. The
+goal of this step is to get a sense for how good (or bad) the data that we got
+back from the sequencing center is, in terms of number of reads per sample,
+base quality scores, distribution of A, C, G, and T bases, the number of missing
+bases, and the occurrence of overrepresented sequences (that could indicate
+contamination or untrimmed Illumina adapters, etc.)
+
+The following figure shows where this fits into our overall workflow.  We will be
+using FASTQC to profile each FASTQ file, and then we will summarize all those results
+with MULTIQC.
+```{r fastqc-multiqc-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='FASTQC steps and the associated MULTIQC step of this section shown in color.'}
+knitr::include_graphics("figs/snakemake-dags/fastqc-multiqc.svg", auto_pdf = TRUE)
+```
+
+
+
+There is a standard
 piece of Java software called FASTQC that does a reasonably comprehensive job of this.
 We will focus on running it interactively for now (we will talk about dispatching
 jobs via SLURM later).  So, on the cluster, we will want to get a shell on a compute
@@ -505,7 +544,13 @@ tool TrimmoMatic to:
 2. Chuck out entire reads that are of low quality.
 3. Remove adapter sequences that are improperly inserted into our reads.
 
-To use it, we will have to get it.  If you don't have it in a conda environment
+This step corresponds to the colored node in our now-familiar workflow DAG:
+```{r trimmo-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Running Trimmomatic to clean up our sequencing reads by removing adapter cruft and discarding parts of the reads with low quality.'}
+knitr::include_graphics("figs/snakemake-dags/trimmo.svg", auto_pdf = TRUE)
+```
+
+
+To use Trimmomatic, we will have to get it.  If you don't have it in a conda environment
 yet, you know the drill:
 ```sh
 mamba create -n trimmo -c bioconda trimmomatic
@@ -632,6 +677,7 @@ It is pretty fun to look around in your fastq files to find there sequences...(W
 play around with that if you want).  This particular fasta file is set up to allow
 Trimmomatic to find spurious adapter sequences when they arrived in your reads by
 a few different things (see the Palindrome clipping section in the manual).
+
 * `LEADING:3`: Remove bases at the beginning of the read that have a
 Phred-scaled quality score less than 3.
 * `TRAILING:3`: Remove bases at the end of the read that have a
@@ -670,11 +716,83 @@ LOG=results/logs/trimmomatic/$FP.log
 # you might want to try "echo $INFILES" and "echo $OUTFILES" 
 # and "echo $LOG" to see what those look like.
 
+# We need to make sure that we have directories to put all those
+# output and log files into.  We can do that with:
+mkdir -p $(dirname $LOG $OUTFILES)
+
 # now that we have defined those variables, we can write our 
 # command line like this:
+
 trimmomatic PE $INFILES $OUTFILES $TRIMMER > $LOG 2>&1
 
 ```
+
+Once we have figured out that whole collection of command lines,
+and have verified that it works for
+our "trial" value of `FP` (i.e, `s002---1`), it is time to cycle over all the
+different possible values of `FP`.  
+
+We can use globbing and the `basename` utility to get all the file prefixes.  Check this
+out:
+```sh
+FILE_PREFIXES=$(basename -a -s _R1.fq.gz fastq/*R1.fq.gz)
+```
+Evaluate that and then run `echo $FILE_PREFIXES` to see what you have.
+
+With that, we can then define a for loop to run over all 22 pairs of files:
+```sh
+# This stays outside of the for loop:
+TRIMMER="ILLUMINACLIP:${adapter_fasta}:2:30:10 \
+  LEADING:3 \
+  TRAILING:3 \
+  SLIDINGWINDOW:4:15 \
+  MINLEN:36"
+
+# get list of file prefixes
+FILE_PREFIXES=$(basename -a -s _R1.fq.gz fastq/*R1.fq.gz)
+
+for FP in $FILE_PREFIXES; do
+  INFILES=$(echo fastq/${FP}_{R1,R2}.fq.gz)
+  OUTFILES=$(echo results/trimmed/${FP}_{R1,R2}{,_unpaired}.fq.gz)
+  LOG=results/logs/trimmomatic/$FP.log
+  
+  mkdir -p $(dirname $LOG $OUTFILES) # this could be done outside the for loop
+  
+  trimmomatic PE $INFILES $OUTFILES $TRIMMER > $LOG 2>&1
+
+done
+```
+
+You can run those, and they will likely take 15 to 20 minutues to get through.
+To finish them all, you would typically want to be in a tmux session or something similar
+so that the job is not killed when you logout.
+
+Note that for most big and long jobs you wouldn't run this in an interactive shell,
+but, rather, you would run it through SLURM's `sbatch`.  We will be covering that next
+week when we start to talk about mapping.  But for now, just want to do some
+interactive computing to get a flavor of how one can write and test scripts
+on an interactive shell.
+
+### Multiqc your trimmomatics results
+
+It turns out that Multiqc, which so nicely gobbled up and summarized our
+fastqc results, also knows how to make nice summaries of the log (stderr/stdout) output
+of Trimmomatic.  So, once our Trimmomatic loop is done, we can run Multiqc and
+direct it to _both_ the directory holding the fastqc output _and_ the directory holding the
+Trimmomatic output, so as to get an HTML report that includes both.  Witness:
+```sh
+conda activate multiqc
+multiqc -v -f -o results/qc/multiqc results/qc/fastqc results/logs/trimmomatic
+```
+
+Note that the above command includes the `-f` option to _force_ it to overwrite existing
+output. 
+
+As before, you get the results in `results/logs/trimmomatic/multiqc_report.html`, but you
+have to get them on your laptop to view them easily.
+
+
+
 
 ## Step 2. Mapping each unit to the genome
 
