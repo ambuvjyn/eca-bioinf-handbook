@@ -568,7 +568,7 @@ catgacactcccgttaatcacacagactGG
 Gotta write a blurb here about how much nicer it is to
 use the ftp link:  [ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/](ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/).  More on this, eventually...
 
-## Alignments
+## Alignments {#sambamfiles}
 
 A major task in bioinformatics is _aligning_ reads from a sequencing machine
 to a reference genome.  We will discuss the operational features of that task

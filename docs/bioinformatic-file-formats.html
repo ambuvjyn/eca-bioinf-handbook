@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-01" />
+<meta name="date" content="2022-03-02" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -403,7 +403,7 @@ div.csl-indent {
 <li class="chapter" data-level="17.3.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#extracting-genomic-ranges-from-a-fasta-file"><i class="fa fa-check"></i><b>17.3.2</b> Extracting genomic ranges from a FASTA file</a></li>
 <li class="chapter" data-level="17.3.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#downloading-reference-genomes-from-ncbi"><i class="fa fa-check"></i><b>17.3.3</b> Downloading reference genomes from NCBI</a></li>
 </ul></li>
-<li class="chapter" data-level="17.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#alignments"><i class="fa fa-check"></i><b>17.4</b> Alignments</a>
+<li class="chapter" data-level="17.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#sambamfiles"><i class="fa fa-check"></i><b>17.4</b> Alignments</a>
 <ul>
 <li class="chapter" data-level="17.4.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#how-might-i-align-to-thee-let-me-count-the-ways"><i class="fa fa-check"></i><b>17.4.1</b> How might I align to thee? Let me count the ways…</a></li>
 <li class="chapter" data-level="17.4.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#play-with-simple-alignments"><i class="fa fa-check"></i><b>17.4.2</b> Play with simple alignments</a></li>
@@ -501,7 +501,11 @@ div.csl-indent {
 <li class="chapter" data-level="27.5.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#cycling-over-all-the-files-and-trimming-them"><i class="fa fa-check"></i><b>27.5.1</b> Cycling over all the files and trimming them</a></li>
 <li class="chapter" data-level="27.5.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#multiqc-your-trimmomatics-results"><i class="fa fa-check"></i><b>27.5.2</b> Multiqc your trimmomatics results</a></li>
 </ul></li>
-<li class="chapter" data-level="27.6" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-2.-mapping-each-unit-to-the-genome"><i class="fa fa-check"></i><b>27.6</b> Step 2. Mapping each unit to the genome</a></li>
+<li class="chapter" data-level="27.6" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-2.-mapping-each-unit-to-the-genome"><i class="fa fa-check"></i><b>27.6</b> Step 2. Mapping each unit to the genome</a>
+<ul>
+<li class="chapter" data-level="27.6.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#indexing-the-reference-genome-1"><i class="fa fa-check"></i><b>27.6.1</b> Indexing the reference genome</a></li>
+<li class="chapter" data-level="27.6.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-quick-mapping-run-to-stdout"><i class="fa fa-check"></i><b>27.6.2</b> A quick mapping run to stdout</a></li>
+</ul></li>
 <li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-merging-bams-from-the-same-sample-library"><i class="fa fa-check"></i><b>27.7</b> Step 3. Merging bams from the same sample + library</a></li>
 <li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-marking-duplicates"><i class="fa fa-check"></i><b>27.8</b> Step 4. Marking duplicates</a></li>
 <li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-merging-dup-marked-bams-from-the-same-sample"><i class="fa fa-check"></i><b>27.9</b> Step 5. Merging dup-marked bams from the same sample</a></li>
@@ -1015,7 +1019,7 @@ excerpted above:</p>
 use the ftp link: <a href="ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/">ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/</a>. More on this, eventually…</p>
 </div>
 </div>
-<div id="alignments" class="section level2" number="17.4">
+<div id="sambamfiles" class="section level2" number="17.4">
 <h2><span class="header-section-number">17.4</span> Alignments</h2>
 <p>A major task in bioinformatics is <em>aligning</em> reads from a sequencing machine
 to a reference genome. We will discuss the operational features of that task

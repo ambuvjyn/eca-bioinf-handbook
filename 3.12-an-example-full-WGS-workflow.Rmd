@@ -793,8 +793,120 @@ have to get them on your laptop to view them easily.
 
 
 
-
 ## Step 2. Mapping each unit to the genome
+
+Mapping or aligning reads to a genome is one of the more computationally
+demanding steps in a typical WGS workflow.  However, I find it somewhat
+more straightforward (less prone to errors and failures and bugs in the software)
+than some of the later computational steps (like creating a gVCF file from
+HaplotypeCaller).
+
+There are several different software programs available for alignment. I am a fan
+of the `bwa mem` algorithm, and it is commonly used in many production pipelines,
+so that is what we will be using.
+
+The output of `bwa mem` can often be manipulated as it comes streaming out of the program
+onto _stdout_.  The standard tool for manipulation such streams is `samtools`. For this
+reason, when we define a conda environment for mapping steps, we will typically
+include both the `bwa` program and the `samtools` program in it.  So, let's make a
+conda environment called `bwasam` that has both tools in it:
+```sh
+mamba create -n bwasam -c bioconda bwa=0.7.17 samtools=1.11
+```
+
+Once we have that environment, we can activate it and then look at the
+syntax for `bwa mem` by typing `bwa mem`:
+```sh
+conda activate bwasam
+bwa mem
+```
+The output of that is quite long.  Thankfully, the default program values
+are often a good place to start, and typically work well.  So, for our purposes,
+the most germane things to note are the main syntax statement:
+```sh
+Usage: bwa mem [options] <idxbase> <in1.fq> [in2.fq]
+```
+This means you can give it options, and then you have to pass it
+the path to the genome (which is also the prefix used for the bwa indexes, 
+as we shall see).  And then you pass it a fastq file with read 1, and if you have
+paired end reads you pass it the corresponding read 2 fastq file.  
+
+The other option that we will use is described as:
+```
+-R STR        read group header line such as '@RG\tID:foo\tSM:bar' [null]
+```
+This lets us add information to the output file about the origin of the
+collection of reads in the fastq files (like what sample and library prep they
+are from, what type of platform they were sequenced on, and the machine
+and lane).  
+
+To start out with, we simply want to make a SAM file that we can use
+for further explorations of what a SAM/BAM file is, and what
+it means for DNA to align to a reference genome.  So, make sure that
+you are in your `non-model-wgs-example-data` directory, you have an
+interactive compute shell, and that you have the `bwasam` conda environment
+activated.  Here we go!
+
+### Indexing the reference genome
+
+The reference genome we are working with is in `resources/genome.fasta`.
+In order to quickly and efficiently find places in the genome to which reads align,
+it is necessary to _index_ the reference genome. The bwa subcommand `index` will
+index the reference genome for `bwa mem` to use.
+
+To index the genome we do:
+```sh
+bwa index resources/genome.fasta
+```
+This takes about 40 seconds and creates the files:
+```
+resources/genome.fasta.amb  resources/genome.fasta.bwt  resources/genome.fasta.sa
+resources/genome.fasta.ann  resources/genome.fasta.pac
+```
+The particulars of these files are not too important.  Just know that they
+are required for `bwa mem` to work.  Note that the `<idxbase>` in `bwa mem`'s
+syntax statement is just prefix for these 5 files: `resources/genome.fasta`.
+
+
+### A quick mapping run to stdout
+
+Now that the genome is indexed let's go ahead and map the first pair of files
+that we trimmed:
+```
+results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz
+```
+and we will just let the output go streaming to our screen:
+```sh
+bwa mem resources/genome.fasta \
+   results/trimmed/s001---1_R1.fq.gz  \
+   results/trimmed/s001---1_R2.fq.gz
+```
+You should see a whole lot of lines starting with @ come zooming by first,
+then you will see some things that look like progress messages.  Eventually,
+a bunch of sequences start zooming by.  You can hit cntrl-C to stop that.
+
+OK! That was fun.  Now, we are actually going to redirect that standard output
+into a SAM file, but before we do that, we are going to want to add the `-R` option
+to define the read group for the sequences in this file (we will talk a lot more
+about read groups in a moment).
+
+So,
+```sh
+mkdir -p results/sam  # a directory in which to put the output from stdout
+mkdir -p results/logs/bwa  # a directory in which to put the output from stderr
+bwa mem \
+-R '@RG\tID:s001_T199967_Lib-1_HY75HDSX2_1_AAGACCGT+CAATCGAC\tSM:T199967\tPL:ILLUMINA\tLB:Lib-1\tPU:HY75HDSX2.1.AAGACCGT+CAATCGAC' \
+resources/genome.fasta \
+results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz > \
+results/sam/s001---1.sam 2> results/logs/bwa/s001---1.log
+```
+While that is running (and it may run for a pretty good long while) let's just note that the read-group string in there is a horrifying
+bunch of textual gobbledygook.  The information that goes into it is in the
+file `units.tsv`.  More on read groups later.
+
+For now, let's start exploring how sequences can align, and the meaning of all the
+lines in the SAM file.  This is documented in Section \@ref(sambamfiles).
+
 
 ## Step 3. Merging bams from the same sample + library
 

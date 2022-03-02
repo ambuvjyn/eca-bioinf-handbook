@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-01" />
+<meta name="date" content="2022-03-02" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -403,7 +403,7 @@ div.csl-indent {
 <li class="chapter" data-level="17.3.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#extracting-genomic-ranges-from-a-fasta-file"><i class="fa fa-check"></i><b>17.3.2</b> Extracting genomic ranges from a FASTA file</a></li>
 <li class="chapter" data-level="17.3.3" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#downloading-reference-genomes-from-ncbi"><i class="fa fa-check"></i><b>17.3.3</b> Downloading reference genomes from NCBI</a></li>
 </ul></li>
-<li class="chapter" data-level="17.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#alignments"><i class="fa fa-check"></i><b>17.4</b> Alignments</a>
+<li class="chapter" data-level="17.4" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#sambamfiles"><i class="fa fa-check"></i><b>17.4</b> Alignments</a>
 <ul>
 <li class="chapter" data-level="17.4.1" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#how-might-i-align-to-thee-let-me-count-the-ways"><i class="fa fa-check"></i><b>17.4.1</b> How might I align to thee? Let me count the ways…</a></li>
 <li class="chapter" data-level="17.4.2" data-path="bioinformatic-file-formats.html"><a href="bioinformatic-file-formats.html#play-with-simple-alignments"><i class="fa fa-check"></i><b>17.4.2</b> Play with simple alignments</a></li>
@@ -501,7 +501,11 @@ div.csl-indent {
 <li class="chapter" data-level="27.5.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#cycling-over-all-the-files-and-trimming-them"><i class="fa fa-check"></i><b>27.5.1</b> Cycling over all the files and trimming them</a></li>
 <li class="chapter" data-level="27.5.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#multiqc-your-trimmomatics-results"><i class="fa fa-check"></i><b>27.5.2</b> Multiqc your trimmomatics results</a></li>
 </ul></li>
-<li class="chapter" data-level="27.6" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-2.-mapping-each-unit-to-the-genome"><i class="fa fa-check"></i><b>27.6</b> Step 2. Mapping each unit to the genome</a></li>
+<li class="chapter" data-level="27.6" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-2.-mapping-each-unit-to-the-genome"><i class="fa fa-check"></i><b>27.6</b> Step 2. Mapping each unit to the genome</a>
+<ul>
+<li class="chapter" data-level="27.6.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#indexing-the-reference-genome-1"><i class="fa fa-check"></i><b>27.6.1</b> Indexing the reference genome</a></li>
+<li class="chapter" data-level="27.6.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-quick-mapping-run-to-stdout"><i class="fa fa-check"></i><b>27.6.2</b> A quick mapping run to stdout</a></li>
+</ul></li>
 <li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-merging-bams-from-the-same-sample-library"><i class="fa fa-check"></i><b>27.7</b> Step 3. Merging bams from the same sample + library</a></li>
 <li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-marking-duplicates"><i class="fa fa-check"></i><b>27.8</b> Step 4. Marking duplicates</a></li>
 <li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-merging-dup-marked-bams-from-the-same-sample"><i class="fa fa-check"></i><b>27.9</b> Step 5. Merging dup-marked bams from the same sample</a></li>
@@ -1219,6 +1223,89 @@ have to get them on your laptop to view them easily.</p>
 </div>
 <div id="step-2.-mapping-each-unit-to-the-genome" class="section level2" number="27.6">
 <h2><span class="header-section-number">27.6</span> Step 2. Mapping each unit to the genome</h2>
+<p>Mapping or aligning reads to a genome is one of the more computationally
+demanding steps in a typical WGS workflow. However, I find it somewhat
+more straightforward (less prone to errors and failures and bugs in the software)
+than some of the later computational steps (like creating a gVCF file from
+HaplotypeCaller).</p>
+<p>There are several different software programs available for alignment. I am a fan
+of the <code>bwa mem</code> algorithm, and it is commonly used in many production pipelines,
+so that is what we will be using.</p>
+<p>The output of <code>bwa mem</code> can often be manipulated as it comes streaming out of the program
+onto <em>stdout</em>. The standard tool for manipulation such streams is <code>samtools</code>. For this
+reason, when we define a conda environment for mapping steps, we will typically
+include both the <code>bwa</code> program and the <code>samtools</code> program in it. So, let’s make a
+conda environment called <code>bwasam</code> that has both tools in it:</p>
+<div class="sourceCode" id="cb681"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb681-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb681-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bwasam <span class="at">-c</span> bioconda bwa=0.7.17 samtools=1.11</span></code></pre></div>
+<p>Once we have that environment, we can activate it and then look at the
+syntax for <code>bwa mem</code> by typing <code>bwa mem</code>:</p>
+<div class="sourceCode" id="cb682"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb682-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb682-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
+<span id="cb682-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb682-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem</span></code></pre></div>
+<p>The output of that is quite long. Thankfully, the default program values
+are often a good place to start, and typically work well. So, for our purposes,
+the most germane things to note are the main syntax statement:</p>
+<div class="sourceCode" id="cb683"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb683-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb683-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Usage:</span> bwa mem [options] <span class="op">&lt;</span>idxbase<span class="op">&gt;</span> <span class="op">&lt;</span>in1.fq<span class="op">&gt;</span> [in2.fq]</span></code></pre></div>
+<p>This means you can give it options, and then you have to pass it
+the path to the genome (which is also the prefix used for the bwa indexes,
+as we shall see). And then you pass it a fastq file with read 1, and if you have
+paired end reads you pass it the corresponding read 2 fastq file.</p>
+<p>The other option that we will use is described as:</p>
+<pre><code>-R STR        read group header line such as &#39;@RG\tID:foo\tSM:bar&#39; [null]</code></pre>
+<p>This lets us add information to the output file about the origin of the
+collection of reads in the fastq files (like what sample and library prep they
+are from, what type of platform they were sequenced on, and the machine
+and lane).</p>
+<p>To start out with, we simply want to make a SAM file that we can use
+for further explorations of what a SAM/BAM file is, and what
+it means for DNA to align to a reference genome. So, make sure that
+you are in your <code>non-model-wgs-example-data</code> directory, you have an
+interactive compute shell, and that you have the <code>bwasam</code> conda environment
+activated. Here we go!</p>
+<div id="indexing-the-reference-genome-1" class="section level3" number="27.6.1">
+<h3><span class="header-section-number">27.6.1</span> Indexing the reference genome</h3>
+<p>The reference genome we are working with is in <code>resources/genome.fasta</code>.
+In order to quickly and efficiently find places in the genome to which reads align,
+it is necessary to <em>index</em> the reference genome. The bwa subcommand <code>index</code> will
+index the reference genome for <code>bwa mem</code> to use.</p>
+<p>To index the genome we do:</p>
+<div class="sourceCode" id="cb685"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb685-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb685-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> index resources/genome.fasta</span></code></pre></div>
+<p>This takes about 40 seconds and creates the files:</p>
+<pre><code>resources/genome.fasta.amb  resources/genome.fasta.bwt  resources/genome.fasta.sa
+resources/genome.fasta.ann  resources/genome.fasta.pac</code></pre>
+<p>The particulars of these files are not too important. Just know that they
+are required for <code>bwa mem</code> to work. Note that the <code>&lt;idxbase&gt;</code> in <code>bwa mem</code>’s
+syntax statement is just prefix for these 5 files: <code>resources/genome.fasta</code>.</p>
+</div>
+<div id="a-quick-mapping-run-to-stdout" class="section level3" number="27.6.2">
+<h3><span class="header-section-number">27.6.2</span> A quick mapping run to stdout</h3>
+<p>Now that the genome is indexed let’s go ahead and map the first pair of files
+that we trimmed:</p>
+<pre><code>results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz</code></pre>
+<p>and we will just let the output go streaming to our screen:</p>
+<div class="sourceCode" id="cb688"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb688-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb688-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb688-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb688-2" aria-hidden="true" tabindex="-1"></a>   results/trimmed/s001---1_R1.fq.gz  <span class="dt">\</span></span>
+<span id="cb688-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb688-3" aria-hidden="true" tabindex="-1"></a>   results/trimmed/s001---1_R2.fq.gz</span></code></pre></div>
+<p>You should see a whole lot of lines starting with @ come zooming by first,
+then you will see some things that look like progress messages. Eventually,
+a bunch of sequences start zooming by. You can hit cntrl-C to stop that.</p>
+<p>OK! That was fun. Now, we are actually going to redirect that standard output
+into a SAM file, but before we do that, we are going to want to add the <code>-R</code> option
+to define the read group for the sequences in this file (we will talk a lot more
+about read groups in a moment).</p>
+<p>So,</p>
+<div class="sourceCode" id="cb689"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb689-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/sam  <span class="co"># a directory in which to put the output from stdout</span></span>
+<span id="cb689-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/bwa  <span class="co"># a directory in which to put the output from stderr</span></span>
+<span id="cb689-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="dt">\</span></span>
+<span id="cb689-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-4" aria-hidden="true" tabindex="-1"></a>-R <span class="st">&#39;@RG\tID:s001_T199967_Lib-1_HY75HDSX2_1_AAGACCGT+CAATCGAC\tSM:T199967\tPL:ILLUMINA\tLB:Lib-1\tPU:HY75HDSX2.1.AAGACCGT+CAATCGAC&#39;</span> <span class="dt">\</span></span>
+<span id="cb689-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-5" aria-hidden="true" tabindex="-1"></a>resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb689-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-6" aria-hidden="true" tabindex="-1"></a>results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz <span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb689-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-7" aria-hidden="true" tabindex="-1"></a>results/sam/s001---1.sam <span class="dv">2</span><span class="op">&gt;</span> results/logs/bwa/s001---1.log</span></code></pre></div>
+<p>While that is running (and it may run for a pretty good long while) let’s just note that the read-group string in there is a horrifying
+bunch of textual gobbledygook. The information that goes into it is in the
+file <code>units.tsv</code>. More on read groups later.</p>
+<p>For now, let’s start exploring how sequences can align, and the meaning of all the
+lines in the SAM file. This is documented in Section <a href="bioinformatic-file-formats.html#sambamfiles">17.4</a>.</p>
+</div>
 </div>
 <div id="step-3.-merging-bams-from-the-same-sample-library" class="section level2" number="27.7">
 <h2><span class="header-section-number">27.7</span> Step 3. Merging bams from the same sample + library</h2>
