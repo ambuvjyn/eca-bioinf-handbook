@@ -368,6 +368,7 @@ using `awk` and a TAB-delimited spreadsheet.
 
 ## Processing alignment output with `samtools` {#samtools}
 
+
 Doing the alignment with `bwa mem` is only the first step of getting data ready to do
 variant calling. Once the SAM format data comes out of `bwa mem`, a number of things
 must happen to it before it can be used for variant calling:
@@ -378,8 +379,8 @@ must happen to it before it can be used for variant calling:
 _coordinate-ordered_ format, in which the reads are sorted by where they appear within the
 reference genome.
 3. If you started with multiple pairs of FASTQ files for a single individual (i.e. from different lanes
-or from different sequencing runs or libraries) you might want to merge those all into a single BAM
-file.
+or from different sequencing runs or libraries) you might need to merge those all into a single BAM
+file before variant calling.
 3. You might want to mark PCR duplicates as such in the BAM file.
 3. Finally when you have your BAM file all ready for variant calling, you typically
 will need to index it for rapid access by the variant caller program.
@@ -391,12 +392,28 @@ same people who developed the SAM/BAM formats [@liSequenceAlignmentMap2009] and 
 important to become good friends with `samtools`.
 
 The program `samtools` includes a large number of different subcommands.
-We will cover just a few of them, here, that are used in our typical paired-end workflow,
-and in a somewhat cursory fashion, including only the most commonly used options.
+We will cover just a few of them, here, that are used in our typical paired-end workflow
+for whole genome sequencing,
+and in a somewhat cursory fashion, and we will disscuss only the most commonly used options.
 All readers are encouraged to completely read the online [manual page](http://www.htslib.org/doc/samtools.html)
 for samtools for a complete account of its uses.
 
-In the samtools manual.  The usage patterns of the subcommands can broadly be categorized into
+Or, you can read the usage guidelines for any subcommand from the command line:
+```sh
+conda activate bwasam
+
+# This lists all the different subcommands for you, categorized by
+# their uses
+samtools  
+
+# if you follow samtools by any subcommand with nothing else, it gives you information
+# about all the options of that subcommand.  For example:
+samtools view
+
+samtools sort
+```
+
+The usage patterns of the subcommands can broadly be categorized into
 two groups:
 
 1. Subcommands that explicitly require an argument that gives the name of an output file. 
@@ -427,178 +444,174 @@ like:
 samtools subcommand [options]  in.bam
 ```
 You would typically put the path to the input file in the place of `in.bam` there.
-However, if you put `-` in place of `in.bam` then samtools will take input for
+However, if you put `-` in place of `in.bam` then `samtools` will take input for
 `in.bam` from _stdin_.
 
 So, for example, you can do something like this:
 ```sh
 bwa mem genome.fna R1.fq R2.fq |
-  samtools view -b -  |   # convert the SAM output from bwa mem into BAM format
-  samtools fixmate -m - output_file  # take stdin as the input and write output to output_file
+  samtools view -u -  |   # convert the SAM output from bwa mem into BAM format
+  samtools sort -l 9  - -o output_file.bam  # take stdin as the input, sort it, and write (with the best
+                                        # compression possible: -l 9) the output to output_file.bam
 ```
+This is HUGE!  It means that you don't even have to save the initial SAM file that
+`bwa mem` makes, you can proceed directly to the sorted BAM file you want without
+eating up disk space on the intermediate files.
 
-You can download an 11 Mb BAM file to play around with [here](https://eriqande.github.io/eca-bioinf-handbook/downloads/CH_plate1_A01_mkdup.bam).
-If you are on your HPCC and want to download it, you can use:
-```sh
-wget https://eriqande.github.io/eca-bioinf-handbook/downloads/CH_plate1_A01_mkdup.bam
-```
 
 ### `samtools` subcommands
 
-We will go through some of the subcommands used in the exercises, in a
-more step-by-step fashion, so you can get some experience with them, rather
+We will go through some of the `samtools` subcommands that are particularly
+important in processing whole genome sequencing data in a
+step-by-step fashion, so you can get some experience with them, rather
 than just running them as parts of long and complex pipelines.
 
-To follow along, you will need to download (using rclone) a "tarball" and decompress it
-into a directory full of a variety of SAM and BAM files.  
+To follow along, you will need to have
+a SAM file that is in the location
+`results/sam/s001---1.sam` relative to the current working directory.
+If you were here on Wednesday, you have that file.  If not, you can download
+a small version of it (with only about 15,700 alignments) to your cluster
+into a `results/sam` directory (preferably somewhere in scratch!) with the
+following commands.  DON'T DO THESE COMMANDS IF YOU ALREADY HAVE A `results/sam/s001---1.sam`
+file!!_
+```sh
+mkdir -p results/sam
+wget https://eriqande.github.io/eca-bioinf-handbook/downloads/s001---1.sam
+mv s001---1.sam results/sam/
+```
+
+Also, if you were not here on Wednesday, you might need to install a conda environment
+that has both `bwa` and `samtools` in it, like this:
+```sh
+mamba create -n bwasam -c bioconda bwa=0.7.17 samtools=1.11
+```
 
 NOTE! I recommend that you do these exercises connected to your HPCC with Terminal or
 iTerm on a Mac, or PuTTy on Windows.  The RStudio Terminal is just too slow for streaming
 text...
 
-These are the commands
-needed to prepare yourself to go through the following in-class exercises. You
-should be doing this _on a compute node_.
+You should be doing this _on an interactive shell_.  
+
+Note that you can get a tmux-compliant compute node on summit, using `srun`, by getting
+there via scompile, like this:
 ```sh
-
-# rclone the file here.  Change the remote name from "gdrive-pers" to whatever
-# you have named your rclone google drive remote:
-rclone copyto -P  --drive-shared-with-me  gdrive-pers:CSU-con-gen-2020/in-class-bam-play-session.tar.gz in-class-bam-play-session.tar.gz
-
-# extract the contents of the tarball:
-gunzip in-class-bam-play-session.tar.gz
-tar -xvf in-class-bam-play-session.tar
-
-# cd into the directory we will be working in:
-cd in-class-bam-play-session
-
-# make sure you have activated your conda environment that
-# has samtools
-conda activate bioinf
+ssh scompile
+srun --partition shas-interactive --pty /bin/bash
 ```
 
-
+And, in order to have the samtools command, you should activate your bwasam
+environment.
+```sh
+conda activate bwasam
+```
+And you should be in the `non-model-wgs-example-data` directory.
+(Or wherever you might be that has `results/sam` in it.)
 
 #### `samtools view`
 
 The `view` command is a major `samtools` workhorse.
 
-It is primarily used for viewing BAM files (-h/-H), which, you will recall,
-are not otherwise human readable.
-
-View a BAM (or SAM) file like this:
+It is often used to convert between SAM and BAM format,
+or to view them easily.  Look at the options:
 ```sh
-# from a BAM file
-samtools view bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam | head
-
-# from a SAM file
-samtools view sam-from-bwa/DPCh_plate1_A01_S1_L1_R.sam | head
+samtools view
 ```
-That shows the first 10 lines of output.
 
-Note that there is no header in that output.  To see the header also, you
+To convert from SAM to BAM format specify that the output should
+be BAM with the `-b` option:
+```sh
+samtools view -b results/sam/s001---1.sam > results/sam/s001---1.bam
+```
+Once you have done that, compare the size of the SAM and BAM versions
+of the same data:
+```sh
+du -h results/sam/*
+```
+How much of a reduction in storage is that?
+
+Note that you can't read a BAM file as a human.  Try it with head and
+get the universal symbols of "HEY THIS IS A BINARY FILE!!"
+```sh
+head results/sam/s001---1.bam
+```
+
+You can use `samtools view` to look at the alignments in a bam file.
+By default it doesn't show you the SAM header:
+```sh
+# pipe output to head to look at the first 10 alignments
+samtools view results/sam/s001---1.bam | head
+```
+If you want the output to inlude the header, you
 use the `-h` option:
 ```sh
-samtools view -h bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam | head
+samtools view -h results/sam/s001---1.bam | head
 ```
 
 If all you want to print is the SAM header, then use the `-H` command:
 ```sh
-# this is a handy way to get the last N (5 in this case) lines of the
+# this is a handy way to get the last N (12 in this case) lines of the
 # SAM header:
-samtools view -H bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam | tail -n 5
+samtools view -H results/sam/s001---1.bam | tail -n 12
 ```
-Check out that read group line!
+Check out that read group line!  Also, note that some PG lines have been
+added there
 
-`samtools view` is also used for converting from the text-based SAM format
-to BAM format.  Whenever processing SAM/BAM files, you want it to be in BAM format
-(and that is required for some operations) because it is much faster to process
-binary BAM files than text-based SAM files.  Conversion from SAM to BAB is done with the `-b` option,
-which produces BAM output, or by using the `-1` option which produces compressed
-BAM output using fast compression, or by using the `-u` option which outputs
-uncompressed BAM format.  If you are not writing output to the disk, the
-`-u` option is preferred, since it saves the time that would be spent compressing
+In general, you will almost exclusively use BAM format instead of SAM format
+in bioinformatics, because it is much faster to process BAM input that SAM
+input.  But it is worth understanding that BAM format can come in uncompressed
+or highly compressed versions.  The compressed versions take up less disk
+space, but could require more time to operate on.
+
+When `samtools view` is used for converting from the text-based SAM format
+to BAM format, you might not want to spend time compressing the output.
+This is particularly true if you are piping the output back into another
+command that would just have to de-compress the BAM output in order to use it.
+If that is the case, then BAM output using the
+`-u` option is preferred over the `-b` option, since `-u` makes BAM output, but
+it saves the time that would be spent compressing
 and then decompressing the data as it gets piped from one `samtools` command
 to the next.  
 
-```sh
-# write SAM output to BAM file
-samtools view -1 sam-from-bwa/DPCh_plate1_A01_S1_L1_R.sam  > one.bam
-
-# write it to a file directly, not through redirection
-samtools view -1 -o two.bam sam-from-bwa/DPCh_plate1_A01_S1_L1_R.sam
-
-# see that those are the same:
-shasum two.bam one.bam
-
-# do the same with -b instead of -1
-samtools view -b -o three.bam sam-from-bwa/DPCh_plate1_A01_S1_L1_R.sam
-```
-
-Finally, if the you have _indexed_ a BAM file, you can use `samtools view`
-to retrieve and print all the reads in that indexed BAM file covering one
-or more genomic regions as specified using genomic coordinates:
-```sh
-samtools view duplicates-marked/DPCh_plate1_A01_mkdup.bam  CM009233.1:11271560-11271570  CM009233.1:1907820-1907830
-```
+We will see an example of that when we do sorting.
 
 
-
-
-#### `samtools fixmate`
-
-This utility adds information about mates.  In our pipeline, it is used
-with the `-m` option to add
-a "mate-score" field to each alignment.  This is used later by `samtools markdup`.
-Mates must be adjacent to one another in the input BAM.  This is how mates are arranged
-right after running `bwa mem`, so it is best to run this right after alignment.
-
-This subcommand does not write to _stdout_, so output must be written to a file.
-```sh
-# run it on the BAM
-samtools fixmate -m bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam  fixed.bam
-
-# do the same, but take input on stdin from the SAM getting coverted
-# to BAM. Notice the use of "-" in place of the filename for input from stdin.
-samtools view -b sam-from-bwa/DPCh_plate1_A01_S1_L1_R.sam | samtools fixmate -m - fixed2.bam
-
-# note that both give the same result:
-shasum fixed*.bam
-
-# compare the first alignment in the BAMs before and after running fixmate:
-samtools view bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam | head -n 1
-samtools view fixed.bam | head -n 1
-
-# how do the above two outputs differ?
-# What new information is in fixed.bam?
-```
 
 #### `samtools sort`
 
 This subcommand sorts the alignments in a BAM file in order of their placement
 in the reference genome.  This must be done for
-most downstream operations---especially for merging and for marking duplicates---so
-it is something that you will always do to alignments from `bwa mem` or any
+many downstream operations, so
+it is something that you will often do to alignments that come out of `bwa mem` or any
 other aligner.
 
+When a BAM file is sorted by genomic coordinates (i.e., by order of the placement of
+the alignments in the genome), it is said to be "coordinate-sorted."
+
+Here we will coordinate sort the BAM file we made above.  We will put it into
+a file called `results/sam/s001---1.srt.bam`.  First, look at the `samtools sort` syntax:
 ```sh
-# first note that, when it comes off the seqencer, it is not sorted
-samtools view bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam | awk '{print $1, $3, $4}' | less
-
-# how is it sorted?
-
-# coordinate-sort that file:
-samtools sort bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam > sorted1.bam
-
-# rather than redirecting sort's stdout to a file you can use the -o option
-samtools sort -o sorted2.bam bam-from-sam-from-bwa/DPCh_plate1_A01_S1_L1_R.bam
-
-# check they are the same with shasum (this is left for you to do)
-
-# now, look at the order of the positions in the sorted file
-samtools view sorted1.bam | awk '{print $3, $4}' | less
-
+samtools sort
 ```
+Now, let's sort the file and make sure it is well compressed:
+```sh
+samtools sort -l 9 -o results/sam/s001---1.srt.bam results/sam/s001---1.bam
+```
+Check out how big the resulting file is:
+```sh
+du -h results/sam/*
+```
+Cool! Even smaller than the original BAM file!
+
+For fun, check out the header for the file and see that it now has an `@HD` line:
+```sh
+samtools view -H results/sam/s001---1.srt.bam | head
+```
+And, for fun, look at the `@PG` lines at the bottom of the header:
+```sh
+samtools view -H results/sam/s001---1.srt.bam | tail -n 10
+```
+Note that every command that has been used to modify the file contents is there!
+
 
 `samtools sort` produces intermediate files when it is sorting large BAM files.
 You will sometimes see them if `ls`-ing the contents of directories while running
@@ -606,6 +619,54 @@ a sort job.
 You used to have to be very careful if sorting multiple files at the same time
 that those intermediate files didn't overwrite one another, but that is largely
 fixed/taken care of automatically by versions of `samtools sort` available today.
+
+Note that, instead of making the intermediate bam file, we could have
+piped BAM output into sort.  This is very useful:
+```sh
+# remove the .bam .srt.bam files:
+rm results/sam/s001---1.bam results/sam/s001---1.srt.bam
+
+# now, directly make a sorted BAM file at results/sam/s001---1.srt.bam
+# by piping samtools view output into samtools sort.  Note the use
+# of -u for uncompressed BAM output, and the - at the end of the
+# line, instead of a file name, to mean take
+# input from stdin instead of a file
+samtools view -u results/sam/s001---1.sam | \
+  samtools sort -l 9 -o results/sam/s001---1.srt.bam -
+```
+
+#### `samtools index`
+
+The `samtools index` command operates on a _coordinate-sorted_ BAM file and creates a new file having the
+name of the original file, but with the extension `.bai` added.  `.bai` stands for
+"bam index."  It is an index that makes it very fast to access the alignments within
+certain genomic regions.
+
+We can index our sorted BAM file like this:
+```sh
+samtools index results/sam/s001---1.srt.bam
+```
+
+Once we've done that, let's see how big that .bai file is:
+```sh
+du -h results/sam/*
+```
+It's pretty small!  It is also a binary file.  
+
+
+If you have _indexed_ a BAM file, you can use `samtools view`
+to retrieve and print all the reads in that indexed BAM file covering one
+or more genomic regions as specified using genomic coordinates.  This
+happens very fast.
+
+For example, to see all the read that overlap the 100 base pairs from 1001 to 1100
+on chromosome `CM031202.1`, you would do this.
+```sh
+samtools view results/sam/s001---1.srt.bam CM031202.1:1001-1100
+```
+In the full dataset there are three sequences that overlap that region.
+In the small data set, if you directly downloaded it today, there might not be any.
+
 
 
 #### `samtools merge`
@@ -623,18 +684,16 @@ play nicely with mutliple read groups in different files.  For the most part, th
 were resolved in later releases.  So, if you have just mapped a bunch of fastqs into BAMs and
 have sorted them, `samtools merge` should work and behave appropriately when merging those files.
 
-Why should you merge file?  The reason we do so here is to run `samtools markdup` on all the
-reads that came from one individual in one library prep.  Originally we had 8 BAMs per individual
-because each individual was sequenced on 8 different lanes.  However, PCR duplicates formed during the
-library prep could be found on any of those 8 lanes.  So, the 8 bams all have to be merged
-together into a single BAM to do a proper marking of PCR duplicates.
+Why should you merge files?  The reason we typically to it is to make a single file that holds all the
+reads that came from one individual in one library prep for finding PCR duplicates.
+Alternatively, you might want to merge all BAMS from a single individual into a single BAM for
+variant calling.
 
 Back in the "old days" people would sometimes merge all the BAMs from multiple individuals.
-This is definitely _not_ recommended today.  The resulting files can be huge and difficult to
-manage! Furthermore, most variant callers (like GATK) allow you to input long lists of BAM files---one
-per individual, for doing variant calling.  Some utilities, like ANGSD, even require that input
+This is definitely _not_ recommended today.  It is easier to have a single
+BAM for each sample.  Some utilities, like ANGSD, even require that input
 for variant discovery be done with one individual per BAM.  So, you should almost never take
-BAM-merging further than merging all the alignments for a sinble individual (i.e., when you are
+BAM-merging further than merging all the alignments for a single individual (i.e., when you are
 done you should have one BAM file per
 individual.)
 
@@ -647,60 +706,10 @@ followed by all the input file names.  If you get the order of the filenames wro
 example putting the output file last, then it will usually bark you an error because
 you are, in effect, asking it to overwrite an existing input file.
 
-```sh
-# merge 8 input BAMs into a single BAM
-samtools merge merged.bam   8-sorted-bams/*.bam
-
-# now, look at the read groups in the header of that new, merged file:
-samtools view -H merged.bam | tail -n 20
-```
-
-#### `samtools markdup`
-
-Mark PCR (or optical) duplicates.  Input must have a mate-score field (obtained
-from running `samtools fixmate -m`).  And, it must be coordinate-sorted.  _And_ it must
-include all the alignments from a single sample from a single library prep.
-
-```sh
-# mark duplicates in the merged bam
-samtools markdup 8-sorted-bams-merged-into-1/DPCh_plate1_A01.bam marked.bam
-```
-How does this file differ now?  Well, reads that look like PCR duplicates have
-been marked as such by including the bits 0x400 to its SAM Flag.  We can verify
-that by using the `-f` option to `samtools view` to print alignments that have the
-0x400 bit set:
-```sh
-# see the reads marked as PCR duplicates:
-samtools view -f 0x400 marked.bam | less
-
-# note that there are none before marking duplicates
-samtools view -f 0x400 8-sorted-bams-merged-into-1/DPCh_plate1_A01.bam
-
-# (nothing, nada, zip, goose-eggs...)
-```
-
-The file produced here (`marked.bam`) is ready to go for variant calling, but
-you will also want to index it for rapid access to reads aligned to any genomic
-regions.  Indexing is required for most variant callers.
-
-#### `samtools index`
-
-Once you have a sorted BAM file that is ready for variant calling, you will want
-to _index_ it.  This is also necessary for some other operations, like `idxstats`.
-The syntax is simple:
-```sh
-samtools index duplicates-marked/DPCh_plate1_A01_mkdup.bam
-```
-The index for file `FILE.bam` is stored alongside the file in
-`FILE.bam.bai`.  The `bai` extension means "bam index."
+We don't have multiple files to merge at this point, but you will see
+`samtools merge` later in our example workflow.
 
 
-
-
-Now, your file would be read to go for variant calling!
-But there are a few things one might want to do with it to check how well
-the mapping went and to learn more about where and how the reads align
-to the reference genome.
 
 #### `samtools flagstats`
 
@@ -708,13 +717,7 @@ Provide summary information about the SAM flags of the alignments.
 This is a great utility to assess how many reads mapped, how many didn't,
 and the nature of their mapping (as relayed by their SAM flags).
 ```sh
-# SAM flag summary for the final dupe-marked file
-samtools flagstat duplicates-marked/DPCh_plate1_A01_mkdup.bam
-
-# Summary for the merged file before dupe-marking
-samtools flagstat  8-sorted-bams-merged-into-1/DPCh_plate1_A01.bam
-
-# how do those two differ?
+samtools flagstats results/sam/s001---1.srt.bam
 ```
 
 
@@ -723,10 +726,9 @@ samtools flagstat  8-sorted-bams-merged-into-1/DPCh_plate1_A01.bam
 From an indexed BAM file, report how many reads map to each
 sequence in the reference genome.  
 ```sh
-# see how many reads mapped to each of the "named" chromosomes
-# in the reference genome (those that start with "CM")
-samtools idxstats duplicates-marked/DPCh_plate1_A01_mkdup.bam | awk '/^CM/'
+samtools idxstats results/sam/s001---1.srt.bam | less
 ```
+
 The columns that come out of this are:
 
 1. Reference sequence name
@@ -743,27 +745,18 @@ The columns that come out of this are:
 
 Comprehensive summaries of features of the alignments.
 
-```sh
-# check them all out:
-samtools stats duplicates-marked/DPCh_plate1_A01_mkdup.bam | more
 
-# look at the headers for each of the different sections:
-samtools stats duplicates-marked/DPCh_plate1_A01_mkdup.bam | awk '/^#/'
+```sh
+samtools stats results/sam/s001---1.srt.bam | less
 ```
 
 Note that, in the headers for each of the different summaries in the output
 from `samtools stats`, instructions are given on how to extract just that
-summary. For example,
-
-```sh
-# extract the Summary Numbers:
-samtools stats duplicates-marked/DPCh_plate1_A01_mkdup.bam | grep ^SN | cut -f 2-
-
-# extract the distribution of read lengths
-samtools stats duplicates-marked/DPCh_plate1_A01_mkdup.bam | grep ^RL | cut -f 2-
-```
+summary.
 
 
+Page through the output.  It isn't always easy to read in text format.
+MULTIQC can gobble it up and make pretty graphs of it.
 
 
 

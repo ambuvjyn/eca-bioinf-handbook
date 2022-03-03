@@ -288,11 +288,9 @@ hold-it-right-there-buddy-what-about-the-read-groups
 samtools
 samtools-subcommands
 samtools-view
-samtools-fixmate
 samtools-sort
-samtools-merge
-samtools-markdup
 samtools-index
+samtools-merge
 samtools-flagstats
 samtools-idxstats
 samtools-stats

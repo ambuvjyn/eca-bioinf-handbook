@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-02" />
+<meta name="date" content="2022-03-03" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1605,21 +1605,35 @@ reverse strand.</p>
 </div>
 <div id="sam-headers" class="section level3" number="17.4.6">
 <h3><span class="header-section-number">17.4.6</span> SAM File Headers</h3>
+<p><em>This next section benefits from a SAM file that is in the location
+<code>results/sam/s001---1.sam</code> relative to the current working directory.
+If you were here on Wednesday, you have that file. If not, you can download
+a small version of it (with only about 15,700 alignments) to your cluster
+into a <code>results/sam</code> directory (preferably somewhere in scratch!) with the
+following commands. DON’T DO THESE COMMANDS IF YOU ALREADY HAVE A <code>results/sam/s001---1.sam</code>
+file!!</em></p>
+<div class="sourceCode" id="cb547"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb547-1"><a href="bioinformatic-file-formats.html#cb547-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/sam</span>
+<span id="cb547-2"><a href="bioinformatic-file-formats.html#cb547-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://eriqande.github.io/eca-bioinf-handbook/downloads/s001---1.sam</span>
+<span id="cb547-3"><a href="bioinformatic-file-formats.html#cb547-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> s001---1.sam results/sam/</span></code></pre></div>
 <p>To this point, we have talked almost exclusively about the rows in a SAM file
 which record the alignments of different reads. However, if you look at a SAM file
 (with <code>cat</code> or <code>less</code>, or in a text editor) the first thing you will see is the
 SAM file <em>header</em>: a series of lines that all start with the <code>@</code> symbol followed by
 two capital letters. Like <code>@SQ</code>.</p>
+<p>Try this:</p>
+<div class="sourceCode" id="cb548"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb548-1"><a href="bioinformatic-file-formats.html#cb548-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> results/sam/s001---1.sam</span></code></pre></div>
+<p>Keep hitting the space bar until you get down to the alignments, then
+use the <code>b</code> key to go <em>back</em> up through the pages, and inspect all the header lines.</p>
 <p>These file header lines can appear daunting at first, and, when merging or dividing
 SAM and BAM files can prove to the bain of your existence, so understanding both their
 purpose and structure is paramount to avoiding some pain down the road.</p>
 <p>In a nutshell, the lines in the header provide information to programs (and people)
 that will be processing the data in a SAM (or BAM, see below) file. Some of the header
-lines give information about the reference genome that was aligned to, others
+lines give information about the reference genome that the reads were aligned to, others
 provide an overview of the various samples (and other information) included in the file,
 while still others give information about the program and data that produced the
 SAM file.</p>
-<p>If you have every looked at the SAM header for an alignment to a reference genome
+<p>If you have ever looked at the SAM header for an alignment to a reference genome
 that is in thousands of pieces, you were likely overwhelmed by thousands of
 lines that started with <code>@SQ</code>. Each of these lines gives information about the
 names and lengths (and optionally, some other information) of sequences that
@@ -1630,7 +1644,9 @@ five kinds of header lines:</p>
 <ul>
 <li><code>@HD</code>: the “main” header line, which, if present, will be the first line of the
 file. It’s purpose is to reveal the version of the SAM format in use, and also information
-about how the alignments in the file are sorted.</li>
+about how the alignments in the file are sorted. (You won’t find this line in
+<code>results/sam/s001---1sam</code>. It’s not there! But we will see it later after
+converting it to a BAM file and sorting it!)</li>
 <li><code>@SQ</code>: typically the most abundant SAM header lines, each of these gives information about
 a sequence in the reference genome aligned to.</li>
 <li><code>@RG</code>: these indicate information about <em>read groups</em>, which are collections of reads that,
@@ -1640,14 +1656,18 @@ We will discuss read groups more fully in the section on alignment.</li>
 <li><code>@PG</code>: a line that tells about the program that was used to produced the SAM file.</li>
 <li><code>@CO</code>: a line in which a comment can be placed.</li>
 </ul>
-<p>Those first three characters signify that a line is a header line, but, within each
+<p>Look though the header for <code>results/sam/s001---1.sam</code> and find the <code>@RG</code> and <code>@PG</code> lines.</p>
+<p>Those first three characters (i.e. <code>@</code> followed to two uppercase letters)
+signify that a line is a header line, but, within each
 header line, how is information conveyed? In all cases (except for the comment lines
-using <code>@CO</code>), information within a header line is provided in TAB-delimited, colon-separate
-<em>key-value</em> pairs. This means that the type or meaning or each piece of information is tagged
-with a key, like <code>ID</code>, and its <em>value</em> follows that key after a colon. For example, then line</p>
-<pre><code>@PG ID:bwa  PN:bwa  VN:0.7.9a-r786</code></pre>
+using <code>@CO</code>), information within a header line is provided in TAB-delimited, colon-separated
+<em>key-value</em> pairs. This means that the type or meaning of each piece of information is tagged
+with a key, like <code>ID</code>, and its <em>value</em> follows that key after a colon. For example, the line</p>
+<pre><code>@PG     ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -R @RG\tID:s001_T199967_Lib-1_HY75HDSX2_1_AAGACCGT+CAATCGAC\tSM:T199967\tPL:ILLUMINA\tL
+B:Lib-1\tPU:HY75HDSX2.1.AAGACCGT+CAATCGAC resources/genome.fasta results/trimmed/s001---1_R1.fq.gz results/trimmed/s001---1_R2.fq.gz</code></pre>
 <p>tells us that the ID of the program that produced the SAM file was <code>bwa</code>, and
-its version number (VN) was 0.7.9a-r786.</p>
+its version number (VN) was <code>0.7.17-r1188</code>. Ad it also shows the complete command line (CL) that was
+used to produce it.</p>
 <p>The keys in the key-value pairs are always two uppercase letters. And different keys
 are allowed (and in some case required) in the context of each of the five different
 kinds of SAM header lines.</p>
@@ -1656,7 +1676,7 @@ kinds of SAM header lines.</p>
 <li>For <code>@HD</code>
 <ul>
 <li><code>VN</code>: the version of the SAM specification in use. This is required.</li>
-<li><code>SO</code>: the sort order of the file. The default value is be <code>unknown</code>.
+<li><code>SO</code>: the sort order of the file. The default value is <code>unknown</code>.
 More commonly, when your SAM/BAM file is prepared for variant calling, it will have been sorted in the
 order of the reference genome, which is denoted as <code>SO:coordinate</code>. For other purposes, it is important
 to sort the file in the order of read names, or <code>SO:queryname</code>. It is important to note that
@@ -1671,11 +1691,11 @@ a SAM/BAM file, that program will make a note in the header about how it is sort
 </ul></li>
 <li>For <code>@RG</code>
 <ul>
-<li><code>ID</code> is the only required key for <code>@RG</code> lines. Note that if multiple <code>@RG</code> lines occur in the file,
+<li><code>ID</code> is the only required key for <code>@RG</code> lines. HUGE NOTE: if multiple <code>@RG</code> lines occur in the file,
 each of their <code>ID</code> values must be different.</li>
 <li><code>SM</code> is the key for the name of the sample from which the reads came from. This is the name
 used when recording genotypes of individuals when doing variant calling.</li>
-<li><code>LB</code> denotes the particularly library in which the sample was prepared for sequencing.</li>
+<li><code>LB</code> denotes the particularl library in which the sample was prepared for sequencing.</li>
 <li><code>PU</code> denotes the “Platform Unit,” of sequencing. Typically interpreted to mean the flow-cell and
 the lane upon which the sample was sequenced. We will talk much more about the contents of read-group
 header lines, and how to fill them.</li>
@@ -1697,7 +1717,9 @@ you read the section on header lines.</p>
 <div id="the-bam-format" class="section level3" number="17.4.7">
 <h3><span class="header-section-number">17.4.7</span> The BAM format</h3>
 <p>As you might have inferred from the foregoing, SAM files can end up being enormous
-text files. The two big problems with that are:</p>
+text files. For the files that you made yesterday, try this:
+<code>du -h results/sam/s001---1.sam</code> to see how big it is:</p>
+<p>The two big problems with having such large files are:</p>
 <ol style="list-style-type: decimal">
 <li>They could take up a lot of hard drive space.</li>
 <li>It would take you (or some program that was processing a SAM file)
@@ -1708,7 +1730,7 @@ might be interested in.</li>
 a compressed <em>binary</em> (meaning “not composed of text”) format to store all the
 information in a SAM file. This is called a BAM (Binary Alignment Map) file. In a
 BAM file, each column of information is stored in its native data type (i.e., the way a
-computer would reprensent it internally if it were working on it) and then the file holding all
+computer would represent it internally if it were working on it) and then the file holding all
 of these “rows” is compressed into a series of small blocks in such a way that the file can be
 indexed, allowing rapid
 access (without “scrolling” through the whole file) to the alignments within
@@ -1887,13 +1909,13 @@ your contacts’ phone numbers and addresses with.</p>
 <li><a href="https://www.dropbox.com/s/d303fi7en71p8ug/chinook-32-3Mb.vcf.gz.csi?dl=1">https://www.dropbox.com/s/d303fi7en71p8ug/chinook-32-3Mb.vcf.gz.csi?dl=1</a></li>
 </ul>
 <p>If you want to download these onto a remote Unix server you can use:</p>
-<div class="sourceCode" id="cb550"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb550-1"><a href="bioinformatic-file-formats.html#cb550-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/dzwixabvy3wwfdr/chinook-32-3Mb.vcf.gz<span class="pp">?</span>dl=1</span>
-<span id="cb550-2"><a href="bioinformatic-file-formats.html#cb550-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/d303fi7en71p8ug/chinook-32-3Mb.vcf.gz.csi<span class="pp">?</span>dl=1</span>
-<span id="cb550-3"><a href="bioinformatic-file-formats.html#cb550-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb550-4"><a href="bioinformatic-file-formats.html#cb550-4" aria-hidden="true" tabindex="-1"></a><span class="co"># after which you might need to rename them, if wget retained the `?dl=1`</span></span>
-<span id="cb550-5"><a href="bioinformatic-file-formats.html#cb550-5" aria-hidden="true" tabindex="-1"></a><span class="co"># in the resulting file names:</span></span>
-<span id="cb550-6"><a href="bioinformatic-file-formats.html#cb550-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz</span>
-<span id="cb550-7"><a href="bioinformatic-file-formats.html#cb550-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz.csi<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz.csi</span></code></pre></div>
+<div class="sourceCode" id="cb552"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb552-1"><a href="bioinformatic-file-formats.html#cb552-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/dzwixabvy3wwfdr/chinook-32-3Mb.vcf.gz<span class="pp">?</span>dl=1</span>
+<span id="cb552-2"><a href="bioinformatic-file-formats.html#cb552-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/d303fi7en71p8ug/chinook-32-3Mb.vcf.gz.csi<span class="pp">?</span>dl=1</span>
+<span id="cb552-3"><a href="bioinformatic-file-formats.html#cb552-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb552-4"><a href="bioinformatic-file-formats.html#cb552-4" aria-hidden="true" tabindex="-1"></a><span class="co"># after which you might need to rename them, if wget retained the `?dl=1`</span></span>
+<span id="cb552-5"><a href="bioinformatic-file-formats.html#cb552-5" aria-hidden="true" tabindex="-1"></a><span class="co"># in the resulting file names:</span></span>
+<span id="cb552-6"><a href="bioinformatic-file-formats.html#cb552-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz</span>
+<span id="cb552-7"><a href="bioinformatic-file-formats.html#cb552-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz.csi<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz.csi</span></code></pre></div>
 <p>At their core, VCF files are TAB-delimited text files. Below is a fragment of a VCF file body (and the final header line) holding information
 about 9 variants (in 9 rows below the final header line) and the genotypes at
 those variants carried in four
@@ -1976,52 +1998,52 @@ are encoded in this system, it is helpful to view them in columnar format with
 positions running down the first column, and different alleles in different columns.
 Thus, a simple SNP, such as the first row in the above VCF example
 would appear as:</p>
-<div class="sourceCode" id="cb553"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb553-1"><a href="bioinformatic-file-formats.html#cb553-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4001417 .   T   G </span></span>
-<span id="cb553-2"><a href="bioinformatic-file-formats.html#cb553-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb553-3"><a href="bioinformatic-file-formats.html#cb553-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pos</span>         Ref  Alt</span>
-<span id="cb553-4"><a href="bioinformatic-file-formats.html#cb553-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4001417</span>     T      G</span></code></pre></div>
+<div class="sourceCode" id="cb555"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb555-1"><a href="bioinformatic-file-formats.html#cb555-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4001417 .   T   G </span></span>
+<span id="cb555-2"><a href="bioinformatic-file-formats.html#cb555-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb555-3"><a href="bioinformatic-file-formats.html#cb555-3" aria-hidden="true" tabindex="-1"></a><span class="ex">pos</span>         Ref  Alt</span>
+<span id="cb555-4"><a href="bioinformatic-file-formats.html#cb555-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4001417</span>     T      G</span></code></pre></div>
 <p>By contrast, an insertion, relative to the reference genome, creates bases that
 don’t have a standard coordinate that they align to. Thus, if we take the
 second-to-last variant in the above example (at position 4007583), and we assume
 that positions 4007582 and 4007584 in the reference sequence are a G and a T,
 respectively, then the first five columns of the row
 indicate that the variation appears as follows:</p>
-<div class="sourceCode" id="cb554"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb554-1"><a href="bioinformatic-file-formats.html#cb554-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4007583 .   C   CAA</span></span>
-<span id="cb554-2"><a href="bioinformatic-file-formats.html#cb554-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb554-3"><a href="bioinformatic-file-formats.html#cb554-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Pos</span>         Ref  Alt</span>
-<span id="cb554-4"><a href="bioinformatic-file-formats.html#cb554-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4007582</span>     G    G</span>
-<span id="cb554-5"><a href="bioinformatic-file-formats.html#cb554-5" aria-hidden="true" tabindex="-1"></a><span class="ex">4007583</span>     C    C</span>
-<span id="cb554-6"><a href="bioinformatic-file-formats.html#cb554-6" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span>           <span class="at">-</span>    A</span>
-<span id="cb554-7"><a href="bioinformatic-file-formats.html#cb554-7" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span>           <span class="at">-</span>    A</span>
-<span id="cb554-8"><a href="bioinformatic-file-formats.html#cb554-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4007584</span>     T    T</span></code></pre></div>
+<div class="sourceCode" id="cb556"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb556-1"><a href="bioinformatic-file-formats.html#cb556-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4007583 .   C   CAA</span></span>
+<span id="cb556-2"><a href="bioinformatic-file-formats.html#cb556-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb556-3"><a href="bioinformatic-file-formats.html#cb556-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Pos</span>         Ref  Alt</span>
+<span id="cb556-4"><a href="bioinformatic-file-formats.html#cb556-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4007582</span>     G    G</span>
+<span id="cb556-5"><a href="bioinformatic-file-formats.html#cb556-5" aria-hidden="true" tabindex="-1"></a><span class="ex">4007583</span>     C    C</span>
+<span id="cb556-6"><a href="bioinformatic-file-formats.html#cb556-6" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span>           <span class="at">-</span>    A</span>
+<span id="cb556-7"><a href="bioinformatic-file-formats.html#cb556-7" aria-hidden="true" tabindex="-1"></a><span class="bu">.</span>           <span class="at">-</span>    A</span>
+<span id="cb556-8"><a href="bioinformatic-file-formats.html#cb556-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4007584</span>     T    T</span></code></pre></div>
 <p>where the <code>-</code> represents an insertion relative to the reference genome.</p>
 <p>A deletion relative to the reference genome, like that in the third row
 of the above example:
 would appear in columnar format as:</p>
-<div class="sourceCode" id="cb555"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb555-1"><a href="bioinformatic-file-formats.html#cb555-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4004574 .   AAAGG   A</span></span>
-<span id="cb555-2"><a href="bioinformatic-file-formats.html#cb555-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb555-3"><a href="bioinformatic-file-formats.html#cb555-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Pos</span>         Ref  Alt</span>
-<span id="cb555-4"><a href="bioinformatic-file-formats.html#cb555-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4004573</span>     C    C</span>
-<span id="cb555-5"><a href="bioinformatic-file-formats.html#cb555-5" aria-hidden="true" tabindex="-1"></a><span class="ex">4004574</span>     A    A</span>
-<span id="cb555-6"><a href="bioinformatic-file-formats.html#cb555-6" aria-hidden="true" tabindex="-1"></a><span class="ex">4004575</span>     A    <span class="at">-</span></span>
-<span id="cb555-7"><a href="bioinformatic-file-formats.html#cb555-7" aria-hidden="true" tabindex="-1"></a><span class="ex">4004576</span>     A    <span class="at">-</span></span>
-<span id="cb555-8"><a href="bioinformatic-file-formats.html#cb555-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4004577</span>     G    <span class="at">-</span></span>
-<span id="cb555-9"><a href="bioinformatic-file-formats.html#cb555-9" aria-hidden="true" tabindex="-1"></a><span class="ex">4004578</span>     G    <span class="at">-</span></span>
-<span id="cb555-10"><a href="bioinformatic-file-formats.html#cb555-10" aria-hidden="true" tabindex="-1"></a><span class="ex">4004579</span>     T    T</span></code></pre></div>
+<div class="sourceCode" id="cb557"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb557-1"><a href="bioinformatic-file-formats.html#cb557-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4004574 .   AAAGG   A</span></span>
+<span id="cb557-2"><a href="bioinformatic-file-formats.html#cb557-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb557-3"><a href="bioinformatic-file-formats.html#cb557-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Pos</span>         Ref  Alt</span>
+<span id="cb557-4"><a href="bioinformatic-file-formats.html#cb557-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4004573</span>     C    C</span>
+<span id="cb557-5"><a href="bioinformatic-file-formats.html#cb557-5" aria-hidden="true" tabindex="-1"></a><span class="ex">4004574</span>     A    A</span>
+<span id="cb557-6"><a href="bioinformatic-file-formats.html#cb557-6" aria-hidden="true" tabindex="-1"></a><span class="ex">4004575</span>     A    <span class="at">-</span></span>
+<span id="cb557-7"><a href="bioinformatic-file-formats.html#cb557-7" aria-hidden="true" tabindex="-1"></a><span class="ex">4004576</span>     A    <span class="at">-</span></span>
+<span id="cb557-8"><a href="bioinformatic-file-formats.html#cb557-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4004577</span>     G    <span class="at">-</span></span>
+<span id="cb557-9"><a href="bioinformatic-file-formats.html#cb557-9" aria-hidden="true" tabindex="-1"></a><span class="ex">4004578</span>     G    <span class="at">-</span></span>
+<span id="cb557-10"><a href="bioinformatic-file-formats.html#cb557-10" aria-hidden="true" tabindex="-1"></a><span class="ex">4004579</span>     T    T</span></code></pre></div>
 <p>where we are imagining that the reference holds a C at position 4004573 and a T at
 position 4004579, and where the <code>-</code>’s indicate deletions relative to the reference.</p>
 <p>Finally, the multiallelic and complex example on the last row,
 in columnar format, if the reference held an A at position 4007583 and
 a T at position 4007587, would
 show the two possible alternate alleles like:</p>
-<div class="sourceCode" id="cb556"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb556-1"><a href="bioinformatic-file-formats.html#cb556-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4007584 .   GCC G,CCC</span></span>
-<span id="cb556-2"><a href="bioinformatic-file-formats.html#cb556-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb556-3"><a href="bioinformatic-file-formats.html#cb556-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Pos</span>         Ref   Alt1  Alt2</span>
-<span id="cb556-4"><a href="bioinformatic-file-formats.html#cb556-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4007583</span>     A     A     A</span>
-<span id="cb556-5"><a href="bioinformatic-file-formats.html#cb556-5" aria-hidden="true" tabindex="-1"></a><span class="ex">4007584</span>     G     G     C</span>
-<span id="cb556-6"><a href="bioinformatic-file-formats.html#cb556-6" aria-hidden="true" tabindex="-1"></a><span class="ex">4007585</span>     C     <span class="at">-</span>     C</span>
-<span id="cb556-7"><a href="bioinformatic-file-formats.html#cb556-7" aria-hidden="true" tabindex="-1"></a><span class="ex">4007586</span>     C     <span class="at">-</span>     C</span>
-<span id="cb556-8"><a href="bioinformatic-file-formats.html#cb556-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4007587</span>     T     T     T</span></code></pre></div>
+<div class="sourceCode" id="cb558"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb558-1"><a href="bioinformatic-file-formats.html#cb558-1" aria-hidden="true" tabindex="-1"></a><span class="co"># meaning of: NC_037124.1 4007584 .   GCC G,CCC</span></span>
+<span id="cb558-2"><a href="bioinformatic-file-formats.html#cb558-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb558-3"><a href="bioinformatic-file-formats.html#cb558-3" aria-hidden="true" tabindex="-1"></a><span class="ex">Pos</span>         Ref   Alt1  Alt2</span>
+<span id="cb558-4"><a href="bioinformatic-file-formats.html#cb558-4" aria-hidden="true" tabindex="-1"></a><span class="ex">4007583</span>     A     A     A</span>
+<span id="cb558-5"><a href="bioinformatic-file-formats.html#cb558-5" aria-hidden="true" tabindex="-1"></a><span class="ex">4007584</span>     G     G     C</span>
+<span id="cb558-6"><a href="bioinformatic-file-formats.html#cb558-6" aria-hidden="true" tabindex="-1"></a><span class="ex">4007585</span>     C     <span class="at">-</span>     C</span>
+<span id="cb558-7"><a href="bioinformatic-file-formats.html#cb558-7" aria-hidden="true" tabindex="-1"></a><span class="ex">4007586</span>     C     <span class="at">-</span>     C</span>
+<span id="cb558-8"><a href="bioinformatic-file-formats.html#cb558-8" aria-hidden="true" tabindex="-1"></a><span class="ex">4007587</span>     T     T     T</span></code></pre></div>
 </div>
 <div id="the-genotype-columns" class="section level4" number="17.5.1.2">
 <h4><span class="header-section-number">17.5.1.2</span> The Genotype Columns</h4>
@@ -2047,12 +2069,12 @@ respectively.
 not <em>phased</em>—in other words, it is not known which <em>haplotype</em> they occur on.</p></li>
 <li><p>A <code>|</code> as the separator means that the two gene copies in the individual are recorded
 as being phased. If an indiduals <code>GT</code> field in a series of variants looks like:</p>
-<div class="sourceCode" id="cb558"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb558-1"><a href="bioinformatic-file-formats.html#cb558-1" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span><span class="sc">|</span><span class="dv">1</span></span>
-<span id="cb558-2"><a href="bioinformatic-file-formats.html#cb558-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">0</span></span>
-<span id="cb558-3"><a href="bioinformatic-file-formats.html#cb558-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">0</span></span>
-<span id="cb558-4"><a href="bioinformatic-file-formats.html#cb558-4" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">1</span></span>
-<span id="cb558-5"><a href="bioinformatic-file-formats.html#cb558-5" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span><span class="sc">|</span><span class="dv">0</span></span>
-<span id="cb558-6"><a href="bioinformatic-file-formats.html#cb558-6" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">0</span></span></code></pre></div>
+<div class="sourceCode" id="cb560"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb560-1"><a href="bioinformatic-file-formats.html#cb560-1" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span><span class="sc">|</span><span class="dv">1</span></span>
+<span id="cb560-2"><a href="bioinformatic-file-formats.html#cb560-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">0</span></span>
+<span id="cb560-3"><a href="bioinformatic-file-formats.html#cb560-3" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">0</span></span>
+<span id="cb560-4"><a href="bioinformatic-file-formats.html#cb560-4" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">1</span></span>
+<span id="cb560-5"><a href="bioinformatic-file-formats.html#cb560-5" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span><span class="sc">|</span><span class="dv">0</span></span>
+<span id="cb560-6"><a href="bioinformatic-file-formats.html#cb560-6" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span><span class="sc">|</span><span class="dv">0</span></span></code></pre></div>
 <p>Then this is recording that on one of the (diploid) individual’s two chromosomes, the
 alleles would be strung along like: <code>0-1-1-1-0-1</code>, and the other chromosome would carry
 the alleles strung along like: <code>1-0-0-1-0-1</code>.<br />

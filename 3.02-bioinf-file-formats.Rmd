@@ -1013,11 +1013,32 @@ reverse strand.
 
 ### SAM File Headers {#sam-headers}
 
+_This next section benefits from a SAM file that is in the location
+`results/sam/s001---1.sam` relative to the current working directory.
+If you were here on Wednesday, you have that file.  If not, you can download
+a small version of it (with only about 15,700 alignments) to your cluster
+into a `results/sam` directory (preferably somewhere in scratch!) with the
+following commands.  DON'T DO THESE COMMANDS IF YOU ALREADY HAVE A `results/sam/s001---1.sam`
+file!!_
+```sh
+mkdir -p results/sam
+wget https://eriqande.github.io/eca-bioinf-handbook/downloads/s001---1.sam
+mv s001---1.sam results/sam/
+```
+
 To this point, we have talked almost exclusively about the rows in a SAM file
 which record the alignments of different reads.  However, if you look at a SAM file
 (with `cat` or `less`, or in a text editor) the first thing you will see is the
 SAM file _header_: a series of lines that all start with the `@` symbol followed by
 two capital letters.  Like `@SQ`.  
+
+Try this:
+```sh
+less results/sam/s001---1.sam
+```
+Keep hitting the space bar until you get down to the alignments, then
+use the `b` key to go _back_ up through the pages, and inspect all the header lines.
+
 
 These file header lines can appear daunting at first, and, when merging or dividing
 SAM and BAM files can prove to the bain of your existence, so understanding both their
@@ -1025,12 +1046,12 @@ purpose and structure is paramount to avoiding some pain down the road.
 
 In a nutshell, the lines in the header provide information to programs (and people)
 that will be processing the data in a SAM (or BAM, see below) file. Some of the header
-lines give information about the reference genome that was aligned to, others
+lines give information about the reference genome that the reads were aligned to, others
 provide an overview of the various samples (and other information) included in the file,
 while still others give information about the program and data that produced the
 SAM file.
 
-If you have every looked at the SAM header for an alignment to a reference genome
+If you have ever looked at the SAM header for an alignment to a reference genome
 that is in thousands of pieces, you were likely overwhelmed by thousands of
 lines that started with `@SQ`.  Each of these lines gives information about the
 names and lengths (and optionally, some other information) of sequences that
@@ -1042,7 +1063,9 @@ five kinds of header lines:
 
 * `@HD`: the "main" header line, which, if present, will be the first line of the
 file.  It's purpose is to reveal the version of the SAM format in use, and also information
-about how the alignments in the file are sorted.
+about how the alignments in the file are sorted.  (You won't find this line in
+`results/sam/s001---1sam`.  It's not there!  But we will see it later after
+converting it to a BAM file and sorting it!)
 * `@SQ`: typically the most abundant SAM header lines, each of these gives information about
 a sequence in the reference genome aligned to.
 * `@RG`: these indicate information about _read groups_, which are collections of reads that,
@@ -1052,16 +1075,21 @@ We will discuss read groups more fully in the section on alignment.
 * `@PG`: a line that tells about the program that was used to produced the SAM file.
 * `@CO`: a line in which a comment can be placed.
 
-Those first three characters signify that a line is a header line, but, within each
+Look though the header for `results/sam/s001---1.sam` and find the `@RG` and `@PG` lines.
+
+Those first three characters (i.e. `@` followed to two uppercase letters)
+signify that a line is a header line, but, within each
 header line, how is information conveyed?  In all cases (except for the comment lines
-using `@CO`), information within a header line is provided in TAB-delimited, colon-separate
-_key-value_ pairs.  This means that the type or meaning or each piece of information is tagged
-with a key, like `ID`, and its _value_ follows that key after a colon.  For example, then line
+using `@CO`), information within a header line is provided in TAB-delimited, colon-separated
+_key-value_ pairs.  This means that the type or meaning of each piece of information is tagged
+with a key, like `ID`, and its _value_ follows that key after a colon.  For example, the line
 ```
-@PG	ID:bwa	PN:bwa	VN:0.7.9a-r786
+@PG     ID:bwa  PN:bwa  VN:0.7.17-r1188 CL:bwa mem -R @RG\tID:s001_T199967_Lib-1_HY75HDSX2_1_AAGACCGT+CAATCGAC\tSM:T199967\tPL:ILLUMINA\tL
+B:Lib-1\tPU:HY75HDSX2.1.AAGACCGT+CAATCGAC resources/genome.fasta results/trimmed/s001---1_R1.fq.gz results/trimmed/s001---1_R2.fq.gz
 ```
 tells us that the ID of the program that produced the SAM file was `bwa`, and
-its version number (VN) was 0.7.9a-r786.
+its version number (VN) was `0.7.17-r1188`. Ad it also shows the complete command line (CL) that was
+used to produce it.  
 
 The keys in the key-value pairs are always two uppercase letters.  And different keys
 are allowed (and in some case required) in the context of each of the five different
@@ -1071,7 +1099,7 @@ The most important keys for the different kinds of header lines are as follows:
 
 * For `@HD`
     - `VN`: the version of the SAM specification in use.  This is required.
-    - `SO`: the sort order of the file.  The default value is be `unknown`.
+    - `SO`: the sort order of the file.  The default value is `unknown`.
     More commonly, when your SAM/BAM file is prepared for variant calling, it will have been sorted in the
     order of the reference genome, which is denoted as `SO:coordinate`. For other purposes, it is important
     to sort the file in the order of read names, or `SO:queryname`.  It is important to note that
@@ -1081,17 +1109,16 @@ The most important keys for the different kinds of header lines are as follows:
     - `SN` is the key for the sequence name and is required.  
     - `LN` is the key for the length (in nucleotide bases) of the sequence, and is also required.
 * For `@RG`
-    - `ID` is the only required key for `@RG` lines.  Note that if multiple `@RG` lines occur in the file,
+    - `ID` is the only required key for `@RG` lines.  HUGE NOTE: if multiple `@RG` lines occur in the file,
     each of their `ID` values must be different.
     - `SM` is the key for the name of the sample from which the reads came from.  This is the name
     used when recording genotypes of individuals when doing variant calling.
-    - `LB` denotes the particularly library in which the sample was prepared for sequencing.
+    - `LB` denotes the particularl library in which the sample was prepared for sequencing.
     - `PU` denotes the "Platform Unit," of sequencing.  Typically interpreted to mean the flow-cell and
     the lane upon which the sample was sequenced.  We will talk much more about the contents of read-group
     header lines, and how to fill them.
     - `PL` denotes the sequencing technology (PL is short for "platform") used.  If the reads are from
     an Illumina sequencer, the value would be `ILLUMINA`.
-    
 * For `@PG`
     - `ID` is required and provides information about the program that produced the SAM output.
     - `VN` as we saw before, this key lets you record the version of the program used to produce the
@@ -1107,7 +1134,10 @@ you read the section on header lines.
 ### The BAM format
 
 As you might have inferred from the foregoing, SAM files can end up being enormous
-text files.  The two big problems with that are:
+text files.  For the files that you made yesterday, try this:
+`du -h results/sam/s001---1.sam` to see how big it is:
+
+The two big problems with having such large files are:
 
 1. They could take up a lot of hard drive space.
 2. It would take you (or some program that was processing a SAM file)
@@ -1118,7 +1148,7 @@ The originators of the SAM format dealt with this by also specifying and creatin
 a compressed _binary_ (meaning "not composed of text") format to store all the
 information in a SAM file.  This is called a BAM (Binary Alignment Map) file.  In a
 BAM file, each column of information is stored in its native data type (i.e., the way a 
-computer would reprensent it internally if it were working on it) and then the file holding all
+computer would represent it internally if it were working on it) and then the file holding all
 of these "rows" is compressed into a series of small blocks in such a way that the file can be 
 indexed, allowing rapid
 access (without "scrolling" through the whole file) to the alignments within
