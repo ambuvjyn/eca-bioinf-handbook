@@ -3,6 +3,7 @@ output:
   pdf_document: default
   html_document: default
 ---
+
 # High Performance Computing Clusters (HPCC's) {#chap-HPCC}
 
 One interesting aspect of modern next generation sequencing data is simply its
@@ -78,7 +79,12 @@ the data in these home directories is usually safe or protected, meaning you can
 and expect that it will be there next week, month, or year, etc. It is also likely that the home directories are
 backed up (but check the docs for your cluster to confirm this!). Since the space in home directories is limited,
 you typically will not put large data sets in your home directory for long-term storage, but you will
-store scripts and programs, and such items as cloned GitHub repositories there.  Another
+store scripts and programs, and such items as cloned GitHub repositories there. 
+(On the SUMMIT computer, space on the home directory is _very_ restricted, and as we have
+already seen, your projects directory at `/projects/username` serves the purpose of a typical
+home directory on SUMMIT).
+
+Another
 type of storage that exists on the hard drive array is called _persistent long-term storage_.  This type of storage
 is purchased for use by research groups to store large quantities of
 data on the cluster for long periods of time.  As discussed in the last chapter, the rise of cloud-based storage solutions,
@@ -128,14 +134,14 @@ that language as well, using _queue_ to refer to the line of jobs that are waiti
 on an HPCC; however we warn the reader that other job schedulers (like the Univa Grid Engine)
 use the term "queues" to refer to collections of nodes.
 
-On every cluster, however, there will be one to several nodes that are reserved not for
+On every cluster, there will be one to several nodes that are reserved not for
 doing computation, but for allowing users to access the cluster.  These are called the
 _login_ nodes or the _head_ nodes.  These nodes are _solely_ for logging in, light editing of
 scripts, minor manipulation of directories, and scheduling and managing jobs.  They are absolutely _not_
 for doing major computations.  For example, you should never login to the head node and immediately
 start using it, in an interactive `bash` session to, say, sort BAM files or run `bwa mem`
-to do alignments.  Running commands that require a lot of computation, or a lot of
-input and output from the disk, on the login nodes is an egregious
+to do alignments.  Running commands that require a lot of computation---or a lot of
+input and output from the disk---on the login nodes is an egregious
 _faux pas_ of cluster computing.  Doing so can
 negatively impact the ability of other users to login or otherwise get their work done, and it
 might lead the system administrators to disable your account.  Therefore,
@@ -165,8 +171,8 @@ at least a few CPU cycles every now and again.  Rather, on an HPCC, every _job_ 
 by a user will be assigned to a dedicated core (or several cores, if requested, and granted)
 with a dedicated amount of memory.
 If a core is not available for use, the job "gets in line" (into the "queue", so to speak)
-where it sits and waits (doing nothing) until a core
-(with sufficient associated resources, like RAM memory) becomes available.  When such a core
+where it sits and waits (doing nothing) until a core (or multiple cores if requested)
+with sufficient associated resources, like RAM memory, becomes available.  When such a core
 becomes available in the cluster, the job gets launched on it.  All of this is orchestrated by the job scheduler,
 of which SLURM is an example.  
 
@@ -221,7 +227,7 @@ harboring a few cores that were not being used---I tend to endorse the approach 
 down into small units that will run relatively quickly, with low RAM requirements, on a
 single core.
 
-Since the requested resources for a job play such a large role in wait times for jobs to start,
+Since the requested resources for a job can play such a large role in wait times for jobs to start,
 you might wonder why people don't intentionally underestimate the resources they request for their
 jobs.  The answer is simple:  the job scheduler is a highly efficient and completely dispassionate
 manager.  If you requested 2 hours for your job, but your job has not finished in that amount of time,
@@ -248,7 +254,7 @@ of the resources are in use and how many users are waiting to use them.
 
 Requests for resources, and for _information_ about the computing cluster, are made to the job scheduler
 using a few basic commands.  As said, we will focus on the commands available in a SLURM-based system.
-In a later section, (after a discussion of installing software that you might need on your cluster)
+In a later section,
 we will more fully cover the commands used to _launch_, _schedule_, and manage jobs.  Here
 we will first explore the SLURM commands that
 you can use to "get to know" your cluster.
@@ -256,8 +262,9 @@ you can use to "get to know" your cluster.
 All SLURM commands begin with an `s`, and all SLURM systems support the `sinfo` command
 that gives you information about the cluster's nodes and their status (whether they are currently
 running jobs or not.)  On your cluster, `man sinfo` will tell you about this command.
-On the `Sedna` cluster, which just got installed and therefore does not
-have many users, we see:
+
+On the `Sedna` cluster, shortly after it got installed and therefore did not
+have many users, when we issue the `sinfo` command we see this:
 ```sh
 % sinfo
 PARTITION AVAIL  TIMELIMIT  NODES  STATE NODELIST
@@ -271,9 +278,10 @@ currently allocated to a job (`STATE` = `alloc`), and two more that
 are not currently allocated to jobs. The `himem` partition holds machines
 with lots of RAM memory for tasks like sequence assembly (and, when I ran that
 command, one of the nodes in `himem` was busy assembling the genome of
-some interesting sea creature [need to ask Krista again what the hell it was...].
+some interesting sea creature.
 It also has 28 compute nodes in the 
-`nodes` partition that are free.  This is a very small cluster.
+`nodes` partition that are `idle`, which means they are available for use.
+This is a very small cluster.
 
 If you do the same command on SUMMIT you get many more lines of output.  There
 are many more different partitions, and there is a lot of information about how many
@@ -331,7 +339,21 @@ ssky-csu-rsp        up 7-00:00:00      4   idle ssky[0947-0950]
 ```
 
 Yikes!  That is a lot of info.  The numbers that you see on the ends of the lines there
-are node numbers.
+are node numbers that belong to each category.
+
+The first column gives the _partition_ that the nodes on the row belong to. (Note that
+some nodes belong to multiple partitions).  The second column tells us whether the
+machine(s) are operational (i.e., `up`).  The third line is the time limit for jobs
+in the partition and the fourth column is the number of nodes in the row.  The fifth
+column is very important---it describes the state of the nodes in the row.  There are
+technically a lot of states that a node can be in but the most common and relevant ones
+are:
+
+- `alloc`: Every core in the node is allocated to jobs that are currently running.
+- `mix`: Some, but not all of the cores on the node are allocated to currently running jobs.
+- `drain`: Jobs are running on the node, but no new jobs will be run on it, as it is being
+reserved (typically for maintenance).
+- `idle`: No cores are allocated to jobs.  These are available for use!
 
 If you wanted to see information about each node in the `shas` partition, you could
 print long information for each node  like this:
@@ -342,7 +364,7 @@ On Summit, that creates almost 1500 lines of output.  Some nodes are listed seve
 because they belong to different partitions.  To look at results for just the standard compute
 parition (`shas`: 380 nodes with Intel Xeon Haswell processors) you can use
 ```sh
-% sinfo -l -n -p shas
+% sinfo -l -N -p shas
 ```
 Try that command.  (Or try a similar command with an appropriate partition name on your
 own cluster.)  If you want to see explicitly how many cores are available vs allocated
@@ -409,7 +431,8 @@ for it by adding a line such as the following to your `~/.bashrc`:
 alias myjobs='squeue -u eriq@colostate.edu'
 ```
 Then, typing `myjobs` shows all of the jobs that you have running, or waiting to be launched
-on the cluster.
+on the cluster. (Of course, you should replace `eriq@colostate.edu` with your own
+user name!)
 
 
 ## Getting compute resources allocated to your jobs on an HPCC
@@ -448,6 +471,19 @@ So, you could do:
 ```sh
 sinteractive
 ``` 
+However, that method uses `screen` under the hood, and that can interfere
+with you TMUX session.  So, you might prefer to do:
+```sh
+# get on the scompile node
+ssh scompile
+
+# Then use srun, requesting the shas-interactive partition
+srun --partition shas-interactive --pty /bin/bash
+```
+Note that you might only be able to get one job at a time on the
+`shas-interactive` partition.
+
+You might also try the `shas-testing` partition on SUMMIT.
 
 On the Hummingbird cluster, at UCSC, it takes a few more steps.  The webpage at [https://www.hb.ucsc.edu/getting-started/](https://www.hb.ucsc.edu/getting-started/)
 tells you how to do that.  Go to that page and search for `Job Allocation – Interactive, Serial`.  That takes you to
@@ -486,7 +522,7 @@ you are logged into.
 
 It is also worth using your alias `myjobs` (see the last part of Section \@ref(slurm-info)
 to learn how to make such an alias) to check that your interactive shell session is listed amongst
-your running jobs.
+your running jobs. 
 
 Once you have obtained an interactive shell on a compute node by one of the above
 methods, it should behave like any other shell you work on. You can give commands
@@ -539,7 +575,7 @@ shell should respond with the absolute path to the bash shell interpreter.
 may want to pass to the script. 
 
 
-For practice in submitting batch jobs, we will, first write a simple job script that
+For practice in submitting batch jobs, we will first write a simple job script that
 prints a few pieces of information about the shell that is running and the environment
 variables defined within that shell.  
 
@@ -610,7 +646,7 @@ invoke it in the shell from which the job was scheduled. Try doing that like thi
 # first, make a file of the environment variables in effect in the
 # shell the job was scheduled from.  Sort these alphabetically to
 # make it easier to compare between the two environments
-env | sort > sheduling_env.txt
+env | sort > scheduling_env.txt
 
 # also, sort the error-XXXXX file
 sort error-XXXXX > slurm_running_env.txt
@@ -669,7 +705,7 @@ If you want to be notified by email when a job starts and finishes, (or fails
 or gets killed by the scheduler). You can use the `--mail-user` option to supply
 an email address and the `--mail-type` option to tell the scheduler when it should
 email you with updates regarding your job status.  For example, supply your own
-email address in the following, and try it:
+email address in the following (replacing `yourname@yourmail.edu`) and try it:
 ```sh
 sbatch --mail-type=ALL --mail-user=yourname@yourmail.edu --time=00:05:00 --output=output-%j --error=error-%j  easy.sh
 ```
@@ -741,11 +777,11 @@ pander::pander(
 
 Since you can write options for the `sbatch` command either 1) on the command
 line (as in `sbatch --time=00:03:00 ...`), or 2) within the script file given to
-the `sbatch` command (i.e. lines like `#SBATCH --time=00:05:00` within
+the `sbatch` command (i.e., lines like `#SBATCH --time=00:05:00` within
 the top part of the script), you might wonder what happens when the same
 option is supplied both on the command line and within the script.
 It turns out that the version of the option on the command line takes precedence.
-That it, any options that are given _on the command line_ itself will
+That is, any options that are given _on the command line_ itself will
 override the options if they are given within the file.  For example, 
 if we submitted the above `easy2.sh` script with the command:
 ```sh
@@ -771,7 +807,10 @@ features that have to happen within your job script in order to be able to
 explicitly set your `conda` environment within your job script.
 
 To see this, first make a script called `conda-test1.sh` that
-tries to activate a different `conda` environment within the job script:
+tries to activate a different `conda` environment within the job script.
+In this case, it is activating an environment called `trimmo`.  If you
+don't have a trimmo environment, then you should replace `trimmo` with 
+the name of another environment that you do have.
 ```sh
 #!/bin/bash
 
@@ -789,7 +828,7 @@ echo
 echo "Currently, the PATH is set to: $PATH"
 echo
 echo "Activating environment bioinf"
-conda activate bioinf
+conda activate trimmo
 echo
 echo "Now the PATH is: $PATH"
 
@@ -799,14 +838,16 @@ and then run that with:
 ```sh
 sbatch conda-test1.sh
 ```
+Make a note of the job number reported after you submit this job.  That is the
+`XXXX` you will use in `conda-test1-error-XXXX`.
 
 After that has run, reading the contents of the `conda-test1-error-XXXX` file you should
 see an error about not being able to activate a conda environment.  Likewise,
 if you look at the two `PATH`s printed out in `conda-test1-output-XXXX`,
-you will see that they are the same.  So, indeed, the `bioinf` environemnt
+you will see that they are the same.  So, indeed, the `trimmo` environemnt
 was not activated.
 
-To remedy this problem, you need to source your `~/.bashrc` 
+One way to remedy this problem is to source your `~/.bashrc` 
 (which seems to be where Miniconda3 establishes its "conda init" block)
 from within your job script.
 
@@ -831,7 +872,7 @@ echo
 echo "Currently, the PATH is set to: $PATH"
 echo
 echo "Activating environment bioinf"
-conda activate bioinf
+conda activate trimmo
 echo
 echo "Now the PATH is: $PATH"
 echo
@@ -846,58 +887,80 @@ Then run it with:
 sbatch conda-test2.sh
 ```
 If `conda` is working properly within the job script there should be no output
-to `conda-test2-error-XXXX` and you should see that invoking `conda activate bioinf` 
-changed the PATH variable to include paths from the `bioinf` environment.
+to `conda-test2-error-XXXX` and you should see that invoking `conda activate trimmo` 
+changed the PATH variable to include paths from the `trimmo` environment.
 
 The above points are very important if you want to use software like `bwa`, `samtools`,
 and `bcftools`, that you installed using Miniconda, from within a job script.
 
-To repeat: to activate a conda environment like `bioinf` from within a job script running
+To repeat: to activate a conda environment named `env_name`, for example, from within a job script running
 under `sbatch` you must add these lines:
 ```sh
 source ~/.bashrc
-conda activate bioinf
+conda activate env_name
 ```
 
 #### Test a longer running bash script
 
-If you have time and want to pull this all together.  Navigate to the
-`chinook-play` directory that we experimented in before.  There should be
-a directory called `fastq` in there, as well as `chinook-genome-idx`.
+Now we are going to make a job script to map a pair of trimmed fastq
+files in our `non-model-wgs-example-data` directory.
 
-Then, make a job script called `map-it.sh` with these lines in it (modifying the
-email to be your email address):
+Make a new directory in `non-model-wgs-example-data` called `scripts`
+and then make a job script called `map_s002---1.sh` inside the scripts
+directory with these lines in it (_modifying the
+email to be your email address_)
 ```sh
 #!/bin/bash
 
-#SBATCH --time=03:00:00
-#SBATCH --output=map-it-output-%j
-#SBATCH --error=map-it-error-%j 
+#SBATCH --time=01:00:00
+#SBATCH --output=results/slurm_logs/map/map_s002---1-output-%j
+#SBATCH --error=results/slurm_logs/map/map_s002---1-error-%j 
 #SBATCH --mail-type=ALL 
 #SBATCH --mail-user=yourname@yourmail.edu
 
 
 source ~/.bash_profile  # or ~/.bashrc if that is how you are set up
-conda activate bioinf
+conda activate bwasam
 
 
-# map it, then make it a BAM then run fixmate
-bwa mem chinook-genome-idx/GCA_002872995.1_Otsh_v1.0_genomic.fna.gz \
-  fastq/Battle_Creek_01_chinook_R1.fq.gz  \
-  fastq/Battle_Creek_01_chinook_R2.fq.gz  | \
-  samtools view -b -1 - | \
-    samtools fixmate -m -O BAM - OUTPUT-fixed.bam
-    
-# now coordinate-sort it and mark PCR duplicates
-samtools sort OUTPUT-fixed.bam | \
-  samtools markdup - OUTPUT-marked.bam
+mkdir -p results/bam  # a directory in which to put the output from stdout
+mkdir -p results/logs/bwa  # a directory in which to put the output from stderr
+mkdir -p results/logs/samtools-sort
+SU=s002---1
+
+RG='@RG\tID:s002_T199968_Lib-1_HY75HDSX2_1_CAGGTTCA+GGCGTTAT\tSM:T199968\tPL:ILLUMINA\tLB:Lib-1\tPU:HY75HDSX2.1.CAGGTTCA+GGCGTTAT'
+PREFIX=results/trimmed/$SU
+OUT=results/bam/$SU.bam
+BWALOG=results/logs/bwa/$SU.log
+SAMSORTLOG=results/logs/samtools-sort/$SU.log
+
+bwa mem \
+-R $RG \
+resources/genome.fasta \
+${PREFIX}_R1.fq.gz  ${PREFIX}_R2.fq.gz 2> $BWALOG |  \
+samtools view -u - |  \
+samtools sort -l 9 -o $OUT - 2> $SAMSORTLOG
 
 ```
-And schedule it to run (from within the `chinook-play` directory) with:
+And schedule it to run (from within the `non-model-wgs-example-data` directory) with:
 ```sh
-sbatch map-it.sh
+mkdir -p results/slurm_logs/map
+sbatch scripts/map_s002---1.sh
 ```
+Note that we make the directory `results/slurm_logs/map` to put the slurm output into, but most of
+the program output should go to the output files and the logs.
 
+While this job is running it is worthwhile to reflect on how crazy it would be to
+prepare a separate script for each of the pairs of FASTQ files in our
+`non-model-wgs-example-data` data set.  Doing so would mean a lot of copying and pasting
+followed by painstaking revision of the read group strings in the files, etc. 
+There would be lot of nearly redundant scripts and it would even be a hassle to
+manually launch each one.  Obviously, using a little programming and some variable
+names, it would be better to have just a single script that could be applied, with
+minor adjustments that happen at run-time, to all the pairs of FASTQ files.  
+
+The next sections shows one powerful way that the SLURM scheduler makes such
+automation of repetitive tasks a little easier: job arrays.
 
 ### SLURM Job Arrays {#slurm-job-arrays}
 
@@ -920,7 +983,7 @@ for ind in $INDIVS; do
   align.sh $ind.R1.fq.gz $ind.R2.fq.gz 
 done
 ```
-Such an approach will work OK on an HPCC if each task (aligning a single indvidual,
+Such an approach will work OK on an HPCC if each task (aligning a single individual,
 in this case) takes just a short amount of time.  But, what if aligning each
 individual takes almost a day of compute time, and you are only authorized to
 run jobs less than 24 hours on your HPCC?  What is needed in that event is a convenient

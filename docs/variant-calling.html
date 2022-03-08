@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-03" />
+<meta name="date" content="2022-03-08" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -798,41 +798,41 @@ into <code>bcftools</code>.</p>
 <p>The syntax for using it in this context, to compute genotype likelihoods in a
 20 Kb section of the genome we have mapped is as follows—being sure that you are in the
 <code>chr-32-bioinformatics-username</code> directory:</p>
-<div class="sourceCode" id="cb601"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb601-1"><a href="variant-calling.html#cb601-1" aria-hidden="true" tabindex="-1"></a><span class="co"># be sure that you are on a compute node</span></span>
-<span id="cb601-2"><a href="variant-calling.html#cb601-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb601-3"><a href="variant-calling.html#cb601-3" aria-hidden="true" tabindex="-1"></a><span class="co"># activate your conda environment that has bcftools</span></span>
-<span id="cb601-4"><a href="variant-calling.html#cb601-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bioinf</span>
-<span id="cb601-5"><a href="variant-calling.html#cb601-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb601-6"><a href="variant-calling.html#cb601-6" aria-hidden="true" tabindex="-1"></a><span class="co"># do the call.  By default, it outputs in VCF format. Add the AD and DP FORMAT tags</span></span>
-<span id="cb601-7"><a href="variant-calling.html#cb601-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> mpileup <span class="dt">\</span></span>
-<span id="cb601-8"><a href="variant-calling.html#cb601-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-f</span> genome/GCA_002872995.1_Otsh_v1.0_genomic.fna <span class="dt">\</span></span>
-<span id="cb601-9"><a href="variant-calling.html#cb601-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">-r</span> CM009233.1:2000000-2020000 <span class="dt">\</span></span>
-<span id="cb601-10"><a href="variant-calling.html#cb601-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-a</span> AD,DP <span class="dt">\</span></span>
-<span id="cb601-11"><a href="variant-calling.html#cb601-11" aria-hidden="true" tabindex="-1"></a>  mkdup/<span class="pp">*</span>.bam <span class="op">&gt;</span> vcf/geno-likes-from-bcftools.vcf</span>
-<span id="cb601-12"><a href="variant-calling.html#cb601-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb601-13"><a href="variant-calling.html#cb601-13" aria-hidden="true" tabindex="-1"></a><span class="co"># after that is done, look at the names of the individuals</span></span>
-<span id="cb601-14"><a href="variant-calling.html#cb601-14" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> vcf/geno-likes-from-bcftools.vcf</span>
-<span id="cb601-15"><a href="variant-calling.html#cb601-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb601-16"><a href="variant-calling.html#cb601-16" aria-hidden="true" tabindex="-1"></a><span class="co"># also check the types of the INFO and FORMAT fields:</span></span>
-<span id="cb601-17"><a href="variant-calling.html#cb601-17" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> vcf/geno-likes-from-bcftools.vcf  <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/INFO/ || /FORMAT/&#39;</span></span>
-<span id="cb601-18"><a href="variant-calling.html#cb601-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb601-19"><a href="variant-calling.html#cb601-19" aria-hidden="true" tabindex="-1"></a><span class="co"># What is the FORMAT field there?</span></span>
-<span id="cb601-20"><a href="variant-calling.html#cb601-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb601-21"><a href="variant-calling.html#cb601-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Now, look at the first 10 positions:</span></span>
-<span id="cb601-22"><a href="variant-calling.html#cb601-22" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view  vcf/geno-likes-from-bcftools.vcf <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^##/ {next} /^#CHROM/ {print; next} {print}&#39;</span> <span class="kw">|</span> <span class="fu">head</span></span>
-<span id="cb601-23"><a href="variant-calling.html#cb601-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb601-24"><a href="variant-calling.html#cb601-24" aria-hidden="true" tabindex="-1"></a><span class="co"># How many rows are in this file?</span></span>
-<span id="cb601-25"><a href="variant-calling.html#cb601-25" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span>  vcf/geno-likes-from-bcftools.vcf <span class="kw">|</span> <span class="fu">wc</span></span></code></pre></div>
+<div class="sourceCode" id="cb602"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb602-1"><a href="variant-calling.html#cb602-1" aria-hidden="true" tabindex="-1"></a><span class="co"># be sure that you are on a compute node</span></span>
+<span id="cb602-2"><a href="variant-calling.html#cb602-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb602-3"><a href="variant-calling.html#cb602-3" aria-hidden="true" tabindex="-1"></a><span class="co"># activate your conda environment that has bcftools</span></span>
+<span id="cb602-4"><a href="variant-calling.html#cb602-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bioinf</span>
+<span id="cb602-5"><a href="variant-calling.html#cb602-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb602-6"><a href="variant-calling.html#cb602-6" aria-hidden="true" tabindex="-1"></a><span class="co"># do the call.  By default, it outputs in VCF format. Add the AD and DP FORMAT tags</span></span>
+<span id="cb602-7"><a href="variant-calling.html#cb602-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> mpileup <span class="dt">\</span></span>
+<span id="cb602-8"><a href="variant-calling.html#cb602-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">-f</span> genome/GCA_002872995.1_Otsh_v1.0_genomic.fna <span class="dt">\</span></span>
+<span id="cb602-9"><a href="variant-calling.html#cb602-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">-r</span> CM009233.1:2000000-2020000 <span class="dt">\</span></span>
+<span id="cb602-10"><a href="variant-calling.html#cb602-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">-a</span> AD,DP <span class="dt">\</span></span>
+<span id="cb602-11"><a href="variant-calling.html#cb602-11" aria-hidden="true" tabindex="-1"></a>  mkdup/<span class="pp">*</span>.bam <span class="op">&gt;</span> vcf/geno-likes-from-bcftools.vcf</span>
+<span id="cb602-12"><a href="variant-calling.html#cb602-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb602-13"><a href="variant-calling.html#cb602-13" aria-hidden="true" tabindex="-1"></a><span class="co"># after that is done, look at the names of the individuals</span></span>
+<span id="cb602-14"><a href="variant-calling.html#cb602-14" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> vcf/geno-likes-from-bcftools.vcf</span>
+<span id="cb602-15"><a href="variant-calling.html#cb602-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb602-16"><a href="variant-calling.html#cb602-16" aria-hidden="true" tabindex="-1"></a><span class="co"># also check the types of the INFO and FORMAT fields:</span></span>
+<span id="cb602-17"><a href="variant-calling.html#cb602-17" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> vcf/geno-likes-from-bcftools.vcf  <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/INFO/ || /FORMAT/&#39;</span></span>
+<span id="cb602-18"><a href="variant-calling.html#cb602-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb602-19"><a href="variant-calling.html#cb602-19" aria-hidden="true" tabindex="-1"></a><span class="co"># What is the FORMAT field there?</span></span>
+<span id="cb602-20"><a href="variant-calling.html#cb602-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb602-21"><a href="variant-calling.html#cb602-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Now, look at the first 10 positions:</span></span>
+<span id="cb602-22"><a href="variant-calling.html#cb602-22" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view  vcf/geno-likes-from-bcftools.vcf <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^##/ {next} /^#CHROM/ {print; next} {print}&#39;</span> <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb602-23"><a href="variant-calling.html#cb602-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb602-24"><a href="variant-calling.html#cb602-24" aria-hidden="true" tabindex="-1"></a><span class="co"># How many rows are in this file?</span></span>
+<span id="cb602-25"><a href="variant-calling.html#cb602-25" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span>  vcf/geno-likes-from-bcftools.vcf <span class="kw">|</span> <span class="fu">wc</span></span></code></pre></div>
 <p>Check that out! It has computed values for almost every single base pair in the 20,000 KB
 genomic region.</p>
 <p>To turn that mpileup VCF into something that has information on variable positions,
 you can “call” genotypes, using <code>bcftools call</code>. The <code>-v</code> option says “keep only
 the variable sites,” and the <code>-m</code> says “use the genotype caller that can deal
 with multiallelic sites.”</p>
-<div class="sourceCode" id="cb602"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb602-1"><a href="variant-calling.html#cb602-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> call <span class="at">-v</span> <span class="at">-m</span> vcf/geno-likes-from-bcftools.vcf <span class="op">&gt;</span> vcf/geno-calls-from-bcftools.vcf</span>
-<span id="cb602-2"><a href="variant-calling.html#cb602-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb602-3"><a href="variant-calling.html#cb602-3" aria-hidden="true" tabindex="-1"></a><span class="co"># now look at what we have</span></span>
-<span id="cb602-4"><a href="variant-calling.html#cb602-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bctools</span> view <span class="at">-h</span> vcf/geno-calls-from-bcftools.vcf <span class="kw">|</span> <span class="fu">head</span> </span></code></pre></div>
+<div class="sourceCode" id="cb603"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb603-1"><a href="variant-calling.html#cb603-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> call <span class="at">-v</span> <span class="at">-m</span> vcf/geno-likes-from-bcftools.vcf <span class="op">&gt;</span> vcf/geno-calls-from-bcftools.vcf</span>
+<span id="cb603-2"><a href="variant-calling.html#cb603-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb603-3"><a href="variant-calling.html#cb603-3" aria-hidden="true" tabindex="-1"></a><span class="co"># now look at what we have</span></span>
+<span id="cb603-4"><a href="variant-calling.html#cb603-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bctools</span> view <span class="at">-h</span> vcf/geno-calls-from-bcftools.vcf <span class="kw">|</span> <span class="fu">head</span> </span></code></pre></div>
 <p>Compare those to the variants found by GATK (listed above)</p>
 </div>
 <div id="angsd" class="section level4" number="20.1.3.3">
@@ -905,17 +905,17 @@ are from different populations, but the populations are so similar, genetically,
 expect a Wahlund effect by mixing them into a single sample.</p>
 <p><a href="https://www.dropbox.com/s/5sb7ygwmpgsz09p/raw-fall-late-fall-geno-calls.vcf.gz?dl=1">raw-fall-late-fall-geno-calls.vcf.gz</a>.</p>
 <p>Download that to your laptop, then use R within RStudio to get the ‘whoa’ package from CRAN and then make a plot:</p>
-<div class="sourceCode" id="cb603"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb603-1"><a href="variant-calling.html#cb603-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;whoa&quot;</span>)</span>
-<span id="cb603-2"><a href="variant-calling.html#cb603-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(whoa)</span>
-<span id="cb603-3"><a href="variant-calling.html#cb603-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vcfR)</span>
-<span id="cb603-4"><a href="variant-calling.html#cb603-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb603-5"><a href="variant-calling.html#cb603-5" aria-hidden="true" tabindex="-1"></a><span class="co"># you might have to change the file location, depending on where</span></span>
-<span id="cb603-6"><a href="variant-calling.html#cb603-6" aria-hidden="true" tabindex="-1"></a><span class="co"># files get downloaded to on your laptop</span></span>
-<span id="cb603-7"><a href="variant-calling.html#cb603-7" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">read.vcfR</span>(<span class="st">&quot;~/Downloads/raw-fall-late-fall-geno-calls.vcf.gz&quot;</span>)</span>
-<span id="cb603-8"><a href="variant-calling.html#cb603-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb603-9"><a href="variant-calling.html#cb603-9" aria-hidden="true" tabindex="-1"></a>gfreqs <span class="ot">&lt;-</span> <span class="fu">exp_and_obs_geno_freqs</span>(v)</span>
-<span id="cb603-10"><a href="variant-calling.html#cb603-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb603-11"><a href="variant-calling.html#cb603-11" aria-hidden="true" tabindex="-1"></a><span class="fu">geno_freqs_scatter</span>(gfreqs, <span class="at">alpha =</span> <span class="fl">0.04</span>, <span class="at">max_plot_loci =</span> <span class="fl">1e15</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb604"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb604-1"><a href="variant-calling.html#cb604-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;whoa&quot;</span>)</span>
+<span id="cb604-2"><a href="variant-calling.html#cb604-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(whoa)</span>
+<span id="cb604-3"><a href="variant-calling.html#cb604-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(vcfR)</span>
+<span id="cb604-4"><a href="variant-calling.html#cb604-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb604-5"><a href="variant-calling.html#cb604-5" aria-hidden="true" tabindex="-1"></a><span class="co"># you might have to change the file location, depending on where</span></span>
+<span id="cb604-6"><a href="variant-calling.html#cb604-6" aria-hidden="true" tabindex="-1"></a><span class="co"># files get downloaded to on your laptop</span></span>
+<span id="cb604-7"><a href="variant-calling.html#cb604-7" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">read.vcfR</span>(<span class="st">&quot;~/Downloads/raw-fall-late-fall-geno-calls.vcf.gz&quot;</span>)</span>
+<span id="cb604-8"><a href="variant-calling.html#cb604-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb604-9"><a href="variant-calling.html#cb604-9" aria-hidden="true" tabindex="-1"></a>gfreqs <span class="ot">&lt;-</span> <span class="fu">exp_and_obs_geno_freqs</span>(v)</span>
+<span id="cb604-10"><a href="variant-calling.html#cb604-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb604-11"><a href="variant-calling.html#cb604-11" aria-hidden="true" tabindex="-1"></a><span class="fu">geno_freqs_scatter</span>(gfreqs, <span class="at">alpha =</span> <span class="fl">0.04</span>, <span class="at">max_plot_loci =</span> <span class="fl">1e15</span>)</span></code></pre></div>
 <p>Whoa!</p>
 </div>
 </div>
