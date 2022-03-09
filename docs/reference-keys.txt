@@ -167,6 +167,8 @@ naming-slurm-job-array-tasks
 variations-on-the-array_spec
 translating-array-indexes-to-job-instances
 slurm-job-array-hands-on
+more-on-converting-task-ids-to-variables-from-a-tab-delimited-file
+last-years-stuff.-now-somewhat-defunct
 prepation-interlude-an-in-class-exercise-to-make-sure-everything-is-configured-correctly
 more-boneyard
 the-queue-slurmsgeuge

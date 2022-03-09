@@ -304,14 +304,15 @@ div.csl-indent {
 <li class="chapter" data-level="8.4.2" data-path="chap-HPCC.html"><a href="chap-HPCC.html#slurm-batch"><i class="fa fa-check"></i><b>8.4.2</b> Batch jobs</a></li>
 <li class="chapter" data-level="8.4.3" data-path="chap-HPCC.html"><a href="chap-HPCC.html#slurm-job-arrays"><i class="fa fa-check"></i><b>8.4.3</b> SLURM Job Arrays</a></li>
 </ul></li>
-<li class="chapter" data-level="8.5" data-path="chap-HPCC.html"><a href="chap-HPCC.html#prepation-interlude-an-in-class-exercise-to-make-sure-everything-is-configured-correctly"><i class="fa fa-check"></i><b>8.5</b> PREPATION INTERLUDE: An in-class exercise to make sure everything is configured correctly</a></li>
-<li class="chapter" data-level="8.6" data-path="chap-HPCC.html"><a href="chap-HPCC.html#more-boneyard"><i class="fa fa-check"></i><b>8.6</b> More Boneyard…</a></li>
-<li class="chapter" data-level="8.7" data-path="chap-HPCC.html"><a href="chap-HPCC.html#the-queue-slurmsgeuge"><i class="fa fa-check"></i><b>8.7</b> The Queue (SLURM/SGE/UGE)</a></li>
-<li class="chapter" data-level="8.8" data-path="chap-HPCC.html"><a href="chap-HPCC.html#modules-package"><i class="fa fa-check"></i><b>8.8</b> Modules package</a></li>
-<li class="chapter" data-level="8.9" data-path="chap-HPCC.html"><a href="chap-HPCC.html#compiling-programs-without-admin-privileges"><i class="fa fa-check"></i><b>8.9</b> Compiling programs without admin privileges</a></li>
-<li class="chapter" data-level="8.10" data-path="chap-HPCC.html"><a href="chap-HPCC.html#job-arrays"><i class="fa fa-check"></i><b>8.10</b> Job arrays</a></li>
-<li class="chapter" data-level="8.11" data-path="chap-HPCC.html"><a href="chap-HPCC.html#writing-stdout-and-stderr-to-files"><i class="fa fa-check"></i><b>8.11</b> Writing stdout and stderr to files</a></li>
-<li class="chapter" data-level="8.12" data-path="chap-HPCC.html"><a href="chap-HPCC.html#breaking-stuff-down"><i class="fa fa-check"></i><b>8.12</b> Breaking stuff down</a></li>
+<li class="chapter" data-level="8.5" data-path="chap-HPCC.html"><a href="chap-HPCC.html#last-years-stuff.-now-somewhat-defunct"><i class="fa fa-check"></i><b>8.5</b> Last year’s stuff. Now somewhat defunct</a></li>
+<li class="chapter" data-level="8.6" data-path="chap-HPCC.html"><a href="chap-HPCC.html#prepation-interlude-an-in-class-exercise-to-make-sure-everything-is-configured-correctly"><i class="fa fa-check"></i><b>8.6</b> PREPATION INTERLUDE: An in-class exercise to make sure everything is configured correctly</a></li>
+<li class="chapter" data-level="8.7" data-path="chap-HPCC.html"><a href="chap-HPCC.html#more-boneyard"><i class="fa fa-check"></i><b>8.7</b> More Boneyard…</a></li>
+<li class="chapter" data-level="8.8" data-path="chap-HPCC.html"><a href="chap-HPCC.html#the-queue-slurmsgeuge"><i class="fa fa-check"></i><b>8.8</b> The Queue (SLURM/SGE/UGE)</a></li>
+<li class="chapter" data-level="8.9" data-path="chap-HPCC.html"><a href="chap-HPCC.html#modules-package"><i class="fa fa-check"></i><b>8.9</b> Modules package</a></li>
+<li class="chapter" data-level="8.10" data-path="chap-HPCC.html"><a href="chap-HPCC.html#compiling-programs-without-admin-privileges"><i class="fa fa-check"></i><b>8.10</b> Compiling programs without admin privileges</a></li>
+<li class="chapter" data-level="8.11" data-path="chap-HPCC.html"><a href="chap-HPCC.html#job-arrays"><i class="fa fa-check"></i><b>8.11</b> Job arrays</a></li>
+<li class="chapter" data-level="8.12" data-path="chap-HPCC.html"><a href="chap-HPCC.html#writing-stdout-and-stderr-to-files"><i class="fa fa-check"></i><b>8.12</b> Writing stdout and stderr to files</a></li>
+<li class="chapter" data-level="8.13" data-path="chap-HPCC.html"><a href="chap-HPCC.html#breaking-stuff-down"><i class="fa fa-check"></i><b>8.13</b> Breaking stuff down</a></li>
 </ul></li>
 <li class="part"><span><b>II Part II: Reproducible Research Strategies</b></span></li>
 <li class="chapter" data-level="9" data-path="introduction-to-reproducible-research.html"><a href="introduction-to-reproducible-research.html"><i class="fa fa-check"></i><b>9</b> Introduction to Reproducible Research</a></li>
@@ -1585,7 +1586,7 @@ allocated to them. In that case you could update the <code>--time</code> setting
 script and then re-run just those four jobs by including:</p>
 <div class="sourceCode" id="cb330"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb330-1"><a href="chap-HPCC.html#cb330-1" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=47,368,477,489</span></span></code></pre></div>
 <p>Be warned, however, that SLURM does not check your <code>&lt;array_spec&gt;</code> to ensure that
-each task index if given only once. If you specify the same index should be run
+each task index is given only once. If you specify that the same index should be run
 twice, as is the case for 4 in the following:</p>
 <div class="sourceCode" id="cb331"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb331-1"><a href="chap-HPCC.html#cb331-1" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-10,4</span></span></code></pre></div>
 <p>then the job will be run twice, and possibly those two jobs will run at
@@ -1606,7 +1607,7 @@ index to a different file to analyze, or perhaps a different region of a chromos
 do variant calling on, etc. A flexible and generic way of doing this mapping from
 array indexes to job specifics is to first define the variables (things like filenames, etc.)
 required by each array task in a simple TAB-delimited text file in which the first row holds
-the names of the variables in different TAB-separate columns, and each row below that holds
+the names of the variables in different TAB-separated columns, and each row below that holds
 the values that those variables should take for different values of the array index. The
 array index itself should be listed in the first column.</p>
 <p>For example, if we have 10 different
@@ -1649,7 +1650,9 @@ proper files are processed, etc., for each different value of SLURM_ARRAY_TASK_I
 <div id="slurm-job-array-hands-on" class="section level4" number="8.4.3.4">
 <h4><span class="header-section-number">8.4.3.4</span> SLURM Job Array hands-on</h4>
 <p>Here, you can run some small scripts to get your feet wet with
-defining slurm job arrays. Save the following lines to a script
+defining slurm job arrays. Create a directory in your <code>scratch</code> directory
+named <code>job-array-fun</code> and then <code>cd</code> into that directory. In that directory,
+save the following lines to a script
 named <code>test-arrays.sh</code> and then submit it via <code>sbatch test-arrays.sh</code>.
 It should produce three output files.</p>
 <div class="sourceCode" id="cb336"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb336-1"><a href="chap-HPCC.html#cb336-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
@@ -1674,8 +1677,8 @@ put one in your <code>~/.bashrc</code>. Add these lines:</p>
 <div class="sourceCode" id="cb338"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb338-1"><a href="chap-HPCC.html#cb338-1" aria-hidden="true" tabindex="-1"></a><span class="co"># aliases for SLURM stuff</span></span>
 <span id="cb338-2"><a href="chap-HPCC.html#cb338-2" aria-hidden="true" tabindex="-1"></a><span class="bu">alias</span> myjobs=<span class="st">&#39;squeue -u username&#39;</span></span></code></pre></div>
 <p>where you have to change <em>username</em> to be your login name on the HPCC. Note
-that, for Colorado State Univesity affiliates on SUMMIT, that username is of the form,
-<code>user@colostate</code>.</p>
+that, for Colorado State University affiliates on SUMMIT, that username is of the form,
+<code>CSUeID@colostate</code>.</p>
 <p>If you would like to see each one of the tasks in a job array listed
 on its own line, you can use the <code>-r, --array</code> option to <code>squeue</code>. In terms
 of a <code>myjobs</code> alias that means issuing <code>myjobs -r</code> or <code>myjobs --array</code> (both are
@@ -1686,7 +1689,9 @@ equivalent):</p>
 <span id="cb339-4"><a href="chap-HPCC.html#cb339-4" aria-hidden="true" tabindex="-1"></a>         <span class="ex">4499052_2</span>      shas test-arr eriq@col PD       0:00      1 <span class="er">(</span><span class="ex">Priority</span><span class="kw">)</span></span>
 <span id="cb339-5"><a href="chap-HPCC.html#cb339-5" aria-hidden="true" tabindex="-1"></a>         <span class="ex">4499052_3</span>      shas test-arr eriq@col PD       0:00      1 <span class="er">(</span><span class="ex">Priority</span><span class="kw">)</span></span></code></pre></div>
 <p>I want people to look closely at the variables SLURM_ARRAY_JOB_ID and
-SLURM_ARRAY_TASK_ID, and to understand how those are different from
+SLURM_ARRAY_TASK_ID, that get written to stdout by each job into the files
+<code>my_output_%A_%a</code> (where <code>%A</code> and <code>%a</code> expand to the job array ID and the
+job array task ID, respectively) and to understand how those are different from
 SLURM_JOB_ID in this context. We will discuss that in class.</p>
 <p>Unfortunately, it seems like it can take a long time for that to start on
 SUMMIT. So, here are the results:</p>
@@ -1716,6 +1721,27 @@ SUMMIT. So, here are the results:</p>
 given internally in the <code>test-arrays.sh</code> with one given on the command line. Thus,
 try submitting the job with:</p>
 <div class="sourceCode" id="cb341"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb341-1"><a href="chap-HPCC.html#cb341-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>100,200,300 test-arrays.sh</span></code></pre></div>
+</div>
+<div id="more-on-converting-task-ids-to-variables-from-a-tab-delimited-file" class="section level4" number="8.4.3.5">
+<h4><span class="header-section-number">8.4.3.5</span> More on converting Task IDs to variables from a tab delimited file</h4>
+<div class="sourceCode" id="cb342"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb342-1"><a href="chap-HPCC.html#cb342-1" aria-hidden="true" tabindex="-1"></a><span class="co"># simple script.  Give it a TAB delimited file $2 with the first column holding</span></span>
+<span id="cb342-2"><a href="chap-HPCC.html#cb342-2" aria-hidden="true" tabindex="-1"></a><span class="co"># indexes.  This will pick out the line that matches $1, and return a command</span></span>
+<span id="cb342-3"><a href="chap-HPCC.html#cb342-3" aria-hidden="true" tabindex="-1"></a><span class="co"># line assigning the column header names as shell variables whose values are the</span></span>
+<span id="cb342-4"><a href="chap-HPCC.html#cb342-4" aria-hidden="true" tabindex="-1"></a><span class="co"># follows in the file $2.</span></span>
+<span id="cb342-5"><a href="chap-HPCC.html#cb342-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb342-6"><a href="chap-HPCC.html#cb342-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 2 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb342-7"><a href="chap-HPCC.html#cb342-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Wrong number of arguments in </span><span class="va">$0</span><span class="st"> &quot;</span> <span class="op">&gt;</span> /dev/stderr</span>
+<span id="cb342-8"><a href="chap-HPCC.html#cb342-8" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb342-9"><a href="chap-HPCC.html#cb342-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb342-10"><a href="chap-HPCC.html#cb342-10" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&quot;\t&quot;</span> <span class="at">-v</span> LINE=<span class="va">$1</span> <span class="st">&#39;</span></span>
+<span id="cb342-11"><a href="chap-HPCC.html#cb342-11" aria-hidden="true" tabindex="-1"></a><span class="st">  $1 == &quot;index&quot; {for(i=1; i&lt;=NF; i++) vars[i]=$i; next}</span></span>
+<span id="cb342-12"><a href="chap-HPCC.html#cb342-12" aria-hidden="true" tabindex="-1"></a><span class="st">  $1 == LINE {for(i=1; i&lt;=NF; i++) printf(&quot;%s=\&quot;%s\&quot;; &quot;, vars[i], $i)}</span></span>
+<span id="cb342-13"><a href="chap-HPCC.html#cb342-13" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span> <span class="va">$2</span></span></code></pre></div>
+</div>
+</div>
+</div>
+<div id="last-years-stuff.-now-somewhat-defunct" class="section level2" number="8.5">
+<h2><span class="header-section-number">8.5</span> Last year’s stuff. Now somewhat defunct</h2>
 <p>Finally, we want to contemplate strategies for turning the <code>SLURM_ARRAY_TASK_ID</code>
 into “directions” for the script about what to do (which files to process, etc.)</p>
 <p>We discussed one approach, above, using a TAB-delimited file, but want to note here
@@ -1726,37 +1752,37 @@ homework <code>chr-32-bioinformatics</code>, consider that you have 1280 pairs o
 to process, and that you will launch jobs to process 128 such pairs at a time.
 A script called <code>run-single-job.sh</code> that mapped the first 128 pairs of files
 looked like this:</p>
-<div class="sourceCode" id="cb342"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb342-1"><a href="chap-HPCC.html#cb342-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb342-2"><a href="chap-HPCC.html#cb342-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb342-3"><a href="chap-HPCC.html#cb342-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=05:00:00</span></span>
-<span id="cb342-4"><a href="chap-HPCC.html#cb342-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=run-single-out-%j</span></span>
-<span id="cb342-5"><a href="chap-HPCC.html#cb342-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=run-single-error-%j</span></span>
-<span id="cb342-6"><a href="chap-HPCC.html#cb342-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL</span></span>
-<span id="cb342-7"><a href="chap-HPCC.html#cb342-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=user@email.edu</span></span>
-<span id="cb342-8"><a href="chap-HPCC.html#cb342-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb342-9"><a href="chap-HPCC.html#cb342-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb342-10"><a href="chap-HPCC.html#cb342-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 1</span></code></pre></div>
+<div class="sourceCode" id="cb343"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb343-1"><a href="chap-HPCC.html#cb343-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb343-2"><a href="chap-HPCC.html#cb343-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb343-3"><a href="chap-HPCC.html#cb343-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=05:00:00</span></span>
+<span id="cb343-4"><a href="chap-HPCC.html#cb343-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=run-single-out-%j</span></span>
+<span id="cb343-5"><a href="chap-HPCC.html#cb343-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=run-single-error-%j</span></span>
+<span id="cb343-6"><a href="chap-HPCC.html#cb343-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL</span></span>
+<span id="cb343-7"><a href="chap-HPCC.html#cb343-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=user@email.edu</span></span>
+<span id="cb343-8"><a href="chap-HPCC.html#cb343-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb343-9"><a href="chap-HPCC.html#cb343-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb343-10"><a href="chap-HPCC.html#cb343-10" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 1</span></code></pre></div>
 <p>If you wanted to map the next 128 pairs of files, the final line in the above
 script should look like:</p>
-<div class="sourceCode" id="cb343"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb343-1"><a href="chap-HPCC.html#cb343-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 129</span></code></pre></div>
+<div class="sourceCode" id="cb344"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb344-1"><a href="chap-HPCC.html#cb344-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 129</span></code></pre></div>
 <p>and to do the next 128 pairs of files after that, the line should look like:</p>
-<div class="sourceCode" id="cb344"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb344-1"><a href="chap-HPCC.html#cb344-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 257</span></code></pre></div>
+<div class="sourceCode" id="cb345"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb345-1"><a href="chap-HPCC.html#cb345-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 257</span></code></pre></div>
 <p>and so forth.</p>
 <p>So, if everyone has already run the first 128 pairs of files (as everyone should
 have finished for the homework) I contend that, if we wanted to modify this script
 so that the remaining 1152 pairs of files could be run as a job array, our new script
 could look like this:</p>
-<div class="sourceCode" id="cb345"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb345-1"><a href="chap-HPCC.html#cb345-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb345-2"><a href="chap-HPCC.html#cb345-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb345-3"><a href="chap-HPCC.html#cb345-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
-<span id="cb345-4"><a href="chap-HPCC.html#cb345-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=run-array-out-%A_%a</span></span>
-<span id="cb345-5"><a href="chap-HPCC.html#cb345-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=run-array-error-%A_%a</span></span>
-<span id="cb345-6"><a href="chap-HPCC.html#cb345-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL</span></span>
-<span id="cb345-7"><a href="chap-HPCC.html#cb345-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=user@email.edu</span></span>
-<span id="cb345-8"><a href="chap-HPCC.html#cb345-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-9</span></span>
-<span id="cb345-9"><a href="chap-HPCC.html#cb345-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb345-10"><a href="chap-HPCC.html#cb345-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb345-11"><a href="chap-HPCC.html#cb345-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 <span class="va">$((SLURM_ARRAY_TASK_ID</span> <span class="op">*</span> <span class="dv">128</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span></code></pre></div>
+<div class="sourceCode" id="cb346"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb346-1"><a href="chap-HPCC.html#cb346-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb346-2"><a href="chap-HPCC.html#cb346-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb346-3"><a href="chap-HPCC.html#cb346-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb346-4"><a href="chap-HPCC.html#cb346-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=run-array-out-%A_%a</span></span>
+<span id="cb346-5"><a href="chap-HPCC.html#cb346-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=run-array-error-%A_%a</span></span>
+<span id="cb346-6"><a href="chap-HPCC.html#cb346-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL</span></span>
+<span id="cb346-7"><a href="chap-HPCC.html#cb346-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=user@email.edu</span></span>
+<span id="cb346-8"><a href="chap-HPCC.html#cb346-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-9</span></span>
+<span id="cb346-9"><a href="chap-HPCC.html#cb346-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb346-10"><a href="chap-HPCC.html#cb346-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb346-11"><a href="chap-HPCC.html#cb346-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./map-N-files-from-K.sh</span> 128 <span class="va">$((SLURM_ARRAY_TASK_ID</span> <span class="op">*</span> <span class="dv">128</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span></code></pre></div>
 <p>Save that file as <code>run-array-job.sh</code></p>
 <p>Note the changes:</p>
 <ul>
@@ -1771,13 +1797,13 @@ will emphasize an important point when it comes to testing your own job-array sc
 if you are testing the code in them interactively, you can simply assign any value you
 want to a variable named <code>SLURM_ARRAY_TASK_ID</code> and verify the results are what you would
 like them to be. So, try this:</p>
-<div class="sourceCode" id="cb346"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb346-1"><a href="chap-HPCC.html#cb346-1" aria-hidden="true" tabindex="-1"></a><span class="va">SLURM_ARRAY_TASK_ID=</span>1</span>
-<span id="cb346-2"><a href="chap-HPCC.html#cb346-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> ./map-N-files-from-K.sh 128 <span class="va">$((SLURM_ARRAY_TASK_ID</span> <span class="op">*</span> <span class="dv">128</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span></code></pre></div>
+<div class="sourceCode" id="cb347"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb347-1"><a href="chap-HPCC.html#cb347-1" aria-hidden="true" tabindex="-1"></a><span class="va">SLURM_ARRAY_TASK_ID=</span>1</span>
+<span id="cb347-2"><a href="chap-HPCC.html#cb347-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> ./map-N-files-from-K.sh 128 <span class="va">$((SLURM_ARRAY_TASK_ID</span> <span class="op">*</span> <span class="dv">128</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span></code></pre></div>
 <p>And to check them all, including when SLURM_ARRAY_TASK_ID=0 (which is the case that
 you already did for your homework, running it as a single job), try this:</p>
-<div class="sourceCode" id="cb347"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb347-1"><a href="chap-HPCC.html#cb347-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> SLURM_ARRAY_TASK_ID <span class="kw">in</span> {0..9}<span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb347-2"><a href="chap-HPCC.html#cb347-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> ./map-N-files-from-K.sh 128 <span class="va">$((SLURM_ARRAY_TASK_ID</span> <span class="op">*</span> <span class="dv">128</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
-<span id="cb347-3"><a href="chap-HPCC.html#cb347-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb348"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb348-1"><a href="chap-HPCC.html#cb348-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> SLURM_ARRAY_TASK_ID <span class="kw">in</span> {0..9}<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb348-2"><a href="chap-HPCC.html#cb348-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> ./map-N-files-from-K.sh 128 <span class="va">$((SLURM_ARRAY_TASK_ID</span> <span class="op">*</span> <span class="dv">128</span> <span class="op">+</span> <span class="dv">1</span><span class="va">))</span></span>
+<span id="cb348-3"><a href="chap-HPCC.html#cb348-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
 <p>Once you have convinced yourself that your <code>run-array-job.sh</code> script will
 work correctly, and it is set for an array=1-9, and you have configured
 your email properly within it, then you should copy it to your
@@ -1786,10 +1812,8 @@ the reads from all the remaining individuals, so we will have them for
 variant calling down the road.</p>
 <p><strong>THAT LAST STEP ABOVE IS PART OF YOUR HOMEWORK FOR NEXT WEEK THAT WILL BE DUE NEXT TUESDAY </strong></p>
 </div>
-</div>
-</div>
-<div id="prepation-interlude-an-in-class-exercise-to-make-sure-everything-is-configured-correctly" class="section level2" number="8.5">
-<h2><span class="header-section-number">8.5</span> PREPATION INTERLUDE: An in-class exercise to make sure everything is configured correctly</h2>
+<div id="prepation-interlude-an-in-class-exercise-to-make-sure-everything-is-configured-correctly" class="section level2" number="8.6">
+<h2><span class="header-section-number">8.6</span> PREPATION INTERLUDE: An in-class exercise to make sure everything is configured correctly</h2>
 <p>Here, we run through a number of steps to start aligning sequence data to a reference
 genome. The main purpose of this exercise is to ensure that everyone has their systems
 configured correctly. Namely, we want to make sure that:</p>
@@ -1817,89 +1841,89 @@ the next homework assignment which involves aligning short reads to a reference
 genome and will be assigned after spring break.</p>
 <ol style="list-style-type: decimal">
 <li><p>If you are not already in a tmux session, start a new <code>tmux</code> session called <code>inclass</code> on the login node.</p>
-<div class="sourceCode" id="cb348"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb348-1"><a href="chap-HPCC.html#cb348-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> new <span class="at">-s</span> inclass</span></code></pre></div></li>
+<div class="sourceCode" id="cb349"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb349-1"><a href="chap-HPCC.html#cb349-1" aria-hidden="true" tabindex="-1"></a><span class="ex">tmux</span> new <span class="at">-s</span> inclass</span></code></pre></div></li>
 <li><p>Get a bash shell on a compute node</p>
-<div class="sourceCode" id="cb349"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb349-1"><a href="chap-HPCC.html#cb349-1" aria-hidden="true" tabindex="-1"></a><span class="co"># on summit:</span></span>
-<span id="cb349-2"><a href="chap-HPCC.html#cb349-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sinteractive</span></span>
-<span id="cb349-3"><a href="chap-HPCC.html#cb349-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb349-4"><a href="chap-HPCC.html#cb349-4" aria-hidden="true" tabindex="-1"></a><span class="co"># on hummingbird</span></span>
-<span id="cb349-5"><a href="chap-HPCC.html#cb349-5" aria-hidden="true" tabindex="-1"></a><span class="ex">salloc</span> <span class="at">--partition</span><span class="op">=</span>Instruction <span class="at">--nodes</span><span class="op">=</span>1 <span class="at">--time</span><span class="op">=</span>02:00:00 <span class="at">--mem</span><span class="op">=</span>4G <span class="at">--cpus-per-task</span><span class="op">=</span>1</span>
-<span id="cb349-6"><a href="chap-HPCC.html#cb349-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="va">$SLURM_NODELIST</span></span>
-<span id="cb349-7"><a href="chap-HPCC.html#cb349-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb349-8"><a href="chap-HPCC.html#cb349-8" aria-hidden="true" tabindex="-1"></a><span class="co"># otherwise, you can try this (will work on Sedna)</span></span>
-<span id="cb349-9"><a href="chap-HPCC.html#cb349-9" aria-hidden="true" tabindex="-1"></a><span class="ex">srun</span> <span class="at">--pty</span> /bin/bash</span></code></pre></div></li>
+<div class="sourceCode" id="cb350"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb350-1"><a href="chap-HPCC.html#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="co"># on summit:</span></span>
+<span id="cb350-2"><a href="chap-HPCC.html#cb350-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sinteractive</span></span>
+<span id="cb350-3"><a href="chap-HPCC.html#cb350-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb350-4"><a href="chap-HPCC.html#cb350-4" aria-hidden="true" tabindex="-1"></a><span class="co"># on hummingbird</span></span>
+<span id="cb350-5"><a href="chap-HPCC.html#cb350-5" aria-hidden="true" tabindex="-1"></a><span class="ex">salloc</span> <span class="at">--partition</span><span class="op">=</span>Instruction <span class="at">--nodes</span><span class="op">=</span>1 <span class="at">--time</span><span class="op">=</span>02:00:00 <span class="at">--mem</span><span class="op">=</span>4G <span class="at">--cpus-per-task</span><span class="op">=</span>1</span>
+<span id="cb350-6"><a href="chap-HPCC.html#cb350-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh</span> <span class="va">$SLURM_NODELIST</span></span>
+<span id="cb350-7"><a href="chap-HPCC.html#cb350-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb350-8"><a href="chap-HPCC.html#cb350-8" aria-hidden="true" tabindex="-1"></a><span class="co"># otherwise, you can try this (will work on Sedna)</span></span>
+<span id="cb350-9"><a href="chap-HPCC.html#cb350-9" aria-hidden="true" tabindex="-1"></a><span class="ex">srun</span> <span class="at">--pty</span> /bin/bash</span></code></pre></div></li>
 <li><p>Check what host you are on with <code>hostname</code></p>
-<div class="sourceCode" id="cb350"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb350-1"><a href="chap-HPCC.html#cb350-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hostname</span></span>
-<span id="cb350-2"><a href="chap-HPCC.html#cb350-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb350-3"><a href="chap-HPCC.html#cb350-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The hostname should be something like shasXXX. </span></span>
-<span id="cb350-4"><a href="chap-HPCC.html#cb350-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  Do not proceed if you are on a login node still (ie. hostname is loginXX)</span></span></code></pre></div>
+<div class="sourceCode" id="cb351"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb351-1"><a href="chap-HPCC.html#cb351-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hostname</span></span>
+<span id="cb351-2"><a href="chap-HPCC.html#cb351-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb351-3"><a href="chap-HPCC.html#cb351-3" aria-hidden="true" tabindex="-1"></a><span class="co"># The hostname should be something like shasXXX. </span></span>
+<span id="cb351-4"><a href="chap-HPCC.html#cb351-4" aria-hidden="true" tabindex="-1"></a><span class="co">#  Do not proceed if you are on a login node still (ie. hostname is loginXX)</span></span></code></pre></div>
 <p>If you are still on a login node, try running <code>sinteractive</code> again.</p></li>
 <li><p>Use your alias <code>myjobs</code> (if you have created it) to see what jobs you have running.</p>
-<div class="sourceCode" id="cb351"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb351-1"><a href="chap-HPCC.html#cb351-1" aria-hidden="true" tabindex="-1"></a><span class="ex">myjobs</span></span>
-<span id="cb351-2"><a href="chap-HPCC.html#cb351-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb351-3"><a href="chap-HPCC.html#cb351-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or, if you don&#39;t have that aliased:</span></span>
-<span id="cb351-4"><a href="chap-HPCC.html#cb351-4" aria-hidden="true" tabindex="-1"></a><span class="ex">squeue</span> <span class="at">-u</span> your_username</span>
-<span id="cb351-5"><a href="chap-HPCC.html#cb351-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb351-6"><a href="chap-HPCC.html#cb351-6" aria-hidden="true" tabindex="-1"></a><span class="co"># You should see that you have one job running.  That &quot;job&quot; is a bash shell</span></span>
-<span id="cb351-7"><a href="chap-HPCC.html#cb351-7" aria-hidden="true" tabindex="-1"></a><span class="co"># that you are interactively working with.</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb352"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb352-1"><a href="chap-HPCC.html#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="ex">myjobs</span></span>
+<span id="cb352-2"><a href="chap-HPCC.html#cb352-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb352-3"><a href="chap-HPCC.html#cb352-3" aria-hidden="true" tabindex="-1"></a><span class="co"># or, if you don&#39;t have that aliased:</span></span>
+<span id="cb352-4"><a href="chap-HPCC.html#cb352-4" aria-hidden="true" tabindex="-1"></a><span class="ex">squeue</span> <span class="at">-u</span> your_username</span>
+<span id="cb352-5"><a href="chap-HPCC.html#cb352-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb352-6"><a href="chap-HPCC.html#cb352-6" aria-hidden="true" tabindex="-1"></a><span class="co"># You should see that you have one job running.  That &quot;job&quot; is a bash shell</span></span>
+<span id="cb352-7"><a href="chap-HPCC.html#cb352-7" aria-hidden="true" tabindex="-1"></a><span class="co"># that you are interactively working with.</span></span></code></pre></div></li>
 <li><p>Navigate to your scratch directory using <code>cd</code>. On SUMMIT that will look like this:</p>
-<div class="sourceCode" id="cb352"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb352-1"><a href="chap-HPCC.html#cb352-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /scratch/summit/wcfunk\@colostate.edu/</span></code></pre></div>
+<div class="sourceCode" id="cb353"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb353-1"><a href="chap-HPCC.html#cb353-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /scratch/summit/wcfunk\@colostate.edu/</span></code></pre></div>
 <p>You can make a symbolic link to that in your home directory like this:</p>
-<div class="sourceCode" id="cb353"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb353-1"><a href="chap-HPCC.html#cb353-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span>  <span class="co"># returns you to hour home directory</span></span>
-<span id="cb353-2"><a href="chap-HPCC.html#cb353-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb353-3"><a href="chap-HPCC.html#cb353-3" aria-hidden="true" tabindex="-1"></a><span class="co"># this line makes a symbolic link called scratch in your home directory</span></span>
-<span id="cb353-4"><a href="chap-HPCC.html#cb353-4" aria-hidden="true" tabindex="-1"></a><span class="co"># that points to your scratch space at /scratch/summit/wcfunk\@colostate.edu/</span></span>
-<span id="cb353-5"><a href="chap-HPCC.html#cb353-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ln</span> <span class="at">-s</span> /scratch/summit/wcfunk\@colostate.edu/ scratch</span></code></pre></div>
+<div class="sourceCode" id="cb354"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb354-1"><a href="chap-HPCC.html#cb354-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span>  <span class="co"># returns you to hour home directory</span></span>
+<span id="cb354-2"><a href="chap-HPCC.html#cb354-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb354-3"><a href="chap-HPCC.html#cb354-3" aria-hidden="true" tabindex="-1"></a><span class="co"># this line makes a symbolic link called scratch in your home directory</span></span>
+<span id="cb354-4"><a href="chap-HPCC.html#cb354-4" aria-hidden="true" tabindex="-1"></a><span class="co"># that points to your scratch space at /scratch/summit/wcfunk\@colostate.edu/</span></span>
+<span id="cb354-5"><a href="chap-HPCC.html#cb354-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ln</span> <span class="at">-s</span> /scratch/summit/wcfunk\@colostate.edu/ scratch</span></code></pre></div>
 <p>Just be sure to use your own user name instead of wcfunk. Once that symbolic link is set up, you can
 <code>cd</code> into it, just like it was your scratch directory:</p>
-<div class="sourceCode" id="cb354"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb354-1"><a href="chap-HPCC.html#cb354-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> scratch</span></code></pre></div>
+<div class="sourceCode" id="cb355"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb355-1"><a href="chap-HPCC.html#cb355-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> scratch</span></code></pre></div>
 <p>But if you don’t want to set up a symbolic link just use the full path:</p>
-<div class="sourceCode" id="cb355"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb355-1"><a href="chap-HPCC.html#cb355-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /scratch/summit/wcfunk\@colostate.edu/</span></code></pre></div>
+<div class="sourceCode" id="cb356"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb356-1"><a href="chap-HPCC.html#cb356-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /scratch/summit/wcfunk\@colostate.edu/</span></code></pre></div>
 <p>On hummingbird you go to</p>
-<div class="sourceCode" id="cb356"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb356-1"><a href="chap-HPCC.html#cb356-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /hb/scratch/username/</span></code></pre></div>
+<div class="sourceCode" id="cb357"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb357-1"><a href="chap-HPCC.html#cb357-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /hb/scratch/username/</span></code></pre></div>
 <p>where username is your ucsc username. Note that if you want to make a symbolic link to that, then
 <em>while in your home directory</em> do this:</p>
-<div class="sourceCode" id="cb357"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb357-1"><a href="chap-HPCC.html#cb357-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ln</span> <span class="at">-s</span> /hb/scratch/username scratch</span></code></pre></div></li>
+<div class="sourceCode" id="cb358"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb358-1"><a href="chap-HPCC.html#cb358-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ln</span> <span class="at">-s</span> /hb/scratch/username scratch</span></code></pre></div></li>
 <li><p>Within your account’s scratch space, make a directory called <code>chinook-play</code> and <code>cd</code> into it:</p>
-<div class="sourceCode" id="cb358"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb358-1"><a href="chap-HPCC.html#cb358-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> chinook-play</span>
-<span id="cb358-2"><a href="chap-HPCC.html#cb358-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> chinook-play/</span></code></pre></div></li>
+<div class="sourceCode" id="cb359"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb359-1"><a href="chap-HPCC.html#cb359-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> chinook-play</span>
+<span id="cb359-2"><a href="chap-HPCC.html#cb359-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> chinook-play/</span></code></pre></div></li>
 <li><p>Make sure you have followed the link in your email to the shared google drive folder I sent you last night. If the email
 went to an email address that is not associated with your rclone configuration for google drive, then request access
 (at google drive) for that email. (Or setup a new rclone config for your other gmail address…)</p></li>
 <li><p>Now, use rclone to list the files in the folder I shared with you:</p>
-<div class="sourceCode" id="cb359"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb359-1"><a href="chap-HPCC.html#cb359-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rclone</span> lsd <span class="at">--drive-shared-with-me</span> gdrive-pers:CSU-con-gen-2020</span></code></pre></div>
+<div class="sourceCode" id="cb360"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb360-1"><a href="chap-HPCC.html#cb360-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rclone</span> lsd <span class="at">--drive-shared-with-me</span> gdrive-pers:CSU-con-gen-2020</span></code></pre></div>
 <p>Note that <code>gdrive-pers</code> above is the name of my rclone configuration associated with the gmail account where
 I got an email (from myself at my CSU account) about the shared folder. You will have to change <code>gdrive-pers</code>
 to be appropriate to your config, depending on how you set it up. Note also how you access folders shared with
 you using <code>--drive-shared-with-me</code>.</p></li>
 <li><p>After you get the above command to work, you should see something like the following, though it
 will change as more things get added to this directory…</p>
-<div class="sourceCode" id="cb360"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb360-1"><a href="chap-HPCC.html#cb360-1" aria-hidden="true" tabindex="-1"></a><span class="ex">-1</span> 2020-03-09 17:51:06        <span class="at">-1</span> chr32-160-chinook</span>
-<span id="cb360-2"><a href="chap-HPCC.html#cb360-2" aria-hidden="true" tabindex="-1"></a><span class="ex">-1</span> 2020-03-05 07:33:21        <span class="at">-1</span> pre-indexed-chinook-genome</span></code></pre></div></li>
+<div class="sourceCode" id="cb361"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb361-1"><a href="chap-HPCC.html#cb361-1" aria-hidden="true" tabindex="-1"></a><span class="ex">-1</span> 2020-03-09 17:51:06        <span class="at">-1</span> chr32-160-chinook</span>
+<span id="cb361-2"><a href="chap-HPCC.html#cb361-2" aria-hidden="true" tabindex="-1"></a><span class="ex">-1</span> 2020-03-05 07:33:21        <span class="at">-1</span> pre-indexed-chinook-genome</span></code></pre></div></li>
 <li><p>Use rclone to download <code>big-fastq-play.zip</code> (about 170 MB). Once again you have to change
 the name of the rclone remoate (<code>gdrive-pers</code> in this case), to the name of your Google drive
 rclone remote.</p>
-<div class="sourceCode" id="cb361"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb361-1"><a href="chap-HPCC.html#cb361-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rclone</span> copy <span class="at">-P</span>  <span class="at">--drive-shared-with-me</span> gdrive-pers:CSU-con-gen-2020/big-fastq-play.zip ./</span></code></pre></div></li>
+<div class="sourceCode" id="cb362"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb362-1"><a href="chap-HPCC.html#cb362-1" aria-hidden="true" tabindex="-1"></a><span class="ex">rclone</span> copy <span class="at">-P</span>  <span class="at">--drive-shared-with-me</span> gdrive-pers:CSU-con-gen-2020/big-fastq-play.zip ./</span></code></pre></div></li>
 <li><p>Unzip the file you just downloaded. Note: on Hummingbird, <code>unzip</code> is not installed by default.
 So I recommend doing <code>conda install unzip</code> to add it to your base Miniconda environment.</p>
-<div class="sourceCode" id="cb362"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb362-1"><a href="chap-HPCC.html#cb362-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> big-fastq-play.zip</span></code></pre></div>
+<div class="sourceCode" id="cb363"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb363-1"><a href="chap-HPCC.html#cb363-1" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span> big-fastq-play.zip</span></code></pre></div>
 <p>This creates a directory called <code>big-fastq-play</code> within your <code>chinook-play</code> directory.</p></li>
 <li><p>Create a directory called <code>fastq</code> and move the two paired-end FASTQ files from <code>big-fastq-play</code> into it:</p>
-<div class="sourceCode" id="cb363"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb363-1"><a href="chap-HPCC.html#cb363-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> fastq </span>
-<span id="cb363-2"><a href="chap-HPCC.html#cb363-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> big-fastq-play/data/Battle_Creek_01_chinook_R<span class="pp">*</span> fastq/</span>
-<span id="cb363-3"><a href="chap-HPCC.html#cb363-3" aria-hidden="true" tabindex="-1"></a><span class="co"># then make sure that they got moved</span></span>
-<span id="cb363-4"><a href="chap-HPCC.html#cb363-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> fastq</span>
-<span id="cb363-5"><a href="chap-HPCC.html#cb363-5" aria-hidden="true" tabindex="-1"></a><span class="co"># if the files were moved, then feel free to remove the big fastq stuff</span></span>
-<span id="cb363-6"><a href="chap-HPCC.html#cb363-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-r</span> big-fastq-play<span class="pp">*</span></span></code></pre></div></li>
+<div class="sourceCode" id="cb364"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb364-1"><a href="chap-HPCC.html#cb364-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> fastq </span>
+<span id="cb364-2"><a href="chap-HPCC.html#cb364-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> big-fastq-play/data/Battle_Creek_01_chinook_R<span class="pp">*</span> fastq/</span>
+<span id="cb364-3"><a href="chap-HPCC.html#cb364-3" aria-hidden="true" tabindex="-1"></a><span class="co"># then make sure that they got moved</span></span>
+<span id="cb364-4"><a href="chap-HPCC.html#cb364-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> fastq</span>
+<span id="cb364-5"><a href="chap-HPCC.html#cb364-5" aria-hidden="true" tabindex="-1"></a><span class="co"># if the files were moved, then feel free to remove the big fastq stuff</span></span>
+<span id="cb364-6"><a href="chap-HPCC.html#cb364-6" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span> <span class="at">-r</span> big-fastq-play<span class="pp">*</span></span></code></pre></div></li>
 <li><p>Download the Chinook salmon genome into a directory called <code>genome</code></p>
-<div class="sourceCode" id="cb364"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb364-1"><a href="chap-HPCC.html#cb364-1" aria-hidden="true" tabindex="-1"></a> <span class="fu">mkdir</span> genome</span>
-<span id="cb364-2"><a href="chap-HPCC.html#cb364-2" aria-hidden="true" tabindex="-1"></a> <span class="bu">cd</span> genome</span>
-<span id="cb364-3"><a href="chap-HPCC.html#cb364-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">wget</span> ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/vertebrate_other/Oncorhynchus_tshawytscha/all_assembly_versions/GCA_002872995.1_Otsh_v1.0/GCA_002872995.1_Otsh_v1.0_genomic.fna.gz</span></code></pre></div>
+<div class="sourceCode" id="cb365"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb365-1"><a href="chap-HPCC.html#cb365-1" aria-hidden="true" tabindex="-1"></a> <span class="fu">mkdir</span> genome</span>
+<span id="cb365-2"><a href="chap-HPCC.html#cb365-2" aria-hidden="true" tabindex="-1"></a> <span class="bu">cd</span> genome</span>
+<span id="cb365-3"><a href="chap-HPCC.html#cb365-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">wget</span> ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/vertebrate_other/Oncorhynchus_tshawytscha/all_assembly_versions/GCA_002872995.1_Otsh_v1.0/GCA_002872995.1_Otsh_v1.0_genomic.fna.gz</span></code></pre></div>
 <p>That dude is 760 Mb, but it goes really quickly (at least on SUMMIT. Hummingbird seems to be a different story…)</p></li>
 <li><p>Activate your <code>bioinf</code> conda environment to be able to use <code>bwa</code>:</p>
-<div class="sourceCode" id="cb365"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb365-1"><a href="chap-HPCC.html#cb365-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bioinf</span></code></pre></div></li>
+<div class="sourceCode" id="cb366"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb366-1"><a href="chap-HPCC.html#cb366-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bioinf</span></code></pre></div></li>
 <li><p>Index the genome with <code>bwa</code> in order to align reads to it:</p>
-<div class="sourceCode" id="cb366"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb366-1"><a href="chap-HPCC.html#cb366-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> index GCA_002872995.1_Otsh_v1.0_genomic.fna.gz </span></code></pre></div>
+<div class="sourceCode" id="cb367"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb367-1"><a href="chap-HPCC.html#cb367-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> index GCA_002872995.1_Otsh_v1.0_genomic.fna.gz </span></code></pre></div>
 <p>This will take about 10 to 15 minutes. During that time, do this:</p>
 <ul>
 <li>If you are doing this within a <code>tmux</code> session, create a new tmux window (<code>cntrl-b c</code>). Note that this shell opens on the login node (the one that you started your tmux session on.)</li>
@@ -1918,38 +1942,38 @@ instead, here is what we will do:</p>
 result in the <code>chinook-play</code> directory inside a directory called <code>chinook-genome-idx</code>. NOTE: Again,
 you will likely have to use your name for your rclone remote, rather than <code>gdrive-pers</code>.</li>
 </ol>
-<div class="sourceCode" id="cb367"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb367-1"><a href="chap-HPCC.html#cb367-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../ <span class="co"># move up to the chinook-play directory</span></span>
-<span id="cb367-2"><a href="chap-HPCC.html#cb367-2" aria-hidden="true" tabindex="-1"></a><span class="ex">rclone</span> copy  <span class="at">-P</span>  <span class="at">--drive-shared-with-me</span> gdrive-pers:CSU-con-gen-2020/pre-indexed-chinook-genome chinook-genome-idx </span></code></pre></div>
+<div class="sourceCode" id="cb368"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb368-1"><a href="chap-HPCC.html#cb368-1" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> ../ <span class="co"># move up to the chinook-play directory</span></span>
+<span id="cb368-2"><a href="chap-HPCC.html#cb368-2" aria-hidden="true" tabindex="-1"></a><span class="ex">rclone</span> copy  <span class="at">-P</span>  <span class="at">--drive-shared-with-me</span> gdrive-pers:CSU-con-gen-2020/pre-indexed-chinook-genome chinook-genome-idx </span></code></pre></div>
 <p>That thing is 4.6 Gb, but can take less than a minute to transfer. (Let’s see if things slow down with everyone
 running this command at the same time.)</p></li>
 <li><p>Now when you do <code>ls</code> you should see something like this:</p>
-<div class="sourceCode" id="cb368"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb368-1"><a href="chap-HPCC.html#cb368-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">bioinf</span><span class="kw">)</span> <span class="ex">[chinook-play]--%</span> ls</span>
-<span id="cb368-2"><a href="chap-HPCC.html#cb368-2" aria-hidden="true" tabindex="-1"></a><span class="ex">chinook-genome-idx</span>  fastq  genome</span></code></pre></div></li>
+<div class="sourceCode" id="cb369"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb369-1"><a href="chap-HPCC.html#cb369-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span><span class="ex">bioinf</span><span class="kw">)</span> <span class="ex">[chinook-play]--%</span> ls</span>
+<span id="cb369-2"><a href="chap-HPCC.html#cb369-2" aria-hidden="true" tabindex="-1"></a><span class="ex">chinook-genome-idx</span>  fastq  genome</span></code></pre></div></li>
 <li><p>For a final hurrah, we will start aligning those fastqs to the chinook genome. We will put the result in a directory
 we create called <code>sam</code>. To make it clearer what we are doing we
 will define some shell variables.:</p>
-<div class="sourceCode" id="cb369"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb369-1"><a href="chap-HPCC.html#cb369-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> sam</span>
-<span id="cb369-2"><a href="chap-HPCC.html#cb369-2" aria-hidden="true" tabindex="-1"></a><span class="va">GENOME=</span>chinook-genome-idx/GCA_002872995.1_Otsh_v1.0_genomic.fna.gz</span>
-<span id="cb369-3"><a href="chap-HPCC.html#cb369-3" aria-hidden="true" tabindex="-1"></a><span class="va">FQB=</span>fastq/Battle_Creek_01_chinook_R</span>
-<span id="cb369-4"><a href="chap-HPCC.html#cb369-4" aria-hidden="true" tabindex="-1"></a><span class="va">SAMOUT=$(</span><span class="fu">basename</span> <span class="va">$FQB)</span>.sam</span>
-<span id="cb369-5"><a href="chap-HPCC.html#cb369-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb369-6"><a href="chap-HPCC.html#cb369-6" aria-hidden="true" tabindex="-1"></a><span class="co"># for fun, try echoing each of those variables and make sure they look right.</span></span>
-<span id="cb369-7"><a href="chap-HPCC.html#cb369-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for example:</span></span>
-<span id="cb369-8"><a href="chap-HPCC.html#cb369-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$FQB</span></span>
-<span id="cb369-9"><a href="chap-HPCC.html#cb369-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb369-10"><a href="chap-HPCC.html#cb369-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span>
-<span id="cb369-11"><a href="chap-HPCC.html#cb369-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb369-12"><a href="chap-HPCC.html#cb369-12" aria-hidden="true" tabindex="-1"></a><span class="co"># then, launch bwa mem to map those reads to the genome.</span></span>
-<span id="cb369-13"><a href="chap-HPCC.html#cb369-13" aria-hidden="true" tabindex="-1"></a><span class="co"># the syntax is:</span></span>
-<span id="cb369-14"><a href="chap-HPCC.html#cb369-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage: bwa mem [options] &lt;idxbase&gt; &lt;in1.fq&gt; [in2.fq]</span></span>
-<span id="cb369-15"><a href="chap-HPCC.html#cb369-15" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="va">$GENOME</span> <span class="va">${FQB}</span>1.fq.gz <span class="va">${FQB}</span>2.fq.gz <span class="op">&gt;</span> sam/<span class="va">$SAMOUT</span> <span class="dv">2</span><span class="op">&gt;</span>sam/<span class="va">$SAMOUT</span>.error</span></code></pre></div></li>
+<div class="sourceCode" id="cb370"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb370-1"><a href="chap-HPCC.html#cb370-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> sam</span>
+<span id="cb370-2"><a href="chap-HPCC.html#cb370-2" aria-hidden="true" tabindex="-1"></a><span class="va">GENOME=</span>chinook-genome-idx/GCA_002872995.1_Otsh_v1.0_genomic.fna.gz</span>
+<span id="cb370-3"><a href="chap-HPCC.html#cb370-3" aria-hidden="true" tabindex="-1"></a><span class="va">FQB=</span>fastq/Battle_Creek_01_chinook_R</span>
+<span id="cb370-4"><a href="chap-HPCC.html#cb370-4" aria-hidden="true" tabindex="-1"></a><span class="va">SAMOUT=$(</span><span class="fu">basename</span> <span class="va">$FQB)</span>.sam</span>
+<span id="cb370-5"><a href="chap-HPCC.html#cb370-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb370-6"><a href="chap-HPCC.html#cb370-6" aria-hidden="true" tabindex="-1"></a><span class="co"># for fun, try echoing each of those variables and make sure they look right.</span></span>
+<span id="cb370-7"><a href="chap-HPCC.html#cb370-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for example:</span></span>
+<span id="cb370-8"><a href="chap-HPCC.html#cb370-8" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$FQB</span></span>
+<span id="cb370-9"><a href="chap-HPCC.html#cb370-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb370-10"><a href="chap-HPCC.html#cb370-10" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span>
+<span id="cb370-11"><a href="chap-HPCC.html#cb370-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb370-12"><a href="chap-HPCC.html#cb370-12" aria-hidden="true" tabindex="-1"></a><span class="co"># then, launch bwa mem to map those reads to the genome.</span></span>
+<span id="cb370-13"><a href="chap-HPCC.html#cb370-13" aria-hidden="true" tabindex="-1"></a><span class="co"># the syntax is:</span></span>
+<span id="cb370-14"><a href="chap-HPCC.html#cb370-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Usage: bwa mem [options] &lt;idxbase&gt; &lt;in1.fq&gt; [in2.fq]</span></span>
+<span id="cb370-15"><a href="chap-HPCC.html#cb370-15" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="va">$GENOME</span> <span class="va">${FQB}</span>1.fq.gz <span class="va">${FQB}</span>2.fq.gz <span class="op">&gt;</span> sam/<span class="va">$SAMOUT</span> <span class="dv">2</span><span class="op">&gt;</span>sam/<span class="va">$SAMOUT</span>.error</span></code></pre></div></li>
 <li><p>Once that has started, it is hard to know anything is happening, because we have
 redirected both stdout and stderr to files. So, do what you did before, use tmux to
 go to another shell and then use <code>tail</code> or <code>less</code> to look at the output files, which
 are in <code>sam/Battle_Creek_01_chinook_R.sam</code> and <code>sam/Battle_Creek_01_chinook_R.sam.error</code>
 within the <code>chinook-play</code> directory in <code>scratch</code>. You might even count how many
 lines of alignments file have been formed:</p>
-<div class="sourceCode" id="cb370"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb370-1"><a href="chap-HPCC.html#cb370-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;!/^@/&#39;</span> Battle_Creek_01_chinook_R.sam <span class="kw">|</span> <span class="fu">wc</span> </span></code></pre></div></li>
+<div class="sourceCode" id="cb371"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb371-1"><a href="chap-HPCC.html#cb371-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;!/^@/&#39;</span> Battle_Creek_01_chinook_R.sam <span class="kw">|</span> <span class="fu">wc</span> </span></code></pre></div></li>
 <li><p>Note that, in practice, we would not usually save the <code>.sam</code> file to disk. Rather, we would
 convert it into a compressed <code>.bam</code> file right as it comes off of <code>bwa mem</code>, and maybe even sort it
 as it is coming off…</p></li>
@@ -1961,10 +1985,10 @@ I just wanted to first give everyone a chance to step through these tasks in an 
 on a compute node because that is crucial when developing your scripts, and we wanted to
 make sure that everyone has rclone, and miniconda installed and working.</p>
 </div>
-<div id="more-boneyard" class="section level2" number="8.6">
-<h2><span class="header-section-number">8.6</span> More Boneyard…</h2>
+<div id="more-boneyard" class="section level2" number="8.7">
+<h2><span class="header-section-number">8.7</span> More Boneyard…</h2>
 <p>Here is some nice stuff for summarizing all the information from the different runs from the chinook-wgs project:</p>
-<div class="sourceCode" id="cb371"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb371-1"><a href="chap-HPCC.html#cb371-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qacct</span> <span class="at">-o</span> eriq <span class="at">-b</span> 09271925 <span class="at">-j</span> ml <span class="kw">|</span> <span class="ex">tidy-qacct</span></span></code></pre></div>
+<div class="sourceCode" id="cb372"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb372-1"><a href="chap-HPCC.html#cb372-1" aria-hidden="true" tabindex="-1"></a><span class="ex">qacct</span> <span class="at">-o</span> eriq <span class="at">-b</span> 09271925 <span class="at">-j</span> ml <span class="kw">|</span> <span class="ex">tidy-qacct</span></span></code></pre></div>
 <p>Explain scratch space and how clusters are configured with respect to storage, etc.</p>
 <p>Strategies—break names up with consistent characters:</p>
 <ul>
@@ -1975,14 +1999,14 @@ make sure that everyone has rclone, and miniconda installed and working.</p>
 <p>etc. Basically, it just makes it much easier to split things up
 when the time comes.</p>
 </div>
-<div id="the-queue-slurmsgeuge" class="section level2" number="8.7">
-<h2><span class="header-section-number">8.7</span> The Queue (SLURM/SGE/UGE)</h2>
+<div id="the-queue-slurmsgeuge" class="section level2" number="8.8">
+<h2><span class="header-section-number">8.8</span> The Queue (SLURM/SGE/UGE)</h2>
 </div>
-<div id="modules-package" class="section level2" number="8.8">
-<h2><span class="header-section-number">8.8</span> Modules package</h2>
+<div id="modules-package" class="section level2" number="8.9">
+<h2><span class="header-section-number">8.9</span> Modules package</h2>
 </div>
-<div id="compiling-programs-without-admin-privileges" class="section level2" number="8.9">
-<h2><span class="header-section-number">8.9</span> Compiling programs without admin privileges</h2>
+<div id="compiling-programs-without-admin-privileges" class="section level2" number="8.10">
+<h2><span class="header-section-number">8.10</span> Compiling programs without admin privileges</h2>
 <p>Inevitably you will want to use a piece of software that is not available as
 a module or is not otherwise installed on they system.</p>
 <p>Typically these software programs have a frightful web of dependencies.</p>
@@ -1996,35 +2020,35 @@ that, you need to let your system know where to look for these packages when it 
 as a dependency.</p>
 <p>Hoffman2 runs CentOS. Turns out that CentOS uses <code>yum</code> as a package manager.</p>
 <p>Let’s see if we can install llvm using yum.</p>
-<div class="sourceCode" id="cb372"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb372-1"><a href="chap-HPCC.html#cb372-1" aria-hidden="true" tabindex="-1"></a><span class="ex">yum</span> search all llvm <span class="co"># &lt;- this got me to devtoolset-7-all.x86_64 : Package shipping all available toolsets.</span></span>
-<span id="cb372-2"><a href="chap-HPCC.html#cb372-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb372-3"><a href="chap-HPCC.html#cb372-3" aria-hidden="true" tabindex="-1"></a><span class="co"># a little web searching made it look like llvm-toolset-7-5.0.1-4.el7.x86_64.rpm or devtoolset-7-llvm-7.0-5.el7.x86_64.rpm</span></span>
-<span id="cb372-4"><a href="chap-HPCC.html#cb372-4" aria-hidden="true" tabindex="-1"></a><span class="co"># might be what we want.  The first is a dependency of the second...</span></span>
-<span id="cb372-5"><a href="chap-HPCC.html#cb372-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ~/centos</span></code></pre></div>
+<div class="sourceCode" id="cb373"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb373-1"><a href="chap-HPCC.html#cb373-1" aria-hidden="true" tabindex="-1"></a><span class="ex">yum</span> search all llvm <span class="co"># &lt;- this got me to devtoolset-7-all.x86_64 : Package shipping all available toolsets.</span></span>
+<span id="cb373-2"><a href="chap-HPCC.html#cb373-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb373-3"><a href="chap-HPCC.html#cb373-3" aria-hidden="true" tabindex="-1"></a><span class="co"># a little web searching made it look like llvm-toolset-7-5.0.1-4.el7.x86_64.rpm or devtoolset-7-llvm-7.0-5.el7.x86_64.rpm</span></span>
+<span id="cb373-4"><a href="chap-HPCC.html#cb373-4" aria-hidden="true" tabindex="-1"></a><span class="co"># might be what we want.  The first is a dependency of the second...</span></span>
+<span id="cb373-5"><a href="chap-HPCC.html#cb373-5" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> ~/centos</span></code></pre></div>
 <p>Was using instructions at <a href="https://stackoverflow.com/questions/36651091/how-to-install-packages-in-linux-centos-without-root-user-with-automatic-depen">https://stackoverflow.com/questions/36651091/how-to-install-packages-in-linux-centos-without-root-user-with-automatic-depen</a></p>
 <p>Couldn’t get yum downloader to download any packages. The whole thing looked like it was going to
 be a mess, so I thought I would try with miniconda.</p>
 <p>I installed miniconda (python 2.7 version) into <code>/u/nobackup/kruegg/eriq/programs/miniconda/</code> and then did this:</p>
-<div class="sourceCode" id="cb373"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb373-1"><a href="chap-HPCC.html#cb373-1" aria-hidden="true" tabindex="-1"></a><span class="co"># probably could have listed them all at once, but wanted to watch them go </span></span>
-<span id="cb373-2"><a href="chap-HPCC.html#cb373-2" aria-hidden="true" tabindex="-1"></a><span class="co"># one at a time...</span></span>
-<span id="cb373-3"><a href="chap-HPCC.html#cb373-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install numpy</span>
-<span id="cb373-4"><a href="chap-HPCC.html#cb373-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install scipy</span>
-<span id="cb373-5"><a href="chap-HPCC.html#cb373-5" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pandas</span>
-<span id="cb373-6"><a href="chap-HPCC.html#cb373-6" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install numba</span>
-<span id="cb373-7"><a href="chap-HPCC.html#cb373-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb373-8"><a href="chap-HPCC.html#cb373-8" aria-hidden="true" tabindex="-1"></a><span class="co"># those all ran great.</span></span>
-<span id="cb373-9"><a href="chap-HPCC.html#cb373-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb373-10"><a href="chap-HPCC.html#cb373-10" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pysnptools</span>
-<span id="cb373-11"><a href="chap-HPCC.html#cb373-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb373-12"><a href="chap-HPCC.html#cb373-12" aria-hidden="true" tabindex="-1"></a><span class="co"># that one didn&#39;t find a match, but I found on the web that I should try:</span></span>
-<span id="cb373-13"><a href="chap-HPCC.html#cb373-13" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> bioconda pysnptools </span>
-<span id="cb373-14"><a href="chap-HPCC.html#cb373-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb373-15"><a href="chap-HPCC.html#cb373-15" aria-hidden="true" tabindex="-1"></a><span class="co"># that worked!</span></span></code></pre></div>
+<div class="sourceCode" id="cb374"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb374-1"><a href="chap-HPCC.html#cb374-1" aria-hidden="true" tabindex="-1"></a><span class="co"># probably could have listed them all at once, but wanted to watch them go </span></span>
+<span id="cb374-2"><a href="chap-HPCC.html#cb374-2" aria-hidden="true" tabindex="-1"></a><span class="co"># one at a time...</span></span>
+<span id="cb374-3"><a href="chap-HPCC.html#cb374-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install numpy</span>
+<span id="cb374-4"><a href="chap-HPCC.html#cb374-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install scipy</span>
+<span id="cb374-5"><a href="chap-HPCC.html#cb374-5" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pandas</span>
+<span id="cb374-6"><a href="chap-HPCC.html#cb374-6" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install numba</span>
+<span id="cb374-7"><a href="chap-HPCC.html#cb374-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb374-8"><a href="chap-HPCC.html#cb374-8" aria-hidden="true" tabindex="-1"></a><span class="co"># those all ran great.</span></span>
+<span id="cb374-9"><a href="chap-HPCC.html#cb374-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb374-10"><a href="chap-HPCC.html#cb374-10" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install pysnptools</span>
+<span id="cb374-11"><a href="chap-HPCC.html#cb374-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb374-12"><a href="chap-HPCC.html#cb374-12" aria-hidden="true" tabindex="-1"></a><span class="co"># that one didn&#39;t find a match, but I found on the web that I should try:</span></span>
+<span id="cb374-13"><a href="chap-HPCC.html#cb374-13" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install <span class="at">-c</span> bioconda pysnptools </span>
+<span id="cb374-14"><a href="chap-HPCC.html#cb374-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb374-15"><a href="chap-HPCC.html#cb374-15" aria-hidden="true" tabindex="-1"></a><span class="co"># that worked!</span></span></code></pre></div>
 <p>Also we want to touch briefly on LD_PATH (linking failures—and note that libraries are often
 named libxxx.a) and CPATH (for failure to find xxxx.h), etc.</p>
 </div>
-<div id="job-arrays" class="section level2" number="8.10">
-<h2><span class="header-section-number">8.10</span> Job arrays</h2>
+<div id="job-arrays" class="section level2" number="8.11">
+<h2><span class="header-section-number">8.11</span> Job arrays</h2>
 <p>Quick note: Redefine IFS to break on TABs so you can have full commands in there.
 This is super useful for parsing job-array COMMLINES files.</p>
 <pre><code>IFS=$&#39;\t\n&#39;; BOP=($(echo boing | awk &#39;{printf(&quot;first\tsecond\tthird that is long\tfourth\n&quot;);}&#39;)); IFS=$&#39; \t\n&#39;;</code></pre>
@@ -2050,14 +2074,14 @@ possibly base the name on the ways things failed the first time. Like,
 structure things so that redos can just be done by invoking it with -t
 and the jobid.</p>
 </div>
-<div id="writing-stdout-and-stderr-to-files" class="section level2" number="8.11">
-<h2><span class="header-section-number">8.11</span> Writing stdout and stderr to files</h2>
+<div id="writing-stdout-and-stderr-to-files" class="section level2" number="8.12">
+<h2><span class="header-section-number">8.12</span> Writing stdout and stderr to files</h2>
 <p>This is always good to do. Note that <code>stdbuf</code> is super useful here so that
 things don’t get buffered super long. (PCAngsd doesn’t seem to write antyhing till
 the end…)</p>
 </div>
-<div id="breaking-stuff-down" class="section level2" number="8.12">
-<h2><span class="header-section-number">8.12</span> Breaking stuff down</h2>
+<div id="breaking-stuff-down" class="section level2" number="8.13">
+<h2><span class="header-section-number">8.13</span> Breaking stuff down</h2>
 <p>It is probably worth talking about how problems can be broken down into
 smaller ones. Maybe give an example, and then say that we will be talking about
 this for every step of the way in bioinformatic pipelines.</p>

@@ -1098,7 +1098,7 @@ script and then re-run just those four jobs by including:
 ```
 
 Be warned, however, that SLURM does not check your `<array_spec>` to ensure that
-each task index if given only once.  If you specify the same index should be run
+each task index is given only once.  If you specify that the same index should be run
 twice, as is the case for 4 in the following:
 ```sh
 #SBATCH --array=1-10,4
@@ -1125,7 +1125,7 @@ index to a different file to analyze, or perhaps a different region of a chromos
 do variant calling on, etc.  A flexible and generic way of doing this mapping from
 array indexes to job specifics is to first define the variables (things like filenames, etc.) 
 required by each array task in a simple TAB-delimited text file in which the first row holds
-the names of the variables in different TAB-separate columns, and each row below that holds
+the names of the variables in different TAB-separated columns, and each row below that holds
 the values that those variables should take for different values of the array index. The
 array index itself should be listed in the first column.  
 
@@ -1176,7 +1176,9 @@ proper files are processed, etc., for each different value of SLURM_ARRAY_TASK_I
 #### SLURM Job Array hands-on
 
 Here, you can run some small scripts to get your feet wet with
-defining slurm job arrays. Save the following lines to a script
+defining slurm job arrays. Create a directory in your `scratch` directory
+named `job-array-fun` and then `cd` into that directory.  In that directory,
+save the following lines to a script
 named `test-arrays.sh` and then submit it via `sbatch test-arrays.sh`.
 It should produce three output files.
 ```sh
@@ -1209,8 +1211,8 @@ put one in your `~/.bashrc`.  Add these lines:
 alias myjobs='squeue -u username'
 ```
 where you have to change _username_ to be your login name on the HPCC.  Note
-that, for Colorado State Univesity affiliates on SUMMIT, that username is of the form, 
-`user@colostate`.
+that, for Colorado State University affiliates on SUMMIT, that username is of the form, 
+`CSUeID@colostate`.
 
 If you would like to see each one of the tasks in a job array listed
 on its own line, you can use the `-r, --array` option to `squeue`.  In terms
@@ -1226,7 +1228,9 @@ equivalent):
 
 
 I want people to look closely at the variables SLURM_ARRAY_JOB_ID and
-SLURM_ARRAY_TASK_ID, and to understand how those are different from
+SLURM_ARRAY_TASK_ID, that get written to stdout by each job into the files
+`my_output_%A_%a` (where `%A` and `%a` expand to the job array ID and the
+job array task ID, respectively) and to understand how those are different from
 SLURM_JOB_ID in this context.  We will discuss that in class.
 
 Unfortunately, it seems like it can take a long time for that to start on
@@ -1262,6 +1266,28 @@ try submitting the job with:
 ```sh
 sbatch --array=100,200,300 test-arrays.sh
 ```
+
+#### More on converting Task IDs to variables from a tab delimited file
+
+```sh
+# simple script.  Give it a TAB delimited file $2 with the first column holding
+# indexes.  This will pick out the line that matches $1, and return a command
+# line assigning the column header names as shell variables whose values are the
+# follows in the file $2.
+
+if [ $# -ne 2 ]; then
+  echo "Wrong number of arguments in $0 " > /dev/stderr
+fi
+
+awk -F"\t" -v LINE=$1 '
+  $1 == "index" {for(i=1; i<=NF; i++) vars[i]=$i; next}
+  $1 == LINE {for(i=1; i<=NF; i++) printf("%s=\"%s\"; ", vars[i], $i)}
+' $2
+
+```   
+
+## Last year's stuff.  Now somewhat defunct
+
 
 Finally, we want to contemplate strategies for turning the `SLURM_ARRAY_TASK_ID`
 into "directions" for the script about what to do (which files to process, etc.)
