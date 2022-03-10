@@ -937,7 +937,7 @@ Here is what such a script looks like:
 #SBATCH --mail-user=yourname@yourmail.edu
 
 
-source ~/.bash_profile  # or ~/.bashrc if that is how you are set up
+source ~/.bashrc
 conda activate bwasam
 eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-units.tsv) 
 
@@ -967,7 +967,9 @@ samtools sort -l 9 -o $OUT - 2> $SAMSORTLOG
 As you can see, we were able to use most of our original test script.  We just
 need to define `SU` and `RG` a little differently, according to the
 value of `SLURM_ARRAY_TASK_ID`, and we added an `#SBATCH --array=1-22`
-line.  (Because there are 22 rows in our `numbered-units.tsv` file!)
+line.  (Because there are 22 rows in our `numbered-units.tsv` file!).
+Also we named the slurm output and error files according to the `%A_%a`
+nomenclature.
 
 #### Step through this interactively to make sure it looks right
 
@@ -1006,15 +1008,20 @@ is an array job.  Whatever!
 
 #### Run just the first job 
 
-You should never launch a large job array without at least launching one of them
-first, to make sure that it doesn't fail immediately.  We can use `--array=1` on the command
-launch just the first job.
+You should never launch a large job array without at least launching a few of them
+first, to make sure that it doesn't fail immediately.  We can use `--array=1-3` on the command
+launch just the first three jobs.
 
-This should run things for `s001---1`.  
+Note also that you always want to make sure that you have created any directories
+necessary for storing the slurm_log output.
 
 Here we go!
 ```sh
-sbatch --array=1 scripts/map-array-job.sh
+# first, make sure the directories are there
+mkdir -p results/slurm_logs/map/
+
+# then launch the first three jobs
+sbatch --array=1-3 scripts/map-array-job.sh
 ```
 Then use your `myjobs` alias to see when that starts.  Once it has started, check the
 file `results/logs/bwa/s001---1.log` to make sure that stuff is coming out that looks
@@ -1023,9 +1030,9 @@ like what you expect.
 #### If the last step looked good, then launch the remaining jobs
 
 Once again, the power of overriding the internal SBATCH directives in the script
-come in handy here, setting `--array=2-22` to do the remaining 21 jobs.
+come in handy here, setting `--array=4-22` to do the remaining 19 jobs.
 ```sh
-sbatch --array=1 scripts/map-array-job.sh
+sbatch --array=4-22 scripts/map-array-job.sh
 ```
 That should map all those trimmed reads to the genome.  Woo-hoo!
 

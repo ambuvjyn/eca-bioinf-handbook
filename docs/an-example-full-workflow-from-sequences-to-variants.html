@@ -1335,7 +1335,7 @@ SLURM job array, according to the SLURM_ARRAY_TASK_ID. Hooray!</p>
 <span id="cb713-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
 <span id="cb713-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb713-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bash_profile  <span class="co"># or ~/.bashrc if that is how you are set up</span></span>
+<span id="cb713-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
 <span id="cb713-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-12" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
 <span id="cb713-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-13" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-units.tsv<span class="va">)</span> </span>
 <span id="cb713-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -1363,7 +1363,9 @@ SLURM job array, according to the SLURM_ARRAY_TASK_ID. Hooray!</p>
 <p>As you can see, we were able to use most of our original test script. We just
 need to define <code>SU</code> and <code>RG</code> a little differently, according to the
 value of <code>SLURM_ARRAY_TASK_ID</code>, and we added an <code>#SBATCH --array=1-22</code>
-line. (Because there are 22 rows in our <code>numbered-units.tsv</code> file!)</p>
+line. (Because there are 22 rows in our <code>numbered-units.tsv</code> file!).
+Also we named the slurm output and error files according to the <code>%A_%a</code>
+nomenclature.</p>
 <div id="step-through-this-interactively-to-make-sure-it-looks-right" class="section level4" number="27.6.3.1">
 <h4><span class="header-section-number">27.6.3.1</span> Step through this interactively to make sure it looks right</h4>
 <p>Before trying to run something like this, it is always good to “pretend”
@@ -1393,12 +1395,17 @@ is an array job. Whatever!</p>
 </div>
 <div id="run-just-the-first-job" class="section level4" number="27.6.3.3">
 <h4><span class="header-section-number">27.6.3.3</span> Run just the first job</h4>
-<p>You should never launch a large job array without at least launching one of them
-first, to make sure that it doesn’t fail immediately. We can use <code>--array=1</code> on the command
-launch just the first job.</p>
-<p>This should run things for <code>s001---1</code>.</p>
+<p>You should never launch a large job array without at least launching a few of them
+first, to make sure that it doesn’t fail immediately. We can use <code>--array=1-3</code> on the command
+launch just the first three jobs.</p>
+<p>Note also that you always want to make sure that you have created any directories
+necessary for storing the slurm_log output.</p>
 <p>Here we go!</p>
-<div class="sourceCode" id="cb717"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb717-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1 scripts/map-array-job.sh</span></code></pre></div>
+<div class="sourceCode" id="cb717"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb717-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first, make sure the directories are there</span></span>
+<span id="cb717-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/slurm_logs/map/</span>
+<span id="cb717-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb717-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-4" aria-hidden="true" tabindex="-1"></a><span class="co"># then launch the first three jobs</span></span>
+<span id="cb717-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1-3 scripts/map-array-job.sh</span></code></pre></div>
 <p>Then use your <code>myjobs</code> alias to see when that starts. Once it has started, check the
 file <code>results/logs/bwa/s001---1.log</code> to make sure that stuff is coming out that looks
 like what you expect.</p>
@@ -1406,8 +1413,8 @@ like what you expect.</p>
 <div id="if-the-last-step-looked-good-then-launch-the-remaining-jobs" class="section level4" number="27.6.3.4">
 <h4><span class="header-section-number">27.6.3.4</span> If the last step looked good, then launch the remaining jobs</h4>
 <p>Once again, the power of overriding the internal SBATCH directives in the script
-come in handy here, setting <code>--array=2-22</code> to do the remaining 21 jobs.</p>
-<div class="sourceCode" id="cb718"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb718-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1 scripts/map-array-job.sh</span></code></pre></div>
+come in handy here, setting <code>--array=4-22</code> to do the remaining 19 jobs.</p>
+<div class="sourceCode" id="cb718"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb718-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>4-22 scripts/map-array-job.sh</span></code></pre></div>
 <p>That should map all those trimmed reads to the genome. Woo-hoo!</p>
 </div>
 </div>
