@@ -44,7 +44,7 @@ All of the examples in this chapter that use such external files
 assume that the current working directory is
 the repository directory `awk-and-sed-inputs`.
 
-## awk
+## awk {#awk}
 
 ### Line-cycling, tests and actions
 

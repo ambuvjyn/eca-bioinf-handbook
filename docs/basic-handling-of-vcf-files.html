@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-08" />
+<meta name="date" content="2022-03-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -223,13 +223,13 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="5.3.1" data-path="shell-programming.html"><a href="shell-programming.html#assigning-values-to-variables"><i class="fa fa-check"></i><b>5.3.1</b> Assigning values to variables</a></li>
 <li class="chapter" data-level="5.3.2" data-path="shell-programming.html"><a href="shell-programming.html#accessing-values-from-variables"><i class="fa fa-check"></i><b>5.3.2</b> Accessing values from variables</a></li>
-<li class="chapter" data-level="5.3.3" data-path="shell-programming.html"><a href="shell-programming.html#what-does-the-shell-do-with-the-value-substituted-for-a-variable"><i class="fa fa-check"></i><b>5.3.3</b> What does the shell do with the value substituted for a variable?</a></li>
+<li class="chapter" data-level="5.3.3" data-path="shell-programming.html"><a href="shell-programming.html#shell-sub-vars"><i class="fa fa-check"></i><b>5.3.3</b> What does the shell do with the value substituted for a variable?</a></li>
 <li class="chapter" data-level="5.3.4" data-path="shell-programming.html"><a href="shell-programming.html#quotes-and-var-subs"><i class="fa fa-check"></i><b>5.3.4</b> Double and Single Quotation Marks and Variable Substitution</a></li>
 <li class="chapter" data-level="5.3.5" data-path="shell-programming.html"><a href="shell-programming.html#one-useful-fancy-variable-substitution-method"><i class="fa fa-check"></i><b>5.3.5</b> One useful, fancy, variable-substitution method</a></li>
 <li class="chapter" data-level="5.3.6" data-path="shell-programming.html"><a href="shell-programming.html#bash-arithmetic"><i class="fa fa-check"></i><b>5.3.6</b> Integer Arithmetic with Shell Variables</a></li>
 <li class="chapter" data-level="5.3.7" data-path="shell-programming.html"><a href="shell-programming.html#variable-arrays"><i class="fa fa-check"></i><b>5.3.7</b> Variable arrays</a></li>
 </ul></li>
-<li class="chapter" data-level="5.4" data-path="shell-programming.html"><a href="shell-programming.html#evaluate-a-command-and-substitute-the-result-on-the-command-line"><i class="fa fa-check"></i><b>5.4</b> Evaluate a command and substitute the result on the command line</a></li>
+<li class="chapter" data-level="5.4" data-path="shell-programming.html"><a href="shell-programming.html#bash-sub-result-on-comm-line"><i class="fa fa-check"></i><b>5.4</b> Evaluate a command and substitute the result on the command line</a></li>
 <li class="chapter" data-level="5.5" data-path="shell-programming.html"><a href="shell-programming.html#groupingcollecting-output-from-multiple-commands-commands-and-commands"><i class="fa fa-check"></i><b>5.5</b> Grouping/Collecting output from multiple commands: <code>(commands)</code> and <code>{ commands; }</code></a></li>
 <li class="chapter" data-level="5.6" data-path="shell-programming.html"><a href="shell-programming.html#exit-status"><i class="fa fa-check"></i><b>5.6</b> Exit Status</a>
 <ul>
@@ -506,6 +506,7 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="27.6.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#indexing-the-reference-genome-1"><i class="fa fa-check"></i><b>27.6.1</b> Indexing the reference genome</a></li>
 <li class="chapter" data-level="27.6.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-quick-mapping-run-to-stdout"><i class="fa fa-check"></i><b>27.6.2</b> A quick mapping run to stdout</a></li>
+<li class="chapter" data-level="27.6.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#map-with-array"><i class="fa fa-check"></i><b>27.6.3</b> Mapping all 22 pairs of trimmed FASTQ files using a SLURM job array</a></li>
 </ul></li>
 <li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-merging-bams-from-the-same-sample-library"><i class="fa fa-check"></i><b>27.7</b> Step 3. Merging bams from the same sample + library</a></li>
 <li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-marking-duplicates"><i class="fa fa-check"></i><b>27.8</b> Step 4. Marking duplicates</a></li>
@@ -568,16 +569,16 @@ of the pain of dealing with VCF files.</p>
 download them from your Unix workstation with the following commands.
 I’d recommend putting them into a directory called <code>bcftools-play</code> in
 <code>scratch</code> somewhere.</p>
-<div class="sourceCode" id="cb606"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb606-1"><a href="basic-handling-of-vcf-files.html#cb606-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/dzwixabvy3wwfdr/chinook-32-3Mb.vcf.gz<span class="pp">?</span>dl=1</span>
-<span id="cb606-2"><a href="basic-handling-of-vcf-files.html#cb606-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/d303fi7en71p8ug/chinook-32-3Mb.vcf.gz.csi<span class="pp">?</span>dl=1</span>
-<span id="cb606-3"><a href="basic-handling-of-vcf-files.html#cb606-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb606-4"><a href="basic-handling-of-vcf-files.html#cb606-4" aria-hidden="true" tabindex="-1"></a><span class="co"># after which you might need to rename them, if wget retained the `?dl=1`</span></span>
-<span id="cb606-5"><a href="basic-handling-of-vcf-files.html#cb606-5" aria-hidden="true" tabindex="-1"></a><span class="co"># in the resulting file names:</span></span>
-<span id="cb606-6"><a href="basic-handling-of-vcf-files.html#cb606-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz</span>
-<span id="cb606-7"><a href="basic-handling-of-vcf-files.html#cb606-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz.csi<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz.csi</span>
-<span id="cb606-8"><a href="basic-handling-of-vcf-files.html#cb606-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb606-9"><a href="basic-handling-of-vcf-files.html#cb606-9" aria-hidden="true" tabindex="-1"></a><span class="co"># after that, make sure you are ready to use bcftools by doing</span></span>
-<span id="cb606-10"><a href="basic-handling-of-vcf-files.html#cb606-10" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bioinf</span></code></pre></div>
+<div class="sourceCode" id="cb618"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb618-1"><a href="basic-handling-of-vcf-files.html#cb618-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/dzwixabvy3wwfdr/chinook-32-3Mb.vcf.gz<span class="pp">?</span>dl=1</span>
+<span id="cb618-2"><a href="basic-handling-of-vcf-files.html#cb618-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://www.dropbox.com/s/d303fi7en71p8ug/chinook-32-3Mb.vcf.gz.csi<span class="pp">?</span>dl=1</span>
+<span id="cb618-3"><a href="basic-handling-of-vcf-files.html#cb618-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb618-4"><a href="basic-handling-of-vcf-files.html#cb618-4" aria-hidden="true" tabindex="-1"></a><span class="co"># after which you might need to rename them, if wget retained the `?dl=1`</span></span>
+<span id="cb618-5"><a href="basic-handling-of-vcf-files.html#cb618-5" aria-hidden="true" tabindex="-1"></a><span class="co"># in the resulting file names:</span></span>
+<span id="cb618-6"><a href="basic-handling-of-vcf-files.html#cb618-6" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz</span>
+<span id="cb618-7"><a href="basic-handling-of-vcf-files.html#cb618-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mv</span> chinook-32-3Mb.vcf.gz.csi<span class="dt">\?</span>dl<span class="dt">\=</span>1 chinook-32-3Mb.vcf.gz.csi</span>
+<span id="cb618-8"><a href="basic-handling-of-vcf-files.html#cb618-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb618-9"><a href="basic-handling-of-vcf-files.html#cb618-9" aria-hidden="true" tabindex="-1"></a><span class="co"># after that, make sure you are ready to use bcftools by doing</span></span>
+<span id="cb618-10"><a href="basic-handling-of-vcf-files.html#cb618-10" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bioinf</span></code></pre></div>
 <p>There are two main programs for handling VCF files: <code>vcftools</code> and <code>bcftools</code>. Both
 of these grew out of the 1000 Genomes effort starting about a decade ago. It seems
 that <code>vcftools</code> may have been developed first, but, currently, <code>bcftools</code> is being
@@ -616,34 +617,34 @@ or counting up the number of records can be time consuming. Here are some
 in a VCF file using grep or awk and parse the individuals out yourself, but
 it turns out to be faster and safer to use the <code>query</code> subcommand from <code>bcftools</code>
 with the <code>-l</code> option. Do it here:</p>
-<div class="sourceCode" id="cb607"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb607-1"><a href="basic-handling-of-vcf-files.html#cb607-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> chinook-32-3Mb.vcf.gz</span></code></pre></div>
+<div class="sourceCode" id="cb619"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb619-1"><a href="basic-handling-of-vcf-files.html#cb619-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> chinook-32-3Mb.vcf.gz</span></code></pre></div>
 <p>Then read about it on the manual page. Find the part that talks describes it.</p>
 <p><strong>How many variants are in this file?</strong> This question can be answered quickly with
 <code>bcftools stats</code>, which also returns to you a plethora of information about the variants.</p>
-<div class="sourceCode" id="cb608"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb608-1"><a href="basic-handling-of-vcf-files.html#cb608-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats chinook-32-3Mb.vcf.gz</span></code></pre></div>
+<div class="sourceCode" id="cb620"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb620-1"><a href="basic-handling-of-vcf-files.html#cb620-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats chinook-32-3Mb.vcf.gz</span></code></pre></div>
 <p>The top part of the output tells you how many SNPs and indels (and other types
 of variants) there are. Then it tells you about Ts/Tv ratios, allele frequencies
 and read depths.</p>
 <p><strong>Where are these variants?</strong> There are several ways to answer this question.
 One might be simply to print the CHROM and the POS for each row in the VCF file:</p>
-<div class="sourceCode" id="cb609"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb609-1"><a href="basic-handling-of-vcf-files.html#cb609-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> chinook-32-3Mb.vcf.gz</span></code></pre></div>
+<div class="sourceCode" id="cb621"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb621-1"><a href="basic-handling-of-vcf-files.html#cb621-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> chinook-32-3Mb.vcf.gz</span></code></pre></div>
 <p>If you want to see where it starts and where it finishes you can do:</p>
-<div class="sourceCode" id="cb610"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb610-1"><a href="basic-handling-of-vcf-files.html#cb610-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span> </span>
-<span id="cb610-2"><a href="basic-handling-of-vcf-files.html#cb610-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">tail</span></span></code></pre></div>
+<div class="sourceCode" id="cb622"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb622-1"><a href="basic-handling-of-vcf-files.html#cb622-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span> </span>
+<span id="cb622-2"><a href="basic-handling-of-vcf-files.html#cb622-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">tail</span></span></code></pre></div>
 <p>From that we see that our example file runs from 4 Mb to 7 Mb or so
 on chromosome NC_037124.1. This shows one use of the subcommand <code>query</code>,
 which is quite useful.</p>
 <p><strong>Give me a glimpse of the file</strong> You can use <code>bcftools view</code> for a number
 of things, but at its simplest, you can merely look at the file in VCF format.
 (In this manner, it behaves much like <code>samtools view</code> for VCF files).</p>
-<div class="sourceCode" id="cb611"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb611-1"><a href="basic-handling-of-vcf-files.html#cb611-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show the whole file from the top (use show just the first 10 lines)</span></span>
-<span id="cb611-2"><a href="basic-handling-of-vcf-files.html#cb611-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span>
-<span id="cb611-3"><a href="basic-handling-of-vcf-files.html#cb611-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb611-4"><a href="basic-handling-of-vcf-files.html#cb611-4" aria-hidden="true" tabindex="-1"></a><span class="co"># show just the header with -h.  Here look at just the last 10 lines of the header</span></span>
-<span id="cb611-5"><a href="basic-handling-of-vcf-files.html#cb611-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">tail</span></span>
-<span id="cb611-6"><a href="basic-handling-of-vcf-files.html#cb611-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb611-7"><a href="basic-handling-of-vcf-files.html#cb611-7" aria-hidden="true" tabindex="-1"></a><span class="co"># show the variants themslves (no header) with -H</span></span>
-<span id="cb611-8"><a href="basic-handling-of-vcf-files.html#cb611-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<div class="sourceCode" id="cb623"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb623-1"><a href="basic-handling-of-vcf-files.html#cb623-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show the whole file from the top (use show just the first 10 lines)</span></span>
+<span id="cb623-2"><a href="basic-handling-of-vcf-files.html#cb623-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb623-3"><a href="basic-handling-of-vcf-files.html#cb623-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb623-4"><a href="basic-handling-of-vcf-files.html#cb623-4" aria-hidden="true" tabindex="-1"></a><span class="co"># show just the header with -h.  Here look at just the last 10 lines of the header</span></span>
+<span id="cb623-5"><a href="basic-handling-of-vcf-files.html#cb623-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">tail</span></span>
+<span id="cb623-6"><a href="basic-handling-of-vcf-files.html#cb623-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb623-7"><a href="basic-handling-of-vcf-files.html#cb623-7" aria-hidden="true" tabindex="-1"></a><span class="co"># show the variants themslves (no header) with -H</span></span>
+<span id="cb623-8"><a href="basic-handling-of-vcf-files.html#cb623-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
 <p>When we did that, we see that there is a lot of information in the INFO
 field. What if we wanted to extract that?</p>
 </div>
@@ -651,23 +652,23 @@ field. What if we wanted to extract that?</p>
 <h3><span class="header-section-number">22.1.2</span> Get fragments/parts of my VCF file</h3>
 <p><strong>Extract keyed values from the INFO field</strong> This is another job for <code>bcftools query</code>. You pass a <em>format string</em> to the <code>-f</code> option that tells the program which fields you want
 to extract and how you want to format it. Check out some examples:</p>
-<div class="sourceCode" id="cb612"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb612-1"><a href="basic-handling-of-vcf-files.html#cb612-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract CHROM POS and BaseQRankSum, separated by TABs</span></span>
-<span id="cb612-2"><a href="basic-handling-of-vcf-files.html#cb612-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%INFO/BaseQRankSum\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span>
-<span id="cb612-3"><a href="basic-handling-of-vcf-files.html#cb612-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb612-4"><a href="basic-handling-of-vcf-files.html#cb612-4" aria-hidden="true" tabindex="-1"></a><span class="co"># extract CHROM POS and total read depth DP</span></span>
-<span id="cb612-5"><a href="basic-handling-of-vcf-files.html#cb612-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%INFO/DP\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<div class="sourceCode" id="cb624"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb624-1"><a href="basic-handling-of-vcf-files.html#cb624-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract CHROM POS and BaseQRankSum, separated by TABs</span></span>
+<span id="cb624-2"><a href="basic-handling-of-vcf-files.html#cb624-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%INFO/BaseQRankSum\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span>
+<span id="cb624-3"><a href="basic-handling-of-vcf-files.html#cb624-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb624-4"><a href="basic-handling-of-vcf-files.html#cb624-4" aria-hidden="true" tabindex="-1"></a><span class="co"># extract CHROM POS and total read depth DP</span></span>
+<span id="cb624-5"><a href="basic-handling-of-vcf-files.html#cb624-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%INFO/DP\n&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
 <p><strong>View data from specified regions</strong></p>
 <p>What if we want to look at variants only in two 10 Kb regions, like
 <code>NC_037124.1:5000000-5010000</code> and <code>NC_037124.1:6000000-6010000</code>? Pass those,
 separated by commas, to the <code>-r</code> option (which is an option that applies to many
 of the subcommands):</p>
-<div class="sourceCode" id="cb613"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb613-1"><a href="basic-handling-of-vcf-files.html#cb613-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> NC_037124.1:5000000-5010000,NC_037124.1:6000000-6010000 chinook-32-3Mb.vcf.gz</span></code></pre></div>
+<div class="sourceCode" id="cb625"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb625-1"><a href="basic-handling-of-vcf-files.html#cb625-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> NC_037124.1:5000000-5010000,NC_037124.1:6000000-6010000 chinook-32-3Mb.vcf.gz</span></code></pre></div>
 <p>You can also specify those regions in a file with <code>-R</code> option.</p>
 <p><strong>View data from specified individuals</strong></p>
 <p>You can give the sample names (comma separated) to the <code>-s</code> option:</p>
-<div class="sourceCode" id="cb614"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb614-1"><a href="basic-handling-of-vcf-files.html#cb614-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-s</span> DPCh_plate1_G05_S77,DPCh_plate1_G06_S78 chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<div class="sourceCode" id="cb626"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb626-1"><a href="basic-handling-of-vcf-files.html#cb626-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-s</span> DPCh_plate1_G05_S77,DPCh_plate1_G06_S78 chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
 <p>Or, if you wanted to view all <em>but</em> those two individuals, precede them with a <code>^</code>:</p>
-<div class="sourceCode" id="cb615"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb615-1"><a href="basic-handling-of-vcf-files.html#cb615-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-s</span> ^DPCh_plate1_G05_S77,DPCh_plate1_G06_S78 chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<div class="sourceCode" id="cb627"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb627-1"><a href="basic-handling-of-vcf-files.html#cb627-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-s</span> ^DPCh_plate1_G05_S77,DPCh_plate1_G06_S78 chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
 <p>You can also supply a text file with sample names (one-per-line) to the capital letter <code>-S</code> option.</p>
 <p>You can combine options, like <code>-r</code> and <code>-s</code>, as well.</p>
 </div>
@@ -676,36 +677,36 @@ of the subcommands):</p>
 <p><strong>Catenate VCF files</strong></p>
 <p>If you have VCF files called from the same reference genome filled with
 the same samples, it is easy to catenate the together with <code>bcftools concat</code>:</p>
-<div class="sourceCode" id="cb616"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb616-1"><a href="basic-handling-of-vcf-files.html#cb616-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make two files from different regions</span></span>
-<span id="cb616-2"><a href="basic-handling-of-vcf-files.html#cb616-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-r</span> NC_037124.1:4000000-5000000 chinook-32-3Mb.vcf.gz  <span class="op">&gt;</span> A.vcf.gz</span>
-<span id="cb616-3"><a href="basic-handling-of-vcf-files.html#cb616-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-r</span> NC_037124.1:6000000-7000000 chinook-32-3Mb.vcf.gz  <span class="op">&gt;</span> B.vcf.gz</span>
-<span id="cb616-4"><a href="basic-handling-of-vcf-files.html#cb616-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb616-5"><a href="basic-handling-of-vcf-files.html#cb616-5" aria-hidden="true" tabindex="-1"></a><span class="co"># how many variants in each of those?</span></span>
-<span id="cb616-6"><a href="basic-handling-of-vcf-files.html#cb616-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats A.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span>
-<span id="cb616-7"><a href="basic-handling-of-vcf-files.html#cb616-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats B.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span>
-<span id="cb616-8"><a href="basic-handling-of-vcf-files.html#cb616-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb616-9"><a href="basic-handling-of-vcf-files.html#cb616-9" aria-hidden="true" tabindex="-1"></a><span class="co"># catenate the back together</span></span>
-<span id="cb616-10"><a href="basic-handling-of-vcf-files.html#cb616-10" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> concat <span class="at">-Oz</span>  A.vcf.gz B.vcf.gz <span class="op">&gt;</span> CAT.vcf.gz</span>
-<span id="cb616-11"><a href="basic-handling-of-vcf-files.html#cb616-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb616-12"><a href="basic-handling-of-vcf-files.html#cb616-12" aria-hidden="true" tabindex="-1"></a><span class="co"># how many variants in that?</span></span>
-<span id="cb616-13"><a href="basic-handling-of-vcf-files.html#cb616-13" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats CAT.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb628"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb628-1"><a href="basic-handling-of-vcf-files.html#cb628-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make two files from different regions</span></span>
+<span id="cb628-2"><a href="basic-handling-of-vcf-files.html#cb628-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-r</span> NC_037124.1:4000000-5000000 chinook-32-3Mb.vcf.gz  <span class="op">&gt;</span> A.vcf.gz</span>
+<span id="cb628-3"><a href="basic-handling-of-vcf-files.html#cb628-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-r</span> NC_037124.1:6000000-7000000 chinook-32-3Mb.vcf.gz  <span class="op">&gt;</span> B.vcf.gz</span>
+<span id="cb628-4"><a href="basic-handling-of-vcf-files.html#cb628-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb628-5"><a href="basic-handling-of-vcf-files.html#cb628-5" aria-hidden="true" tabindex="-1"></a><span class="co"># how many variants in each of those?</span></span>
+<span id="cb628-6"><a href="basic-handling-of-vcf-files.html#cb628-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats A.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span>
+<span id="cb628-7"><a href="basic-handling-of-vcf-files.html#cb628-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats B.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span>
+<span id="cb628-8"><a href="basic-handling-of-vcf-files.html#cb628-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb628-9"><a href="basic-handling-of-vcf-files.html#cb628-9" aria-hidden="true" tabindex="-1"></a><span class="co"># catenate the back together</span></span>
+<span id="cb628-10"><a href="basic-handling-of-vcf-files.html#cb628-10" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> concat <span class="at">-Oz</span>  A.vcf.gz B.vcf.gz <span class="op">&gt;</span> CAT.vcf.gz</span>
+<span id="cb628-11"><a href="basic-handling-of-vcf-files.html#cb628-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb628-12"><a href="basic-handling-of-vcf-files.html#cb628-12" aria-hidden="true" tabindex="-1"></a><span class="co"># how many variants in that?</span></span>
+<span id="cb628-13"><a href="basic-handling-of-vcf-files.html#cb628-13" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats CAT.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
 <p>Note the use of the <code>-O</code> (capital “o”) option to specify the output
 type: <code>v</code> = VCF, <code>b</code> = BCF, <code>u</code> = uncompressed BCF, <code>z</code> = bgzipped VCF.</p>
 <p><strong>Merge VCF files</strong></p>
 <p>If you have files with different samples in them you
 can easily combine them:</p>
-<div class="sourceCode" id="cb617"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb617-1"><a href="basic-handling-of-vcf-files.html#cb617-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make file with first three samples</span></span>
-<span id="cb617-2"><a href="basic-handling-of-vcf-files.html#cb617-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-s</span> DPCh_plate1_A05_S5,DPCh_plate1_A06_S6,DPCh_plate1_A11_S11 chinook-32-3Mb.vcf.gz <span class="op">&gt;</span> first3.vcf.gz</span>
-<span id="cb617-3"><a href="basic-handling-of-vcf-files.html#cb617-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb617-4"><a href="basic-handling-of-vcf-files.html#cb617-4" aria-hidden="true" tabindex="-1"></a><span class="co"># make another with the last three samples</span></span>
-<span id="cb617-5"><a href="basic-handling-of-vcf-files.html#cb617-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-s</span> DPCh_plate1_H06_S90,DPCh_plate1_H11_S95,DPCh_plate1_H12_S96 chinook-32-3Mb.vcf.gz <span class="op">&gt;</span> last3.vcf.gz</span>
-<span id="cb617-6"><a href="basic-handling-of-vcf-files.html#cb617-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb617-7"><a href="basic-handling-of-vcf-files.html#cb617-7" aria-hidden="true" tabindex="-1"></a><span class="co"># merging requires that the files be indexed</span></span>
-<span id="cb617-8"><a href="basic-handling-of-vcf-files.html#cb617-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index first3.vcf.gz</span>
-<span id="cb617-9"><a href="basic-handling-of-vcf-files.html#cb617-9" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index last3.vcf.gz</span>
-<span id="cb617-10"><a href="basic-handling-of-vcf-files.html#cb617-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb617-11"><a href="basic-handling-of-vcf-files.html#cb617-11" aria-hidden="true" tabindex="-1"></a><span class="co"># merge those into a file with 6 samples</span></span>
-<span id="cb617-12"><a href="basic-handling-of-vcf-files.html#cb617-12" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> merge <span class="at">-Oz</span> first3.vcf.gz last3.vcf.gz <span class="op">&gt;</span> 6-samples.vcf.gz</span></code></pre></div>
+<div class="sourceCode" id="cb629"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb629-1"><a href="basic-handling-of-vcf-files.html#cb629-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make file with first three samples</span></span>
+<span id="cb629-2"><a href="basic-handling-of-vcf-files.html#cb629-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-s</span> DPCh_plate1_A05_S5,DPCh_plate1_A06_S6,DPCh_plate1_A11_S11 chinook-32-3Mb.vcf.gz <span class="op">&gt;</span> first3.vcf.gz</span>
+<span id="cb629-3"><a href="basic-handling-of-vcf-files.html#cb629-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb629-4"><a href="basic-handling-of-vcf-files.html#cb629-4" aria-hidden="true" tabindex="-1"></a><span class="co"># make another with the last three samples</span></span>
+<span id="cb629-5"><a href="basic-handling-of-vcf-files.html#cb629-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-s</span> DPCh_plate1_H06_S90,DPCh_plate1_H11_S95,DPCh_plate1_H12_S96 chinook-32-3Mb.vcf.gz <span class="op">&gt;</span> last3.vcf.gz</span>
+<span id="cb629-6"><a href="basic-handling-of-vcf-files.html#cb629-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb629-7"><a href="basic-handling-of-vcf-files.html#cb629-7" aria-hidden="true" tabindex="-1"></a><span class="co"># merging requires that the files be indexed</span></span>
+<span id="cb629-8"><a href="basic-handling-of-vcf-files.html#cb629-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index first3.vcf.gz</span>
+<span id="cb629-9"><a href="basic-handling-of-vcf-files.html#cb629-9" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index last3.vcf.gz</span>
+<span id="cb629-10"><a href="basic-handling-of-vcf-files.html#cb629-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb629-11"><a href="basic-handling-of-vcf-files.html#cb629-11" aria-hidden="true" tabindex="-1"></a><span class="co"># merge those into a file with 6 samples</span></span>
+<span id="cb629-12"><a href="basic-handling-of-vcf-files.html#cb629-12" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> merge <span class="at">-Oz</span> first3.vcf.gz last3.vcf.gz <span class="op">&gt;</span> 6-samples.vcf.gz</span></code></pre></div>
 </div>
 <div id="filter-out-variants-for-a-variety-of-reasons" class="section level3" number="22.1.4">
 <h3><span class="header-section-number">22.1.4</span> Filter out variants for a variety of reasons</h3>
@@ -713,17 +714,17 @@ can easily combine them:</p>
 very general here, and so just about anything is possible. Some simple ones:</p>
 <p><strong>Just the biallelic SNPs please</strong> Get things with no more than 2 alleles and
 no fewer than two alleles, and of a type = SNP:</p>
-<div class="sourceCode" id="cb618"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb618-1"><a href="basic-handling-of-vcf-files.html#cb618-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and see the result all in one line:</span></span>
-<span id="cb618-2"><a href="basic-handling-of-vcf-files.html#cb618-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Ou</span> <span class="at">-m</span> 2 <span class="at">-M</span> 2 <span class="at">--types</span><span class="op">=</span>snps chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb630"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb630-1"><a href="basic-handling-of-vcf-files.html#cb630-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and see the result all in one line:</span></span>
+<span id="cb630-2"><a href="basic-handling-of-vcf-files.html#cb630-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Ou</span> <span class="at">-m</span> 2 <span class="at">-M</span> 2 <span class="at">--types</span><span class="op">=</span>snps chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
 <p><strong>Just the biallelic indels please</strong></p>
-<div class="sourceCode" id="cb619"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb619-1"><a href="basic-handling-of-vcf-files.html#cb619-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and see the result all in one line:</span></span>
-<span id="cb619-2"><a href="basic-handling-of-vcf-files.html#cb619-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Ou</span> <span class="at">-m</span> 2 <span class="at">-M</span> 2 <span class="at">--types</span><span class="op">=</span>indels chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb631"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb631-1"><a href="basic-handling-of-vcf-files.html#cb631-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and see the result all in one line:</span></span>
+<span id="cb631-2"><a href="basic-handling-of-vcf-files.html#cb631-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Ou</span> <span class="at">-m</span> 2 <span class="at">-M</span> 2 <span class="at">--types</span><span class="op">=</span>indels chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
 <p>Note the use of <code>-Ou</code> in order to pipe uncompressed BCF output directly into
 <code>bcftools stats</code> using the <code>-</code> for a filename.</p>
 <p><strong>Fraction of missing sites less than X</strong></p>
 <p>If you want to make sure that 60% of your individuals have at least
 one read at the genotype, you can do this:</p>
-<div class="sourceCode" id="cb620"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb620-1"><a href="basic-handling-of-vcf-files.html#cb620-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-i</span> <span class="st">&#39;F_MISSING &lt; 0.4&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb632"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb632-1"><a href="basic-handling-of-vcf-files.html#cb632-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-i</span> <span class="st">&#39;F_MISSING &lt; 0.4&#39;</span> chinook-32-3Mb.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
 <p>Play with setting the <code>F_MISSING</code> to different values and see how that affects
 the number of variants retained.</p>
 <hr />

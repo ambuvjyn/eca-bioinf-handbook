@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-08" />
+<meta name="date" content="2022-03-10" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -223,13 +223,13 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="5.3.1" data-path="shell-programming.html"><a href="shell-programming.html#assigning-values-to-variables"><i class="fa fa-check"></i><b>5.3.1</b> Assigning values to variables</a></li>
 <li class="chapter" data-level="5.3.2" data-path="shell-programming.html"><a href="shell-programming.html#accessing-values-from-variables"><i class="fa fa-check"></i><b>5.3.2</b> Accessing values from variables</a></li>
-<li class="chapter" data-level="5.3.3" data-path="shell-programming.html"><a href="shell-programming.html#what-does-the-shell-do-with-the-value-substituted-for-a-variable"><i class="fa fa-check"></i><b>5.3.3</b> What does the shell do with the value substituted for a variable?</a></li>
+<li class="chapter" data-level="5.3.3" data-path="shell-programming.html"><a href="shell-programming.html#shell-sub-vars"><i class="fa fa-check"></i><b>5.3.3</b> What does the shell do with the value substituted for a variable?</a></li>
 <li class="chapter" data-level="5.3.4" data-path="shell-programming.html"><a href="shell-programming.html#quotes-and-var-subs"><i class="fa fa-check"></i><b>5.3.4</b> Double and Single Quotation Marks and Variable Substitution</a></li>
 <li class="chapter" data-level="5.3.5" data-path="shell-programming.html"><a href="shell-programming.html#one-useful-fancy-variable-substitution-method"><i class="fa fa-check"></i><b>5.3.5</b> One useful, fancy, variable-substitution method</a></li>
 <li class="chapter" data-level="5.3.6" data-path="shell-programming.html"><a href="shell-programming.html#bash-arithmetic"><i class="fa fa-check"></i><b>5.3.6</b> Integer Arithmetic with Shell Variables</a></li>
 <li class="chapter" data-level="5.3.7" data-path="shell-programming.html"><a href="shell-programming.html#variable-arrays"><i class="fa fa-check"></i><b>5.3.7</b> Variable arrays</a></li>
 </ul></li>
-<li class="chapter" data-level="5.4" data-path="shell-programming.html"><a href="shell-programming.html#evaluate-a-command-and-substitute-the-result-on-the-command-line"><i class="fa fa-check"></i><b>5.4</b> Evaluate a command and substitute the result on the command line</a></li>
+<li class="chapter" data-level="5.4" data-path="shell-programming.html"><a href="shell-programming.html#bash-sub-result-on-comm-line"><i class="fa fa-check"></i><b>5.4</b> Evaluate a command and substitute the result on the command line</a></li>
 <li class="chapter" data-level="5.5" data-path="shell-programming.html"><a href="shell-programming.html#groupingcollecting-output-from-multiple-commands-commands-and-commands"><i class="fa fa-check"></i><b>5.5</b> Grouping/Collecting output from multiple commands: <code>(commands)</code> and <code>{ commands; }</code></a></li>
 <li class="chapter" data-level="5.6" data-path="shell-programming.html"><a href="shell-programming.html#exit-status"><i class="fa fa-check"></i><b>5.6</b> Exit Status</a>
 <ul>
@@ -506,6 +506,7 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="27.6.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#indexing-the-reference-genome-1"><i class="fa fa-check"></i><b>27.6.1</b> Indexing the reference genome</a></li>
 <li class="chapter" data-level="27.6.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-quick-mapping-run-to-stdout"><i class="fa fa-check"></i><b>27.6.2</b> A quick mapping run to stdout</a></li>
+<li class="chapter" data-level="27.6.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#map-with-array"><i class="fa fa-check"></i><b>27.6.3</b> Mapping all 22 pairs of trimmed FASTQ files using a SLURM job array</a></li>
 </ul></li>
 <li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-merging-bams-from-the-same-sample-library"><i class="fa fa-check"></i><b>27.7</b> Step 3. Merging bams from the same sample + library</a></li>
 <li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-marking-duplicates"><i class="fa fa-check"></i><b>27.8</b> Step 4. Marking duplicates</a></li>
@@ -604,11 +605,11 @@ choosing BetterBibTex, and then selecting “Export” button. That yields a pag
 that gives you a place to omit certain reference fields. You life will be easier
 if you omit fields that are often long, or which are not needed for citation. I recommend
 filling that field with:</p>
-<div class="sourceCode" id="cb404"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb404-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb404-1" aria-hidden="true" tabindex="-1"></a>abstract,copyright,file,pmid</span></code></pre></div>
+<div class="sourceCode" id="cb416"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb416-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb416-1" aria-hidden="true" tabindex="-1"></a>abstract,copyright,file,pmid</span></code></pre></div>
 <p>And, you probably should restart Zotero after doing that.</p></li>
 <li><p>Install the R package <code>citr</code>. It is on CRAN, but it is probably best
 to first try the latest development version. Install it from within R using:</p>
-<div class="sourceCode" id="cb405"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb405-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb405-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;crsh/citr&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb417"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb417-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb417-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;crsh/citr&quot;</span>)</span></code></pre></div>
 <p>For more information about this package check out <a href="https://github.com/crsh/citr">https://github.com/crsh/citr</a>.</p></li>
 <li><p>Once that package is installed. Quit and re-open RStudio. Now, if you go to the
 “Addins” menu (right under the name panel at the top of the RStudio window) you will
@@ -637,12 +638,12 @@ so you can edit references.bib to put titles in sentence case. Probably want to 
 <p>Whoa! Bookdown has figured out how to do references to sections and tables and things in a reasonable
 way that just isn’t there for the vanilla Rmarkdown. But you can use the bookdown syntax for a non-book
 too. Just put something like this in the YAML:</p>
-<div class="sourceCode" id="cb406"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb406-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb406-1" aria-hidden="true" tabindex="-1"></a><span class="fu">output</span><span class="kw">:</span></span>
-<span id="cb406-2"><a href="authoring-reproducibly-with-rmarkdown.html#cb406-2" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:word_document2</span><span class="kw">:</span><span class="at"> default</span></span>
-<span id="cb406-3"><a href="authoring-reproducibly-with-rmarkdown.html#cb406-3" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:pdf_document2</span><span class="kw">:</span></span>
-<span id="cb406-4"><a href="authoring-reproducibly-with-rmarkdown.html#cb406-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">number_sections</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
-<span id="cb406-5"><a href="authoring-reproducibly-with-rmarkdown.html#cb406-5" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:html_document2</span><span class="kw">:</span></span>
-<span id="cb406-6"><a href="authoring-reproducibly-with-rmarkdown.html#cb406-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">df_print</span><span class="kw">:</span><span class="at"> paged</span></span></code></pre></div>
+<div class="sourceCode" id="cb418"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb418-1"><a href="authoring-reproducibly-with-rmarkdown.html#cb418-1" aria-hidden="true" tabindex="-1"></a><span class="fu">output</span><span class="kw">:</span></span>
+<span id="cb418-2"><a href="authoring-reproducibly-with-rmarkdown.html#cb418-2" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:word_document2</span><span class="kw">:</span><span class="at"> default</span></span>
+<span id="cb418-3"><a href="authoring-reproducibly-with-rmarkdown.html#cb418-3" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:pdf_document2</span><span class="kw">:</span></span>
+<span id="cb418-4"><a href="authoring-reproducibly-with-rmarkdown.html#cb418-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">number_sections</span><span class="kw">:</span><span class="at"> </span><span class="ch">yes</span></span>
+<span id="cb418-5"><a href="authoring-reproducibly-with-rmarkdown.html#cb418-5" aria-hidden="true" tabindex="-1"></a><span class="at">  bookdown:</span><span class="fu">:html_document2</span><span class="kw">:</span></span>
+<span id="cb418-6"><a href="authoring-reproducibly-with-rmarkdown.html#cb418-6" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">df_print</span><span class="kw">:</span><span class="at"> paged</span></span></code></pre></div>
 </div>
 <div id="google-docs" class="section level2" number="13.4">
 <h2><span class="header-section-number">13.4</span> Google Docs</h2>

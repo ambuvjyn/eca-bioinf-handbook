@@ -178,7 +178,7 @@ For information about FASTQ and FASTA files see Sections \@ref(fastq) and \@ref(
 
 We provide here a simple(ish) flow diagram that shows the different steps/jobs in this
 workflow that have to be done.  The diagram is made from a Snakemake workflow (see Chapter 
-\@ref(#snakemake-chap)) that Eric has implemented for whole genome sequencing in
+\@ref(snakemake-chap)) that Eric has implemented for whole genome sequencing in
 non-model organisms.  The acyclic directed graph (DAG) output from Snakemake has been
 condensed with the function,`condense_dag()`, from one of Eric's R packages
 ([SnakemakeDagR](https://github.com/eriqande/SnakemakeDagR)).  Each step/job is a separate
@@ -801,6 +801,12 @@ more straightforward (less prone to errors and failures and bugs in the software
 than some of the later computational steps (like creating a gVCF file from
 HaplotypeCaller).
 
+Here is a figure showing where in the overall workflow this step fits in:
+```{r bwa-map-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Mapping step (using bwa mem) of this section shown in color.'}
+knitr::include_graphics("figs/snakemake-dags/bwa-map.svg", auto_pdf = TRUE)
+```
+
+
 There are several different software programs available for alignment. I am a fan
 of the `bwa mem` algorithm, and it is commonly used in many production pipelines,
 so that is what we will be using.
@@ -906,6 +912,123 @@ file `units.tsv`.  More on read groups later.
 
 For now, let's start exploring how sequences can align, and the meaning of all the
 lines in the SAM file.  This is documented in Section \@ref(sambamfiles).
+
+
+### Mapping all 22 pairs of trimmed FASTQ files using a SLURM job array {#map-with-array}
+
+Using all the tricks we learned in Section \@ref(slurm-job-arrays) we are ready to map these
+things.  In case you missed it in class, before you proceed with this section, you will
+have to undertake all the steps (to create `numbered-units.tsv` and the `line-assign.sh` 
+script) in Section \@ref(more-convert-task-ids). Otherwise things won't work!
+
+We can build on our mapping script in \@ref(test-a-longer-running-sbatch) to have
+it use `line_assign.sh` to choose different files to align to the genome in a
+SLURM job array, according to the SLURM_ARRAY_TASK_ID.  Hooray!
+
+Here is what such a script looks like:
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-22
+#SBATCH --time=02:00:00
+#SBATCH --output=results/slurm_logs/map/map_s002---1-output-%A-%a
+#SBATCH --error=results/slurm_logs/map/map_s002---1-error-%A-%a 
+#SBATCH --mail-type=ALL 
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+source ~/.bash_profile  # or ~/.bashrc if that is how you are set up
+conda activate bwasam
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-units.tsv) 
+
+
+mkdir -p results/bam  # a directory in which to put the output from stdout
+mkdir -p results/logs/bwa  # a directory in which to put the output from stderr
+mkdir -p results/logs/samtools-sort
+SU=${sample}---${unit}
+
+RGID=${sample}_${sample_id}_${library}_${flowcell}_${lane}_${barcode}
+
+RG="@RG\tID:${RGID}\tSM:${sample}\tPL:${platform}\tLB:${library}\tPU:${flowcell}.${lane}.${barcode}"
+
+PREFIX=results/trimmed/$SU
+OUT=results/bam/$SU.bam
+BWALOG=results/logs/bwa/$SU.log
+SAMSORTLOG=results/logs/samtools-sort/$SU.log
+
+bwa mem \
+-R $RG \
+resources/genome.fasta \
+${PREFIX}_R1.fq.gz  ${PREFIX}_R2.fq.gz 2> $BWALOG |  \
+samtools view -u - |  \
+samtools sort -l 9 -o $OUT - 2> $SAMSORTLOG
+
+```
+As you can see, we were able to use most of our original test script.  We just
+need to define `SU` and `RG` a little differently, according to the
+value of `SLURM_ARRAY_TASK_ID`, and we added an `#SBATCH --array=1-22`
+line.  (Because there are 22 rows in our `numbered-units.tsv` file!)
+
+#### Step through this interactively to make sure it looks right
+
+Before trying to run something like this, it is always good to "pretend"
+it is being run as a SLURM array job by spoofing the variable
+`SLURM_ARRAY_TASK_ID`.  In other words, on an interactive shell
+you can just set a shell variable called `SLURM_ARRAY_TASK_ID`
+to whatever value you want to (let's choose 5 here!) like this:
+```sh
+SLURM_ARRAY_TASK_ID=5
+```
+then you can go through the above script line by line and make sure
+that all the variables get set to appropriate values.  After evaluating
+each line in which a variable value gets set, check the value of that
+variable using `echo`.
+
+If everything looks right, you could even evaluate all the 6 lines of the main
+command and let it run for a little while to make sure that what is coming into
+the output files and logs looks correct.  But, you don't have to do that now.
+
+#### Put that script into `map-array-job.sh` and run it with `--test-only`
+
+Make a new script with nano by doing:
+```sh
+nano scripts/map-array-job.sh
+```
+paste the contents of the above script into it, change the email address
+for notification emails, and the save and exit.
+
+Then run it under `sbatch` but use the `--test-only` option:
+```sh
+sbatch --test-only scripts/map-array-job.sh
+```
+That works, but note that `--test-only` doesn't see to let you know that this
+is an array job.  Whatever!
+
+#### Run just the first job 
+
+You should never launch a large job array without at least launching one of them
+first, to make sure that it doesn't fail immediately.  We can use `--array=1` on the command
+launch just the first job.
+
+This should run things for `s001---1`.  
+
+Here we go!
+```sh
+sbatch --array=1 scripts/map-array-job.sh
+```
+Then use your `myjobs` alias to see when that starts.  Once it has started, check the
+file `results/logs/bwa/s001---1.log` to make sure that stuff is coming out that looks
+like what you expect.
+
+#### If the last step looked good, then launch the remaining jobs
+
+Once again, the power of overriding the internal SBATCH directives in the script
+come in handy here, setting `--array=2-22` to do the remaining 21 jobs.
+```sh
+sbatch --array=1 scripts/map-array-job.sh
+```
+That should map all those trimmed reads to the genome.  Woo-hoo!
+
 
 
 ## Step 3. Merging bams from the same sample + library

@@ -569,7 +569,7 @@ those foods via variable substitution:
 ```
 Are we starting to feel the power of Unix scripting yet?
 
-### What does the shell do with the value substituted for a variable?
+### What does the shell do with the value substituted for a variable? {#shell-sub-vars}
 
 This is a great question, and it gets at the heart of why Unix is so powerful
 for scripting.  Recall that variable substitution occurs before command evaluation.
@@ -963,7 +963,7 @@ Then print the 1st, 2nd and 5th of them each on a separate line.
 ```
 
 
-## Evaluate a command and substitute the result on the command line
+## Evaluate a command and substitute the result on the command line {#bash-sub-result-on-comm-line}
 
 Sometimes what you want to put on a command line isn't just a variable
 you have previously defined but rather the result of a command that
