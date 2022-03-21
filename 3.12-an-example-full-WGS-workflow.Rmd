@@ -1037,7 +1037,7 @@ sbatch --array=4-22 scripts/map-array-job.sh
 That should map all those trimmed reads to the genome.  Woo-hoo!
 
 
-## Step 3. Mark duplicates in BAM files from each individual
+## Step 3. Mark duplicates in BAM files from each individual, and run `samtools stats` on the results
 
 I used to identify (and either remove or mark) duplicates with some of the subcommands 
 of the `samtools` package.  But it turns out that MarkDuplicates from
@@ -1051,6 +1051,12 @@ automatically only consider reads from the same library and individual
 as PCR duplicates (so long as the read group of each group of reads has
 been properly set, with the `LB` read-group key set, as we did during
 the mapping step, above).
+
+Here is our DAG showing what steps we are talking about in this section:
+```{r mark-dup-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Mapping step (using bwa mem) of this section shown in color.'}
+knitr::include_graphics("figs/snakemake-dags/mark-dup.svg", auto_pdf = TRUE)
+```
+
 
 In order to use MarkDuplicates, we first need to get the
 Picard Tools package. So, our first task is going to be to get those
@@ -1217,11 +1223,67 @@ When reads are marked as duplicates, they will be automatically ignored during
 variant calling (which we start in the next step!) by GATK's variant-calling
 programs.  They can also be ignored in ANGSD and most other variant calling programs.
 
+### Run samtools stats on the results
 
+Each sample is now in a single BAM file. For quality checking these, it can be
+a good idea to run `samtools stats` on them. That utility returns a fairly
+comprehensive summary of any BAM file.  
+
+This doesn't take long to run, and we can easily do it with a for loop over
+filenames:
+```sh
+# make a directory for the results
+mkdir -p results/qc/samtools-stats
+
+conda activate bwasam  # to have samtools
+for FILE in results/mkdup-merged/*.bam; do 
+  j=$(basename $FILE); 
+  echo $j; 
+  samtools stats $FILE > results/qc/samtools-stats/${j}_stats  
+done
+```
+
+When that is done, it is worth looking through all the different summaries. For example:
+```sh
+less results/qc/samtools-stats/s008.bam_stats
+```
+
+They give the distribution of a lot of different features of the mapped reads.  
+
+MultiQC has some capability to plot some of the features in the `samtools stats`
+summaries.  You can see those by doing.
+```sh
+conda activate multiqc
+multiqc results/qc/samtools-stats/*.bam_stats
+```
+and then copying the multiqc_report.html to your laptop and opening it in a browser. 
+With as little data as we have in these files, it is not super interesting to look at them. 
+
+MultiQC (at least a suitable new version of it) can also process the "metrics" files from
+MarkDuplicates.  So you can do:
+```sh
+multiqc -f results/qc/samtools-stats/*.bam_stats results/qc/mkdup-merged/*.metrics
+```
+
+
+For that to work, I had to get a newer version of MultiQC than I had, which meant I
+needed to do this first.
+```sh
+conda env remove --name multiqc
+conda config --add channels defaults
+conda config --add channels conda-forge
+conda config --add channels bioconda
+mamba create -n multiqc -c bioconda multiqc=1.12
+```
+
+
+---
 Now we have 8 BAM files. Each one has all the reads from a single
 individual.  Duplicates in them have been marked, and they each have
 an index.  Therefore, it is time to proceed to the variant calling
 steps.
+
+
 
 ## Step 4. Creating a gVCF file for each sample
 

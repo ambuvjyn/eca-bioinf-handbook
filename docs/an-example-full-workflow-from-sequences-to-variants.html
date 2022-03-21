@@ -508,7 +508,10 @@ div.csl-indent {
 <li class="chapter" data-level="27.6.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-quick-mapping-run-to-stdout"><i class="fa fa-check"></i><b>27.6.2</b> A quick mapping run to stdout</a></li>
 <li class="chapter" data-level="27.6.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#map-with-array"><i class="fa fa-check"></i><b>27.6.3</b> Mapping all 22 pairs of trimmed FASTQ files using a SLURM job array</a></li>
 </ul></li>
-<li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-mark-duplicates-in-bam-files-from-each-individual"><i class="fa fa-check"></i><b>27.7</b> Step 3. Mark duplicates in BAM files from each individual</a></li>
+<li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-mark-duplicates-in-bam-files-from-each-individual-and-run-samtools-stats-on-the-results"><i class="fa fa-check"></i><b>27.7</b> Step 3. Mark duplicates in BAM files from each individual, and run <code>samtools stats</code> on the results</a>
+<ul>
+<li class="chapter" data-level="27.7.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#run-samtools-stats-on-the-results"><i class="fa fa-check"></i><b>27.7.1</b> Run samtools stats on the results</a></li>
+</ul></li>
 <li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-creating-a-gvcf-file-for-each-sample"><i class="fa fa-check"></i><b>27.8</b> Step 4. Creating a gVCF file for each sample</a></li>
 <li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
@@ -1417,11 +1420,11 @@ come in handy here, setting <code>--array=4-22</code> to do the remaining 19 job
 </div>
 </div>
 </div>
-<div id="step-3.-mark-duplicates-in-bam-files-from-each-individual" class="section level2" number="27.7">
-<h2><span class="header-section-number">27.7</span> Step 3. Mark duplicates in BAM files from each individual</h2>
-<p>I had originally marked duplicates with some of the subcommands
+<div id="step-3.-mark-duplicates-in-bam-files-from-each-individual-and-run-samtools-stats-on-the-results" class="section level2" number="27.7">
+<h2><span class="header-section-number">27.7</span> Step 3. Mark duplicates in BAM files from each individual, and run <code>samtools stats</code> on the results</h2>
+<p>I used to identify (and either remove or mark) duplicates with some of the subcommands
 of the <code>samtools</code> package. But it turns out that MarkDuplicates from
-the Picard Tools package, from the Broad Institute, might have a few
+the Picard Tools package, from the Broad Institute, has a few
 advantages. Chief among those is the fact that, with MarkDuplicates, it is not
 necessary to merge all of the BAM files from a single individual and
 library prep to mark duplicates. Although the documentation about this
@@ -1431,6 +1434,13 @@ automatically only consider reads from the same library and individual
 as PCR duplicates (so long as the read group of each group of reads has
 been properly set, with the <code>LB</code> read-group key set, as we did during
 the mapping step, above).</p>
+Here is our DAG showing what steps we are talking about in this section:
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:mark-dup-dag"></span>
+<img src="figs/snakemake-dags/mark-dup.svg" alt="Mapping step (using bwa mem) of this section shown in color." width="100%" />
+<p class="caption">
+FIGURE 27.5: Mapping step (using bwa mem) of this section shown in color.
+</p>
+</div>
 <p>In order to use MarkDuplicates, we first need to get the
 Picard Tools package. So, our first task is going to be to get those
 with <code>mamba</code>. We will want version 2.26 (which is pretty
@@ -1442,7 +1452,9 @@ check out the syntax for the MarkDuplicates tool.</p>
 <span id="cb720-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb720-2" aria-hidden="true" tabindex="-1"></a><span class="ex">picard</span> MarkDuplicates <span class="at">--help</span></span></code></pre></div>
 <p>The help file notes that duplicates are identified as reads in which
 each mate maps to the same location in the genome (i.e. they have the
-same 5’ position) and which have sequences that are similar.</p>
+same 5’ position) and which have sequences that are similar. It also
+tells us that the read that is “retained” as the “non-duplicate” is chosen
+to have the highest base quality scores, on average.</p>
 <p>We also see that we can provide multiple
 BAM files, simultaneously, to MarkDuplicates, by giving the
 <code>-I</code> or <code>--INPUT</code> command multiple times, following it, each time,
@@ -1526,8 +1538,7 @@ for the BAM file, as that will save us a step later on!</p>
 <span id="cb723-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">--METRICS_FILE</span> <span class="va">$MET</span> <span class="dt">\</span></span>
 <span id="cb723-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">--TAGGING_POLICY</span> All <span class="dt">\</span></span>
 <span id="cb723-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">--CREATE_INDEX</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span>
-<span id="cb723-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-16" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb723-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-17" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<span id="cb723-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-16" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
 <p>That should only take a few minutes.</p>
 <p>Once that is done we will look at the resulting bamfiles with <code>samtools</code>,
 and compare them to the BAM files before duplicates were marked, just to see
@@ -1558,10 +1569,47 @@ you will find that none of them have any reads marked as duplicates
 <p>When reads are marked as duplicates, they will be automatically ignored during
 variant calling (which we start in the next step!) by GATK’s variant-calling
 programs. They can also be ignored in ANGSD and most other variant calling programs.</p>
+<div id="run-samtools-stats-on-the-results" class="section level3" number="27.7.1">
+<h3><span class="header-section-number">27.7.1</span> Run samtools stats on the results</h3>
+<p>Each sample is now in a single BAM file. For quality checking these, it can be
+a good idea to run <code>samtools stats</code> on them. That utility returns a fairly
+comprehensive summary of any BAM file.</p>
+<p>This doesn’t take long to run, and we can easily do it with a for loop over
+filenames:</p>
+<div class="sourceCode" id="cb727"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb727-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make a directory for the results</span></span>
+<span id="cb727-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/qc/samtools-stats</span>
+<span id="cb727-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb727-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam  <span class="co"># to have samtools</span></span>
+<span id="cb727-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> FILE <span class="kw">in</span> results/mkdup-merged/<span class="pp">*</span>.bam<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb727-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">j=$(</span><span class="fu">basename</span> <span class="va">$FILE)</span><span class="kw">;</span> </span>
+<span id="cb727-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="va">$j</span><span class="kw">;</span> </span>
+<span id="cb727-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">samtools</span> stats <span class="va">$FILE</span> <span class="op">&gt;</span> results/qc/samtools-stats/<span class="va">${j}</span>_stats  </span>
+<span id="cb727-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-9" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>When that is done, it is worth looking through all the different summaries. For example:</p>
+<div class="sourceCode" id="cb728"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb728-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb728-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> results/qc/samtools-stats/s008.bam_stats</span></code></pre></div>
+<p>They give the distribution of a lot of different features of the mapped reads.</p>
+<p>MultiQC has some capability to plot some of the features in the <code>samtools stats</code>
+summaries. You can see those by doing.</p>
+<div class="sourceCode" id="cb729"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb729-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
+<span id="cb729-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> results/qc/samtools-stats/<span class="pp">*</span>.bam_stats</span></code></pre></div>
+<p>and then copying the multiqc_report.html to your laptop and opening it in a browser.
+With as little data as we have in these files, it is not super interesting to look at them.</p>
+<p>MultiQC (at least a suitable new version of it) can also process the “metrics” files from
+MarkDuplicates. So you can do:</p>
+<div class="sourceCode" id="cb730"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb730-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb730-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-f</span> results/qc/samtools-stats/<span class="pp">*</span>.bam_stats results/qc/mkdup-merged/<span class="pp">*</span>.metrics</span></code></pre></div>
+<p>For that to work, I had to get a newer version of MultiQC than I had, which meant I
+needed to do this first.</p>
+<div class="sourceCode" id="cb731"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb731-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env remove <span class="at">--name</span> multiqc</span>
+<span id="cb731-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels defaults</span>
+<span id="cb731-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
+<span id="cb731-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels bioconda</span>
+<span id="cb731-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-5" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> multiqc <span class="at">-c</span> bioconda multiqc=1.12</span></code></pre></div>
+<hr />
 <p>Now we have 8 BAM files. Each one has all the reads from a single
 individual. Duplicates in them have been marked, and they each have
 an index. Therefore, it is time to proceed to the variant calling
 steps.</p>
+</div>
 </div>
 <div id="step-4.-creating-a-gvcf-file-for-each-sample" class="section level2" number="27.8">
 <h2><span class="header-section-number">27.8</span> Step 4. Creating a gVCF file for each sample</h2>

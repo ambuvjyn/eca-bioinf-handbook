@@ -100,7 +100,7 @@ several different hypotheses. In our case, the three different hypotheses are th
 the true, underlying genotype, $G$ is either $CC$, $CT$, or $TT$.  It is also relatively
 easy to tell a computer how to compute it.  
 
-Let's be explicit agout our terms.  We have three different hypotheses:
+Let's be explicit about our terms.  We have three different hypotheses:
 
 - $H_1:~~~G = CC$
 - $H_2:~~~G = CT$
@@ -146,7 +146,7 @@ the probability of observing a $C$ on the read is $1 - \epsilon$.  On the other 
 $1/2$ the read is from the chromosome carrying a $T$, in which case, recording a $C$ requires that
 a sequencing error occurred.  Therefore:
 $$
-P(B_1=C~|~G=CT, \epsilon_1) = \frac{1}{2}(1 - \epsilon) + \frac{1}{2}\epsilon_1
+P(B_1=C~|~G=CT, \epsilon_1) = \frac{1}{2}(1 - \epsilon) + \frac{1}{2}\epsilon_1 = \frac{1}{2}
 $$
 Notice that this is less than $P(B_1=C~|~G=CC, \epsilon_1)$ by a factor of about 2.
 - Finally, if $G=TT$, then, with probability 1, the read will come from a chromosome
@@ -159,7 +159,7 @@ So, summarizing the information from the first read we have:
 $$
 \begin{aligned} 
 L(G=CC | B_1 = C) &=   P(B_1 = C| G=CC, \epsilon_1) &  &=  1 - \epsilon_1 & &= 0.99937 \\ 
-L(G=CT | B_1 = C) &=   P(B_1 = C| G=CT, \epsilon_1) & &=  \frac{1}{2}(1 - \epsilon_1) + \frac{1}{2}\epsilon_1 & &= 0.5 \\ 
+L(G=CT | B_1 = C) &=   P(B_1 = C| G=CT, \epsilon_1) & &=  \frac{1}{2} & &= 0.5 \\ 
 L(G=TT | B_1 = C) &=   P(B_1 = C| G=TT, \epsilon_1) & &=  \epsilon_1 & &= 0.00063
 \end{aligned}
 $$
@@ -171,8 +171,8 @@ the likelihood that $G=CC$ compared to $G=CT$.
 Now, more quickly, we can consider how much evidence **read 3**, $B_3 = T$ with $\epsilon_3 = 0.00031$ offers:
 $$
 \begin{aligned} 
-L(G=CC | B_3 = T) &=   P(B_3 = T| G=CC, \epsilon_3) &  &=   & \epsilon_3 &= 0.00031 \\ 
-L(G=CT | B_3 = T) &=   P(B_3 = T| G=CT, \epsilon_3) & &=  \frac{1}{2}(1 - \epsilon_3) + \frac{1}{2}\epsilon_3 & &= 0.5 \\ 
+L(G=CC | B_3 = T) &=   P(B_3 = T| G=CC, \epsilon_3) &  &=  \epsilon_3 & &= 0.00031 \\ 
+L(G=CT | B_3 = T) &=   P(B_3 = T| G=CT, \epsilon_3) & &=  \frac{1}{2} & &= 0.5 \\ 
 L(G=TT | B_3 = T) &=   P(B_3 = T| G=TT, \epsilon_3) & &=  1 - \epsilon_3 & &= 0.99969
 \end{aligned}
 $$
@@ -186,9 +186,17 @@ So, we have:
 $$
 \small
 \begin{aligned} 
-L(G=CC | B_1 = C, B_3 = T) &=   P(B_1 = C| G=CC, \epsilon_1) \times P(B_3 = T| G=CC, \epsilon_3) & &= 0.99937 * 0.00031  & &= 0.00031\\ 
-L(G=CT | B_1 = C, B_3 = T) &=   P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=CT, \epsilon_3) & &=  0.5 * 0.5 & &= 0.25\\ 
-L(G=TT | B_1 = C, B_3 = T) &=  P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=TT, \epsilon_3) & &=  0.00063 * 0.99969 & &= 0.00063
+L(G=CC | B_1 = C, B_3 = T) &=   P(B_1 = C| G=CC, \epsilon_1) \times P(B_3 = T| G=CC, \epsilon_3) & &= 0.99937 \times 0.00031\\ 
+L(G=CT | B_1 = C, B_3 = T) &=   P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=CT, \epsilon_3) & &=  0.5 \times 0.5 \\ 
+L(G=TT | B_1 = C, B_3 = T) &=  P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=TT, \epsilon_3) & &=  0.00063 \times 0.99969
+\end{aligned}
+$$
+I couldn't fit the actual products of each of those up above, so we put them down here:
+$$
+\begin{aligned} 
+L(G=CC | B_1 = C, B_3 = T)  &= 0.00031\\ 
+L(G=CT | B_1 = C, B_3 = T)  &= 0.25\\ 
+L(G=TT | B_1 = C, B_3 = T)  &= 0.00063
 \end{aligned}
 $$
 So, with only two reads, one of each allele, the likelihood of a heterozygote can be quite high.
@@ -201,7 +209,8 @@ What have we learned from this exercise?  I'd say there are two very important t
 1. If you have only a single read, the likelihood that the genotype is a homozygote is always higher than
 the likelihood that it is a heterozygote.
 1. If you only see reads of a single allele, the likelihood that the genotype is a heterozygote
-drops by a factor of two for each new read.
+drops by a factor of two for each new read. (And the likelihood that the genotype is homozygous for the allele
+you have not seen drops by a factor of the estimated genotyping error each time).
 2. The values of the likelihoods for the homozygous hypotheses are highly dependent on the base quality scores but not so much for the likelihood of the heterozygous hypothesis.
 
 

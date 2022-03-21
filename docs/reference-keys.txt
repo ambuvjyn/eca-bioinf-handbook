@@ -30,6 +30,7 @@ fig:full-dag
 fig:fastqc-multiqc-dag
 fig:trimmo-dag
 fig:bwa-map-dag
+fig:mark-dup-dag
 intro
 erics-notes-of-what-he-might-do
 table-of-topics
@@ -351,7 +352,8 @@ step-through-this-interactively-to-make-sure-it-looks-right
 put-that-script-into-map-array-job.sh-and-run-it-with---test-only
 run-just-the-first-job
 if-the-last-step-looked-good-then-launch-the-remaining-jobs
-step-3.-mark-duplicates-in-bam-files-from-each-individual
+step-3.-mark-duplicates-in-bam-files-from-each-individual-and-run-samtools-stats-on-the-results
+run-samtools-stats-on-the-results
 step-4.-creating-a-gvcf-file-for-each-sample
 step-5.-importing-the-gvcf-files-into-a-genomicsdatabase
 step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase

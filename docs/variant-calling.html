@@ -508,7 +508,10 @@ div.csl-indent {
 <li class="chapter" data-level="27.6.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#a-quick-mapping-run-to-stdout"><i class="fa fa-check"></i><b>27.6.2</b> A quick mapping run to stdout</a></li>
 <li class="chapter" data-level="27.6.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#map-with-array"><i class="fa fa-check"></i><b>27.6.3</b> Mapping all 22 pairs of trimmed FASTQ files using a SLURM job array</a></li>
 </ul></li>
-<li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-mark-duplicates-in-bam-files-from-each-individual"><i class="fa fa-check"></i><b>27.7</b> Step 3. Mark duplicates in BAM files from each individual</a></li>
+<li class="chapter" data-level="27.7" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-3.-mark-duplicates-in-bam-files-from-each-individual-and-run-samtools-stats-on-the-results"><i class="fa fa-check"></i><b>27.7</b> Step 3. Mark duplicates in BAM files from each individual, and run <code>samtools stats</code> on the results</a>
+<ul>
+<li class="chapter" data-level="27.7.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#run-samtools-stats-on-the-results"><i class="fa fa-check"></i><b>27.7.1</b> Run samtools stats on the results</a></li>
+</ul></li>
 <li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-creating-a-gvcf-file-for-each-sample"><i class="fa fa-check"></i><b>27.8</b> Step 4. Creating a gVCF file for each sample</a></li>
 <li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
@@ -645,7 +648,7 @@ evaluating how much evidence a <em>given set of data</em>, <span class="math inl
 several different hypotheses. In our case, the three different hypotheses are that
 the true, underlying genotype, <span class="math inline">\(G\)</span> is either <span class="math inline">\(CC\)</span>, <span class="math inline">\(CT\)</span>, or <span class="math inline">\(TT\)</span>. It is also relatively
 easy to tell a computer how to compute it.</p>
-<p>Let’s be explicit agout our terms. We have three different hypotheses:</p>
+<p>Let’s be explicit about our terms. We have three different hypotheses:</p>
 <ul>
 <li><span class="math inline">\(H_1:~~~G = CC\)</span></li>
 <li><span class="math inline">\(H_2:~~~G = CT\)</span></li>
@@ -690,7 +693,7 @@ the probability of observing a <span class="math inline">\(C\)</span> on the rea
 <span class="math inline">\(1/2\)</span> the read is from the chromosome carrying a <span class="math inline">\(T\)</span>, in which case, recording a <span class="math inline">\(C\)</span> requires that
 a sequencing error occurred. Therefore:
 <span class="math display">\[
-P(B_1=C~|~G=CT, \epsilon_1) = \frac{1}{2}(1 - \epsilon) + \frac{1}{2}\epsilon_1
+P(B_1=C~|~G=CT, \epsilon_1) = \frac{1}{2}(1 - \epsilon) + \frac{1}{2}\epsilon_1 = \frac{1}{2}
 \]</span>
 Notice that this is less than <span class="math inline">\(P(B_1=C~|~G=CC, \epsilon_1)\)</span> by a factor of about 2.</li>
 <li>Finally, if <span class="math inline">\(G=TT\)</span>, then, with probability 1, the read will come from a chromosome
@@ -703,7 +706,7 @@ So, summarizing the information from the first read we have:
 <span class="math display">\[
 \begin{aligned} 
 L(G=CC | B_1 = C) &amp;=   P(B_1 = C| G=CC, \epsilon_1) &amp;  &amp;=  1 - \epsilon_1 &amp; &amp;= 0.99937 \\ 
-L(G=CT | B_1 = C) &amp;=   P(B_1 = C| G=CT, \epsilon_1) &amp; &amp;=  \frac{1}{2}(1 - \epsilon_1) + \frac{1}{2}\epsilon_1 &amp; &amp;= 0.5 \\ 
+L(G=CT | B_1 = C) &amp;=   P(B_1 = C| G=CT, \epsilon_1) &amp; &amp;=  \frac{1}{2} &amp; &amp;= 0.5 \\ 
 L(G=TT | B_1 = C) &amp;=   P(B_1 = C| G=TT, \epsilon_1) &amp; &amp;=  \epsilon_1 &amp; &amp;= 0.00063
 \end{aligned}
 \]</span>
@@ -714,8 +717,8 @@ the likelihood that <span class="math inline">\(G=CC\)</span> compared to <span 
 <p>Now, more quickly, we can consider how much evidence <strong>read 3</strong>, <span class="math inline">\(B_3 = T\)</span> with <span class="math inline">\(\epsilon_3 = 0.00031\)</span> offers:
 <span class="math display">\[
 \begin{aligned} 
-L(G=CC | B_3 = T) &amp;=   P(B_3 = T| G=CC, \epsilon_3) &amp;  &amp;=   &amp; \epsilon_3 &amp;= 0.00031 \\ 
-L(G=CT | B_3 = T) &amp;=   P(B_3 = T| G=CT, \epsilon_3) &amp; &amp;=  \frac{1}{2}(1 - \epsilon_3) + \frac{1}{2}\epsilon_3 &amp; &amp;= 0.5 \\ 
+L(G=CC | B_3 = T) &amp;=   P(B_3 = T| G=CC, \epsilon_3) &amp;  &amp;=  \epsilon_3 &amp; &amp;= 0.00031 \\ 
+L(G=CT | B_3 = T) &amp;=   P(B_3 = T| G=CT, \epsilon_3) &amp; &amp;=  \frac{1}{2} &amp; &amp;= 0.5 \\ 
 L(G=TT | B_3 = T) &amp;=   P(B_3 = T| G=TT, \epsilon_3) &amp; &amp;=  1 - \epsilon_3 &amp; &amp;= 0.99969
 \end{aligned}
 \]</span>
@@ -728,9 +731,17 @@ So, we have:
 <span class="math display">\[
 \small
 \begin{aligned} 
-L(G=CC | B_1 = C, B_3 = T) &amp;=   P(B_1 = C| G=CC, \epsilon_1) \times P(B_3 = T| G=CC, \epsilon_3) &amp; &amp;= 0.99937 * 0.00031  &amp; &amp;= 0.00031\\ 
-L(G=CT | B_1 = C, B_3 = T) &amp;=   P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=CT, \epsilon_3) &amp; &amp;=  0.5 * 0.5 &amp; &amp;= 0.25\\ 
-L(G=TT | B_1 = C, B_3 = T) &amp;=  P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=TT, \epsilon_3) &amp; &amp;=  0.00063 * 0.99969 &amp; &amp;= 0.00063
+L(G=CC | B_1 = C, B_3 = T) &amp;=   P(B_1 = C| G=CC, \epsilon_1) \times P(B_3 = T| G=CC, \epsilon_3) &amp; &amp;= 0.99937 \times 0.00031\\ 
+L(G=CT | B_1 = C, B_3 = T) &amp;=   P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=CT, \epsilon_3) &amp; &amp;=  0.5 \times 0.5 \\ 
+L(G=TT | B_1 = C, B_3 = T) &amp;=  P(B_1 = C| G=CT, \epsilon_1) \times P(B_3 = T| G=TT, \epsilon_3) &amp; &amp;=  0.00063 \times 0.99969
+\end{aligned}
+\]</span>
+I couldn’t fit the actual products of each of those up above, so we put them down here:
+<span class="math display">\[
+\begin{aligned} 
+L(G=CC | B_1 = C, B_3 = T)  &amp;= 0.00031\\ 
+L(G=CT | B_1 = C, B_3 = T)  &amp;= 0.25\\ 
+L(G=TT | B_1 = C, B_3 = T)  &amp;= 0.00063
 \end{aligned}
 \]</span>
 So, with only two reads, one of each allele, the likelihood of a heterozygote can be quite high.</p>
@@ -741,7 +752,8 @@ factors of 1/2 on the heterozygote category.</p>
 <li>If you have only a single read, the likelihood that the genotype is a homozygote is always higher than
 the likelihood that it is a heterozygote.</li>
 <li>If you only see reads of a single allele, the likelihood that the genotype is a heterozygote
-drops by a factor of two for each new read.</li>
+drops by a factor of two for each new read. (And the likelihood that the genotype is homozygous for the allele
+you have not seen drops by a factor of the estimated genotyping error each time).</li>
 <li>The values of the likelihoods for the homozygous hypotheses are highly dependent on the base quality scores but not so much for the likelihood of the heterozygous hypothesis.</li>
 </ol>
 <p>Before we leave this section, we want to stress to the reader that genotype likelihoods are
