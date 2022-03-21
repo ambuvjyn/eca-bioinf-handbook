@@ -1039,9 +1039,9 @@ That should map all those trimmed reads to the genome.  Woo-hoo!
 
 ## Step 3. Mark duplicates in BAM files from each individual
 
-I had originally marked duplicates with some of the subcommands 
+I used to identify (and either remove or mark) duplicates with some of the subcommands 
 of the `samtools` package.  But it turns out that MarkDuplicates from
-the Picard Tools package, from the Broad Institute, might have a few
+the Picard Tools package, from the Broad Institute, has a few
 advantages.  Chief among those is the fact that, with MarkDuplicates, it is not
 necessary to merge all of the BAM files from a single individual and
 library prep to mark duplicates.  Although the documentation about this
@@ -1067,7 +1067,13 @@ conda activate picard
 picard MarkDuplicates --help
 ```
 
-Looking that over, we see that we can provide multiple
+The help file notes that duplicates are identified as reads in which
+each mate maps to the same location in the genome (i.e. they have the
+same 5' position) and which have sequences that are similar.  It also
+tells us that the read that is "retained" as the "non-duplicate" is chosen
+to have the highest base quality scores, on average.
+
+We also see that we can provide multiple
 BAM files, simultaneously, to MarkDuplicates, by giving the
 `-I` or `--INPUT` command multiple times, following it, each time,
 with the path to a different BAM file.  
@@ -1163,7 +1169,6 @@ for LINE in {1..8}; do
       --METRICS_FILE $MET \
       --TAGGING_POLICY All \
       --CREATE_INDEX > $LOG 2>&1
-  
 done
 ```
 
@@ -1208,195 +1213,20 @@ you will find that none of them have any reads marked as duplicates
 samtools view -f 0x400 results/bam/s001---1.bam | head
 ```
 
-
-## Step 3-OLD. Merging bams from the same sample + library
-
-Ha!  This is now deprecated.
-
-Once those 22 mapping jobs have completed, you should have 22 BAM files
-in the directory `results/bam`. This is good! However amongst those
-22 BAM files, there are only 8 samples.  So clearly we will have to merge
-some of them. Nonetheless, before we blindly combine the BAM files from
-the same sample, we need to make note of the fact that, in order to identify
-PCR duplicates, we must first merge together any BAM files that come from
-the same library prep of the same sample. 
-
-Here is a figure showing where in the overall workflow this step fits in:
-```{r merge-lib-samp-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Merging BAM files that include the same sample and library prep, so that we can identify PCR duplicates from them.'}
-knitr::include_graphics("figs/snakemake-dags/merge-lib-samp.svg", auto_pdf = TRUE)
-```
-
-In some cases only a single BAM
-file is from the same sample and library prep, while in others, a single
-sample and library prep might have reads in two, or even three, BAM files.
-
-In order to merge such files, we will use the samtools `merge` subcommand.
-Since the BAM files we are dealing with our quite small, we will simply
-run all of these in a for loop.  However, in order to determine which
-BAM files we must merge, we will use our `units.tsv` file and the `awk` utility.
-
-You should go back and review the section on `awk`'s use of associative (or "hash")
-arrays to better understand how the following combination of an awk script and the unix
-`sort` utility gives us a numbered TSV file that provides a list of bam file paths
-that must be merged for each sample by library-prep combination.  The comments
-in the following script also give some detail.
-```sh
-awk '
-  BEGIN {
-    SUBSEP="\t";  # separate array hash keys by TABs
-    OFS="\t";     # separate output filed with TABs 
-  }
-  NR==1 {next;}   # ignore the first line
-  { # in this block, store a space-seprated list of files for each sample-library
-    # combination in the associative array bams
-    bams[$1,$3] = sprintf("%s results/bam/%s---%s.bam", bams[$1,$3], $1, $2);
-  }
-  END { # at the end, print out the keys of bams and the paths associated with each
-        # in two columns
-    for(i in bams) print i, bams[i]
-  }
-' units.tsv | \
-sort |  \
-awk -F "\t" ' # print these lines out in a numbered TSV file.
-  BEGIN {printf("index\tsample\tlibrary\tbampaths\n");}  # print a header line
-  {printf("%d\t%s\t%s\t%s\n", ++n, $1, $2, $3)}  # print out each numbered line
-' > numbered-sample-libs.tsv
-```
-
-The output file there, `numbered-sample-libs.tsv`, looks like this:
-```
-index	sample	library	bampaths
-1	s001	Lib-1	 results/bam/s001---1.bam
-2	s002	Lib-1	 results/bam/s002---1.bam results/bam/s002---2.bam
-3	s003	Lib-1	 results/bam/s003---1.bam results/bam/s003---2.bam results/bam/s003---3.bam
-4	s004	Lib-1	 results/bam/s004---1.bam
-5	s004	Lib-2	 results/bam/s004---2.bam
-6	s005	Lib-1	 results/bam/s005---1.bam results/bam/s005---2.bam
-7	s005	Lib-3	 results/bam/s005---3.bam
-8	s006	Lib-1	 results/bam/s006---1.bam results/bam/s006---2.bam
-9	s006	Lib-2	 results/bam/s006---3.bam results/bam/s006---4.bam
-10	s007	Lib-1	 results/bam/s007---1.bam results/bam/s007---2.bam
-11	s007	Lib-2	 results/bam/s007---3.bam results/bam/s007---4.bam
-12	s008	Lib-1	 results/bam/s008---1.bam
-13	s008	Lib-2	 results/bam/s008---2.bam
-14	s008	Lib-3	 results/bam/s008---3.bam
-```
-There are only four columns there.  The `bampaths` column sometimes
-includes a space-delimited string of multiple paths---those look like
-extra columns, but since it is a TAB that delimits columns (and not
-any whitespace), the `bampaths` column is still just a single column.
-
-Now that we have that file, we can use our `line_assign.sh` script
-(which should be in our PATH!) to pick out different lines and execute
-them in a for loop. 
-
-Here is a for loop and a few commandsthat can be run
-_in an interactive compute shell_ to do this merge step.
-
-It only takes a minute or two on our non-model-wgs-example-data set.
-```sh
-
-conda activate bwasam
-mkdir -p results/lib-merged
-for I in {1..14}; do
-  eval $(line_assign.sh $I numbered-sample-libs.tsv)
-  echo "Merging $bampaths"
-  samtools merge results/lib-merged/${sample}---${library}.bam $bampaths
-done
-
-```
-
-## Step 4. Marking duplicates
-
-Now, we have a series of files that include all the reads from
-each individual that were prepared in a single library.  These files are
-all in `results/lib-merged`:
-```
-s001---Lib-1.bam  s004---Lib-2.bam  s006---Lib-2.bam  s008---Lib-2.bam
-s002---Lib-1.bam  s005---Lib-1.bam  s007---Lib-1.bam  s008---Lib-3.bam
-s003---Lib-1.bam  s005---Lib-3.bam  s007---Lib-2.bam
-s004---Lib-1.bam  s006---Lib-1.bam  s008---Lib-1.bam
-```
-These are the files that we use to identify PCR duplicates.
-This step fits into our workflow at the following location:
-```{r mark-dup-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Marking duplicates'}
-knitr::include_graphics("figs/snakemake-dags/mark-dup.svg", auto_pdf = TRUE)
-```
-
-For this task we will use the program MarkDuplicates from
-the PicardTools collection of tools.  This is a set of bioinformatics
-tools, written in Java, from the Broad Institute---the same people
-who bring us the Genome Analysis Toolkit, or GATK.  
-
-So, our first task is going to be to make sure that we have
-the picard tools.  We will want version 2.26 (which is pretty
-much the latest minor release as of this writing), so we do:
-```sh
-mamba create -n picard -c bioconda picard=2.26
-```
-
-Once that is installed we can activate the environment and
-check out the syntax for the MarkDuplicates tool.
-```sh
-conda activate picard
-picard MarkDuplicates --help
-```
-
-Looking that over, it seems that we probably could have listed all the
-bams for each sample-by-library combination directly as arguments to
-MarkDuplicates, rather than merging everything first. But since they
-are merged now, it will be straightforward to just cycle over
-the merged bams, and mark duplicates in each.  With these small
-data sets it doesn't take too long to mark duplicates, so we will
-just do it with a for loop over the files in `results/lib-merged`
-from within an _interactive shell on a compute node_.
-```sh
-conda activate picard
-mkdir -p results/mkdup results/qc/mkdup results/logs/mkdup
-for BAM in results/lib-merged/*.bam; do
-  BASEBAM=$(basename $BAM)
-  BASE=${BASEBAM/.bam/}
-  OUT=results/mkdup/$BASE.bam
-  MET=results/qc/mkdup/$BASE.metrics
-  LOG=results/logs/mkdup/$BASE.log
-  
-  echo "Working on $BAM at $(date)"
-  
-  picard MarkDuplicates -I $BAM --OUTPUT $OUT --METRICS_FILE $MET > $LOG 2>&1
-done
-```
-
-That should take about 5 minutes.  When it is done, it is instructive
-to look for reads that are flagged as duplicates in the result.  If a read
-was found to be a duplicate it will have a SAM flag with the 0x400 bit set.
-
-So, we can look at those with `samtools`. For example:
-```sh
-conda activate bwasam
-samtools view -f 0x400 results/mkdup/s001---Lib-1.bam | head
-
-# contrast that to the bam files before duplicate marking.
-# For example:
-samtools view -f 0x400 results/bam/s001---1.bam | head
-```
-
-For a nice summary of how many duplicates were found, we have the "metrics" files
-that were written to the directory `results/qc/mkdup`.  Have a look at one of those,
-like `less results/qc/mkdup/s008.metrics`, and you can see that it has summarized
-it by library.
-
-It is worth noting that these metrics files can be read by MultiQC and the
-information in them rendered into useful images.  However, there is a bug
-in MultiQC such that it gets a little gooched up when MarkDuplicates was run on
-multiple files with multiple libraries in them.
+When reads are marked as duplicates, they will be automatically ignored during
+variant calling (which we start in the next step!) by GATK's variant-calling
+programs.  They can also be ignored in ANGSD and most other variant calling programs.
 
 
-## Step 5. Merging dup-marked bams from the same sample
+Now we have 8 BAM files. Each one has all the reads from a single
+individual.  Duplicates in them have been marked, and they each have
+an index.  Therefore, it is time to proceed to the variant calling
+steps.
 
-## Step 6. Creating a gVCF file for each sample
+## Step 4. Creating a gVCF file for each sample
 
-## Step 7. Importing the gVCF files into a GenomicsDatabase
+## Step 5. Importing the gVCF files into a GenomicsDatabase
 
-## Step8. Calling variants and creating VCF files from the GenomicsDatabase
+## Step 6. Calling variants and creating VCF files from the GenomicsDatabase
 
-## Step9. Filtering variants
+## Step 7. Filtering variants
