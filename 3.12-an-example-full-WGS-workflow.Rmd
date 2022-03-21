@@ -1053,7 +1053,7 @@ been properly set, with the `LB` read-group key set, as we did during
 the mapping step, above).
 
 Here is our DAG showing what steps we are talking about in this section:
-```{r mark-dup-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Duplicate mapping step, and also running samtools stats described in this section.'}
+```{r mark-dup-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Marking PCR and optical duplicates and also running samtools stats described in this section.'}
 knitr::include_graphics("figs/snakemake-dags/mark-dup.svg", auto_pdf = TRUE)
 ```
 
