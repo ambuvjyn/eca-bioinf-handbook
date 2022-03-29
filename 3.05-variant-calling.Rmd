@@ -419,6 +419,243 @@ Whoa!
 
 
 
+## GATK's gVCF Workflow
+
+The Genome Analysis Toolkit, or GATK, includes a program called
+HaplotypeCaller which is well respected for calling variants and
+computing genotype likelihoods from alignments (i.e., from BAM files).
+
+A key feature of HaplotypeCaller is a _local reassembly_ step in which all the reads
+in a small "active" region of the genome are inspected and reassembled amongst themselves
+in a way that can provide a clearer picture of the presence of short structural
+variations like insertions and
+deletions (collectively called "indels," for short).  This local reassembly step helps to improve the 
+HaplotypeCaller's accuracy when calling indels.
+
+Here is a reminder of what insertions and deletions look like.
+```
+AGTGGACCTGACTA  <- Reference Genome
+AGTGG--CTGACTA  <- Aligned read with a deletion
+
+AGTGGAC---CTGACTA  <- Reference Genome expanded to show insertion site
+AGTGGACAAGCTGACTA  <- Aligned read with an insertion
+
+```
+
+Because HaplotypeCaller has good performance for small structural variants, and
+because GATK tools are quite well supported (the Broad Institute has an active
+team of representatives and developers that reply to user issues quite quickly
+when there is a problem with their software), HaplotypeCaller, and other
+associated GATK tools, are frequently used in bioinformatics.  
+
+When HaplotypeCaller first became available, a standard analysis with it
+involved running it with all the samples you had, together at the same time,
+so that variant calling could be done _jointly_, directly producing a
+VCF file for all the individuals.  In other words, it was
+important to have all of your samples in a single run so that if HaplotypeCaller
+found a variant in one individual it could score that variant in all the
+other individuals of the sample.  We will call this the "direct-to-VCF"
+mode of operation for HaplotypeCaller. In the early 2000s, when sequencing
+was considerably more costly than it is today, this was a reasonable strategy,
+because data sets at the time didn't include a whole lot of individual
+samples.  However, today, when hundreds of individuals can be sequenced throughout
+their genomes for only a few thousand dollars, the limitations of the direct-to-VCF
+approach have become more apparent.
+
+The first problem is that run times for HaplotypeCaller in direct-to-VCF mode do not scale
+linearly with the number of samples.  In other words, if instead of a sample
+of size 50 birds, you run HaplotypeCaller in direct-to-VCF mode on a sample of 200 birds, 
+the program
+will not simply require 4 times more computation.  Rather, it might require
+8 times more computing time.  As an example of this, I performed a small experiment
+with alignments from 240 Chinook salmon.  I randomly sampled (without replacement)
+a subsample of size 4, 8, 16, 24, 36, 48, 72,..., 240 fish and ran a 100 Kb section
+of their alignments though HaplotypeCaller in direct-to-VCF mode using 4 cores.  I 
+repeated this with 10
+different random subsamples for each of the sample sizes, and recorded how much CPU time 
+HaplotypeCaller used in each case.  The results are plotted in the figure below.
+```{r hc-time-test, out.width='100%', echo=FALSE}
+knitr::include_graphics(path = "figs/haplotype-caller-run-times.svg")
+```
+
+The blue line shows the average CPU time for the 10 replicates at each value of
+sample size.  The blue dots show the CPU time for each individual replicate, and the
+dashed black line shows what we would expect the times to be---based on the time
+for 48 samples---if HaplotypeCaller's run time increased linearly with the number
+of samples.  The blue line
+clearly looks like a parabola, which means that as your sample sizes get
+larger and larger, the penalty that you pay having to load all of your samples
+into HaplotypeCaller at the same time increases faster than the number of samples---it
+looks like it increases quadratically.  
+
+The second problem with having to run HaplotypeCaller on all of your samples
+at the same time is encountered when you want to add more samples.  If you started
+your sequencing project with 120 fish, and then after you had created a VCF file
+using HaplotypeCaller in direct-to-VCF mode, one of your collaborators surprises you with 
+20 more samples
+to add to the study, you would have to run all 140 fish, total, through
+HaplotypeCaller in direct-to-VCF mode, which is somewhat redundant,
+since you had already run 120 of them
+through it just a little while before.  This problem is called the $N+1$ problem
+by the GATK developers, presumably because it irked them to no end that they had to
+run HaplotypeCaller on $N+1$ samples, just to add one more sample to a VCF file that
+already had $N$ samples in it. 
+
+To solve both the quadratic HaplotypeCaller runtime problem and the $N+1$ problem,
+the scientists and the developers at the Broad Institute developed what is called the
+"gVCF workflow."  Although there are several different flavors of this workflow,
+we will be covering the latest flavor (at the time of writing) which proceeds in
+these three steps:
+
+1. `HaplotypeCaller` is run, individually, on each single sample, creating a special
+type of VCF file called a gVCF file---one gVCF file for each individual sample.
+This gVCF file encodes information not just about 
+sites that are clearly variable in the individual, but it _also_ records how much
+evidence there is for the individual having a variable site in between the
+clearly variable sites.
+
+2. The GATK tool `GenomicsDBImport` loads the gVCF files from all individuals
+into a special type of "genomics data base" that is optimized for retrieval of information
+across individuals at each possible location on each chromosome (or on a collection
+of scaffolds).
+
+3. The GATK tool `GenotypeGVCFs` is then used to extract information from the genomics
+data base about all the
+individuals, at each position on a chromosome (or in a group of scaffolds),
+and this is used to jointly call the variants and genotypes of all the individuals,
+producing, in the end, a proper VCF file for each chromosome (or group of scaffolds).
+
+Having these multiple steps involved in the process of creating a VCF allows for some
+flexibility in optimizing the desired properties of the workflow.  Namely, in
+step 1, `HaplotypeCaller` is still used to do a local reassembly of all the reads
+within a single individual, enhancing the identification of indels, but,
+since that local realignment is not done over all individuals at once, it doesn't
+suffer quadratic scaling with number of samples.  Further, Step 3 still gets to
+use information from all the individuals jointly when calling variants, but it is
+done within the context of an efficient data base structure that allows that joint
+process to scale linearly in the number of samples.  The hope is that
+this gVCF workflow provides the same accuracy as joint calling all samples simultaneously 
+in a single run of HaplotypeCaller, while being much faster for larger
+numbers of samples. Details
+can be found in @poplin2017scaling.
+
+Additionally, by saving the gVCF files produced for each
+individual, or, even better, the genomic databases including all the individuals,
+adding additional samples can be done relatively quickly by updating the
+genomic database with information from the new individuals.  Thus, this workflow
+improves upon the $N+1$ problem, being able to use many of the previously
+computed results (the gVCF files or the genomic data base) from the first
+$N$ individuals.
+
+Here, it is worthwhile to reflect upon how this gVCF workflow allows
+the end goal of obtaining a single VCF file with all your variants and all your
+samples to be broken down into separate, independent tasks (as this is a huge
+theme in bioinformatics).  The direct-to-VCF workflow could be parallelized
+by breaking the genome into a lot of small regions and then running
+HaplotypeCaller on all the samples across just one small region at a time.
+The gVCF workflow, on the other hand, lends itself to parallelizing over
+individuals in step 1 (the HaplotypeCaller step) and then parallelizing
+steps 2 and 3 (genomics data base importing and genotyping) over regions
+of the genome.  The regions focused upon for the genomics data base importing
+step are typically chromosomes, but you can also, as
+we shall see, combine many small scaffolds together into a single genomics
+data base. Step 3 can be further broken down over sub-regions of chromosomes,
+if desired.
+
+### Step 1. Running HaplotypeCaller and getting one gVCF for each sample
+
+We will discuss this in the context or our example workflow in
+Section \@ref(make-gvcfs).
+
+### gVCF files  {#gvcf-format}
+
+So, you may be wondering what the difference between a VCF file a gVCF file is.
+It turns out that a gVCF is a special type of VCF file. (One of the nice things
+about the way VCF files [and SAM files, for that matter], is that the definition of various
+fields in the file can be made in the header, or in the FORMAT column, which makes
+it fairly easy to extend the files to novel situations in a format-compliant way.)
+
+A comprehensive overview of gVCF files can be found at 
+[here](https://gatk.broadinstitute.org/hc/en-us/articles/360035531812-GVCF-Genomic-Variant-Call-Format), and it is recommended reading.  In this section we just summarize the information in that
+document.
+
+Let's start by looking at the first few lines for a chromosome at an individual with low
+fairly low read depth.  We see a lot of lines that look like this:
+```
+#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  s001
+CM031199.1      1       .       A       <NON_REF>       .       .       END=71  GT:DP:GQ:MIN_DP:PL      0/0:1:3:1:0,3,15
+CM031199.1      72      .       T       <NON_REF>       .       .       END=72  GT:DP:GQ:MIN_DP:PL      0/0:1:0:1:0,0,0
+CM031199.1      73      .       A       <NON_REF>       .       .       END=110 GT:DP:GQ:MIN_DP:PL      0/0:1:3:1:0,3,15
+CM031199.1      111     .       C       <NON_REF>       .       .       END=138 GT:DP:GQ:MIN_DP:PL      0/0:1:0:1:0,0,0
+CM031199.1      139     .       T       <NON_REF>       .       .       END=139 GT:DP:GQ:MIN_DP:PL      0/0:2:3:2:0,3,45
+CM031199.1      140     .       A       <NON_REF>       .       .       END=141 GT:DP:GQ:MIN_DP:PL      0/0:2:0:2:0,0,0
+CM031199.1      142     .       T       <NON_REF>       .       .       END=144 GT:DP:GQ:MIN_DP:PL      0/0:2:3:2:0,3,45
+CM031199.1      145     .       A       <NON_REF>       .       .       END=146 GT:DP:GQ:MIN_DP:PL      0/0:2:0:2:0,0,0
+CM031199.1      147     .       G       <NON_REF>       .       .       END=147 GT:DP:GQ:MIN_DP:PL      0/0:2:3:2:0,3,45
+CM031199.1      148     .       G       <NON_REF>       .       .       END=149 GT:DP:GQ:MIN_DP:PL      0/0:2:0:2:0,0,0
+CM031199.1      150     .       A       <NON_REF>       .       .       END=151 GT:DP:GQ:MIN_DP:PL      0/0:2:3:2:0,3,45
+CM031199.1      152     .       A       <NON_REF>       .       .       END=155 GT:DP:GQ:MIN_DP:PL      0/0:2:0:2:0,0,0
+CM031199.1      156     .       A       <NON_REF>       .       .       END=156 GT:DP:GQ:MIN_DP:PL      0/0:2:3:2:0,3,45
+CM031199.1      157     .       G       <NON_REF>       .       .       END=159 GT:DP:GQ:MIN_DP:PL      0/0:2:0:2:0,0,0
+CM031199.1      160     .       G       <NON_REF>       .       .       END=160 GT:DP:GQ:MIN_DP:PL      0/0:2:3:2:0,3,45
+```
+
+Aha!  This is interesting.  The gVCF file has records for sites that are not confident variants.
+Interesting.  Each of the rows here gives an indication of how much information the reads from the
+individual give us about whether there _might_ be a variant site at the individual. 
+
+Breaking it down, starting with the first row, we see that the ALT allele is listed as `<NON_REF>`.
+This is simply a code that means "Not the reference allele."  In other words, it is saying, "There
+might be a variant here, and if there is, then the alternate allele would be something that is
+not the reference allele."  
+
+The other interesting thing on that line is the `END=71` in the INFO field.  That is telling us
+that all of the sites from position 1 (the value in the POS field) to position 71 are described
+by this single row.  Using this type of mechanism, it is possible to describe every position in the
+genome without having a single row for each position.  In other words, this system provides some
+compression.  
+
+If we look at the genotype column in the first row, we see `0/0:1:3:1:0,3,15`.  The
+fields between the colons in that are described by the value in the FORMAT column:
+`GT:DP:GQ:MIN_DP:PL`.  The `GQ` field (the third one) is 3.  That is a Phred scaled
+probability that the genotype call (`0/0` or "reference homozygous") is incorrect in this
+case.  So, this is saying there is a $1 / 10^{3/10} \approx 0.5$ chance that this individual
+is not homozygous for the reference allele at these sites (from POS = 1 to 71).  This is not terribly surprising, since the
+read depth (in the DP field) at these sites is 1.
+
+If we go deeper in the file, we find sites with higher read depth, and hence more confidence that the
+individual is homozygous for the reference allele.  For example:
+```
+CM031199.1      1951    .       C       <NON_REF>       .       .       END=1964        GT:DP:GQ:MIN_DP:PL      0/0:8:21:7:0,21,224
+```
+Here, the sites from 1951 to 1964 all have a genotype quality of 21, indicating a
+chance of $1/10^{21/10} \approx 0.0079$ that the individual is not homozygous for the reference allele
+at these sites.
+
+On the other hand, when we come to a site where it is pretty clear from the information in a single
+individual that there is a variant, like:
+```
+CM031199.1      1903    .       G       T,<NON_REF>     210.02  .       DP=7;ExcessHet=0.0000;MLEAC=2,0;MLEAF=1.00,0.00;RAW_MQandDP=25200,7     GT:AD:DP:GQ:PL:SB   1/1:0,7,0:7:21:224,21,0,224,21,224:0,0,4,3
+```
+that information is recorded.  At the site above (POS = 1903), this is saying that there is at least one
+alternate allele, which is a T, and the gVCF format leaves open the possibility that there
+is another alternate allele (coded as `<NON_REF>`) so that the possibility of that 
+can also be computed and recorded.  In this case, the individual has 7 reads total, and they
+are all for the T allele, which leaves us with a high genotype quality (21).  The genotype
+likelihoods for all the different possible genotypes, ordered as:
+```
+GG,GT,TT,GN,TN,NN
+```
+where N means `<NON_REF>` are also recorded in the PL field that looks like:
+```
+21:224,21,0,224,21,224
+```
+
+This turns out to be all the information needed to eventually come back to this information
+in light of what was found at all the other individuals, and then _jointly_ call
+variants using information from all the individuals.
+
+
 
 
 

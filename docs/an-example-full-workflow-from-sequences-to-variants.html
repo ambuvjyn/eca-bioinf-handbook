@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-21" />
+<meta name="date" content="2022-03-29" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -458,6 +458,11 @@ div.csl-indent {
 <li class="chapter" data-level="20.1.3" data-path="variant-calling.html"><a href="variant-calling.html#computing-genotype-likelihoods-with-three-different-softwares"><i class="fa fa-check"></i><b>20.1.3</b> Computing genotype likelihoods with three different softwares</a></li>
 <li class="chapter" data-level="20.1.4" data-path="variant-calling.html"><a href="variant-calling.html#a-directed-acyclic-graph-for-genotype-likelihoods"><i class="fa fa-check"></i><b>20.1.4</b> A Directed Acyclic Graph For Genotype Likelihoods</a></li>
 </ul></li>
+<li class="chapter" data-level="20.2" data-path="variant-calling.html"><a href="variant-calling.html#gatks-gvcf-workflow"><i class="fa fa-check"></i><b>20.2</b> GATK’s gVCF Workflow</a>
+<ul>
+<li class="chapter" data-level="20.2.1" data-path="variant-calling.html"><a href="variant-calling.html#step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample"><i class="fa fa-check"></i><b>20.2.1</b> Step 1. Running HaplotypeCaller and getting one gVCF for each sample</a></li>
+<li class="chapter" data-level="20.2.2" data-path="variant-calling.html"><a href="variant-calling.html#gvcf-format"><i class="fa fa-check"></i><b>20.2.2</b> gVCF files</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="21" data-path="boneyard-1.html"><a href="boneyard-1.html"><i class="fa fa-check"></i><b>21</b> Boneyard</a></li>
 <li class="chapter" data-level="22" data-path="basic-handling-of-vcf-files.html"><a href="basic-handling-of-vcf-files.html"><i class="fa fa-check"></i><b>22</b> Basic Handling of VCF files</a>
@@ -512,7 +517,13 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="27.7.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#run-samtools-stats-on-the-results"><i class="fa fa-check"></i><b>27.7.1</b> Run samtools stats on the results</a></li>
 </ul></li>
-<li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-4.-creating-a-gvcf-file-for-each-sample"><i class="fa fa-check"></i><b>27.8</b> Step 4. Creating a gVCF file for each sample</a></li>
+<li class="chapter" data-level="27.8" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#make-gvcfs"><i class="fa fa-check"></i><b>27.8</b> Step 4. Creating a gVCF file for each sample</a>
+<ul>
+<li class="chapter" data-level="27.8.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#thats-a-dict-thing-to-do"><i class="fa fa-check"></i><b>27.8.1</b> That’s a dict thing to do!</a></li>
+<li class="chapter" data-level="27.8.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#setting-up-a-slurm-job-array-for-this"><i class="fa fa-check"></i><b>27.8.2</b> Setting up a SLURM job array for this</a></li>
+<li class="chapter" data-level="27.8.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#running-interactively-to-watch-the-output"><i class="fa fa-check"></i><b>27.8.3</b> Running interactively to watch the output</a></li>
+<li class="chapter" data-level="27.8.4" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#launch-the-first-3-jobs-of-our-array"><i class="fa fa-check"></i><b>27.8.4</b> Launch the first 3 jobs of our array</a></li>
+</ul></li>
 <li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.11" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-7.-filtering-variants"><i class="fa fa-check"></i><b>27.11</b> Step 7. Filtering variants</a></li>
@@ -587,9 +598,9 @@ lanes when marking PCR duplicates.</p>
 <p>Downloading the file to a Linux server can be done using <code>wget</code> on the command line. Because the file
 is large, a little bit of extra trickery is required to download it. This (rather complex) command line
 should work:</p>
-<div class="sourceCode" id="cb668"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb668-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb668-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">--load-cookies</span> /tmp/cookies.txt <span class="st">&quot;https://docs.google.com/uc?export=download&amp;confirm=</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">--quiet</span> <span class="at">--save-cookies</span> /tmp/cookies.txt <span class="at">--keep-session-cookies</span> <span class="at">--no-check-certificate</span> <span class="st">&#39;https://docs.google.com/uc?export=download&amp;id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b&#39;</span> <span class="at">-O-</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-rn</span> <span class="st">&#39;s/.*confirm=([0-9A-Za-z_]+).*/\1\n/p&#39;</span><span class="va">)</span><span class="st">&amp;id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b&quot;</span> <span class="at">-O</span> non-model-wgs-example-data.tar <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/cookies.txt</span></code></pre></div>
+<div class="sourceCode" id="cb674"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb674-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb674-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">--load-cookies</span> /tmp/cookies.txt <span class="st">&quot;https://docs.google.com/uc?export=download&amp;confirm=</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">--quiet</span> <span class="at">--save-cookies</span> /tmp/cookies.txt <span class="at">--keep-session-cookies</span> <span class="at">--no-check-certificate</span> <span class="st">&#39;https://docs.google.com/uc?export=download&amp;id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b&#39;</span> <span class="at">-O-</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-rn</span> <span class="st">&#39;s/.*confirm=([0-9A-Za-z_]+).*/\1\n/p&#39;</span><span class="va">)</span><span class="st">&amp;id=1LMK-DCkH1RKFAWTR2OKEJ_K9VOjJIZ1b&quot;</span> <span class="at">-O</span> non-model-wgs-example-data.tar <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/cookies.txt</span></code></pre></div>
 <p>Once the file <code>non-model-wgs-example-data.tar</code> is downloaded, that .tar archive can be untarred with</p>
-<div class="sourceCode" id="cb669"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb669-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb669-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xvf</span> non-model-wgs-example-data.tar</span></code></pre></div>
+<div class="sourceCode" id="cb675"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb675-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb675-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar</span> <span class="at">-xvf</span> non-model-wgs-example-data.tar</span></code></pre></div>
 <p>That will create the directory <code>non-model-wgs-example-data</code>, which contains all the files.</p>
 <p>The contents of that directory look like this (in a <code>tree</code> view):</p>
 <pre><code>non-model-wgs-example-data
@@ -752,52 +763,52 @@ waiting for software to be installed).</p>
 <p>So, I am going to require that people use <code>mamba</code> from here on out. First, test to see
 if you have mamba in your base conda environment: activate your base conda environment
 and see if you have mamba:</p>
-<div class="sourceCode" id="cb671"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb671-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb671-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate base</span>
-<span id="cb671-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb671-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span></span></code></pre></div>
+<div class="sourceCode" id="cb677"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb677-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb677-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate base</span>
+<span id="cb677-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb677-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span></span></code></pre></div>
 <p>If this gives you a screen full of syntax about how to use mamba, like:</p>
-<div class="sourceCode" id="cb672"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb672-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-1" aria-hidden="true" tabindex="-1"></a><span class="ex">usage:</span> mamba [-h] [-V] command ...</span>
-<span id="cb672-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb672-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> is a tool for managing and deploying applications, environments and packages.</span>
-<span id="cb672-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb672-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Options:</span></span>
-<span id="cb672-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb672-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-7" aria-hidden="true" tabindex="-1"></a><span class="ex">positional</span> arguments:</span>
-<span id="cb672-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">command</span></span>
-<span id="cb672-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-9" aria-hidden="true" tabindex="-1"></a>    <span class="ex">clean</span>        Remove unused packages and caches.</span>
-<span id="cb672-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-10" aria-hidden="true" tabindex="-1"></a>    <span class="ex">compare</span>      Compare packages between conda environments.</span>
-<span id="cb672-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">config</span>       Modify configuration values in .condarc. This is modeled after the git config command. Writes to the user .condarc file <span class="er">(</span><span class="ex">/home/eriq@colostate.edu/.condarc</span><span class="kw">)</span> <span class="ex">by</span></span>
-<span id="cb672-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-12" aria-hidden="true" tabindex="-1"></a>                 <span class="ex">default.</span></span>
-<span id="cb672-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-13" aria-hidden="true" tabindex="-1"></a>    <span class="ex">create</span>       Create a new conda environment from a list of specified packages.</span>
-<span id="cb672-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">help</span>         Displays a list of available conda commands and their help strings.</span>
-<span id="cb672-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">info</span>         Display information about current conda install.</span>
-<span id="cb672-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-16" aria-hidden="true" tabindex="-1"></a>    <span class="ex">init</span>         Initialize conda for shell interaction. [Experimental]</span>
-<span id="cb672-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install</span>      Installs a list of packages into a specified conda environment.</span>
-<span id="cb672-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-18" aria-hidden="true" tabindex="-1"></a>    <span class="ex">list</span>         List linked packages in a conda environment.</span>
-<span id="cb672-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-19" aria-hidden="true" tabindex="-1"></a>    <span class="ex">package</span>      Low-level conda package utility. <span class="er">(</span><span class="ex">EXPERIMENTAL</span><span class="kw">)</span></span>
-<span id="cb672-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-20" aria-hidden="true" tabindex="-1"></a>    <span class="ex">remove</span>       Remove a list of packages from a specified conda environment.</span>
-<span id="cb672-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-21" aria-hidden="true" tabindex="-1"></a>    <span class="ex">uninstall</span>    Alias for conda remove.</span>
-<span id="cb672-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-22" aria-hidden="true" tabindex="-1"></a>    <span class="ex">run</span>          Run an executable in a conda environment. [Experimental]</span>
-<span id="cb672-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">search</span>       Search for packages and display associated information. The input is a MatchSpec, a query language for conda packages. See examples below.</span>
-<span id="cb672-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-24" aria-hidden="true" tabindex="-1"></a>    <span class="ex">update</span>       Updates conda packages to the latest compatible version.</span>
-<span id="cb672-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-25" aria-hidden="true" tabindex="-1"></a>    <span class="ex">upgrade</span>      Alias for conda update.</span>
-<span id="cb672-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb672-26" aria-hidden="true" tabindex="-1"></a>    <span class="ex">repoquery</span>    Query repositories using mamba.</span></code></pre></div>
+<div class="sourceCode" id="cb678"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb678-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-1" aria-hidden="true" tabindex="-1"></a><span class="ex">usage:</span> mamba [-h] [-V] command ...</span>
+<span id="cb678-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb678-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> is a tool for managing and deploying applications, environments and packages.</span>
+<span id="cb678-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb678-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-5" aria-hidden="true" tabindex="-1"></a><span class="ex">Options:</span></span>
+<span id="cb678-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb678-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-7" aria-hidden="true" tabindex="-1"></a><span class="ex">positional</span> arguments:</span>
+<span id="cb678-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-8" aria-hidden="true" tabindex="-1"></a>  <span class="bu">command</span></span>
+<span id="cb678-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-9" aria-hidden="true" tabindex="-1"></a>    <span class="ex">clean</span>        Remove unused packages and caches.</span>
+<span id="cb678-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-10" aria-hidden="true" tabindex="-1"></a>    <span class="ex">compare</span>      Compare packages between conda environments.</span>
+<span id="cb678-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">config</span>       Modify configuration values in .condarc. This is modeled after the git config command. Writes to the user .condarc file <span class="er">(</span><span class="ex">/home/eriq@colostate.edu/.condarc</span><span class="kw">)</span> <span class="ex">by</span></span>
+<span id="cb678-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-12" aria-hidden="true" tabindex="-1"></a>                 <span class="ex">default.</span></span>
+<span id="cb678-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-13" aria-hidden="true" tabindex="-1"></a>    <span class="ex">create</span>       Create a new conda environment from a list of specified packages.</span>
+<span id="cb678-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">help</span>         Displays a list of available conda commands and their help strings.</span>
+<span id="cb678-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">info</span>         Display information about current conda install.</span>
+<span id="cb678-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-16" aria-hidden="true" tabindex="-1"></a>    <span class="ex">init</span>         Initialize conda for shell interaction. [Experimental]</span>
+<span id="cb678-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install</span>      Installs a list of packages into a specified conda environment.</span>
+<span id="cb678-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-18" aria-hidden="true" tabindex="-1"></a>    <span class="ex">list</span>         List linked packages in a conda environment.</span>
+<span id="cb678-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-19" aria-hidden="true" tabindex="-1"></a>    <span class="ex">package</span>      Low-level conda package utility. <span class="er">(</span><span class="ex">EXPERIMENTAL</span><span class="kw">)</span></span>
+<span id="cb678-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-20" aria-hidden="true" tabindex="-1"></a>    <span class="ex">remove</span>       Remove a list of packages from a specified conda environment.</span>
+<span id="cb678-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-21" aria-hidden="true" tabindex="-1"></a>    <span class="ex">uninstall</span>    Alias for conda remove.</span>
+<span id="cb678-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-22" aria-hidden="true" tabindex="-1"></a>    <span class="ex">run</span>          Run an executable in a conda environment. [Experimental]</span>
+<span id="cb678-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-23" aria-hidden="true" tabindex="-1"></a>    <span class="ex">search</span>       Search for packages and display associated information. The input is a MatchSpec, a query language for conda packages. See examples below.</span>
+<span id="cb678-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-24" aria-hidden="true" tabindex="-1"></a>    <span class="ex">update</span>       Updates conda packages to the latest compatible version.</span>
+<span id="cb678-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-25" aria-hidden="true" tabindex="-1"></a>    <span class="ex">upgrade</span>      Alias for conda update.</span>
+<span id="cb678-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb678-26" aria-hidden="true" tabindex="-1"></a>    <span class="ex">repoquery</span>    Query repositories using mamba.</span></code></pre></div>
 <p>then you have mamba.</p>
 <p>If, instead, it tells you it doesn’t know anything about the mamba command, then you
 need to install it. Make sure that you install it into your base conda environment,
 using this command:</p>
-<div class="sourceCode" id="cb673"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb673-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb673-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install mamba <span class="at">-n</span> base <span class="at">-c</span> conda-forge</span></code></pre></div>
+<div class="sourceCode" id="cb679"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb679-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb679-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install mamba <span class="at">-n</span> base <span class="at">-c</span> conda-forge</span></code></pre></div>
 <p>Now, if you need to get a working samtools (version 1.11) into an environment called
 samtools, you can do this:</p>
-<div class="sourceCode" id="cb674"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb674-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb674-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> samtools <span class="at">-c</span> bioconda samtools=1.11</span></code></pre></div>
+<div class="sourceCode" id="cb680"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb680-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb680-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> samtools <span class="at">-c</span> bioconda samtools=1.11</span></code></pre></div>
 <p>To use samtools you then must activate the environment</p>
-<div class="sourceCode" id="cb675"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb675-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb675-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate samtools</span></code></pre></div>
+<div class="sourceCode" id="cb681"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb681-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb681-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate samtools</span></code></pre></div>
 </div>
 <div id="indexing-the-reference-genome" class="section level3" number="27.2.2">
 <h3><span class="header-section-number">27.2.2</span> Indexing the reference genome</h3>
 <p>Samtools has wonderful subcommand, <code>faidx</code> that indexes a fasta file.
 We can index our example reference genome by running this command from the
 top level of our <code>non-model-wgs-example-data</code> directory.</p>
-<div class="sourceCode" id="cb676"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb676-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb676-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta</span></code></pre></div>
+<div class="sourceCode" id="cb682"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb682-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb682-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta</span></code></pre></div>
 <p>This creates the file <code>resources/genome.fasta.fai</code>. The extension
 <code>.fai</code> stands for “faidx index.” Look at <code>resources/genome.fasta.fai</code>
 using the <code>less</code> viewer. The first few lines look like:</p>
@@ -852,10 +863,10 @@ separate each base. (Probably should draw a picture, but you can see it
 at this <a href="https://genome-blog.soe.ucsc.edu/blog/2016/12/12/the-ucsc-genome-browser-coordinate-counting-systems/">UCSC genome browser blog site</a>).</p>
 <p>At any rate, if you want to get the 500 bases starting from 1,000,001 on the
 first two chromosomes in our example reference genome you would do:</p>
-<div class="sourceCode" id="cb680"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb680-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb680-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta CM031199.1:1000001-1000500 CM031200.1:1000001-1000500</span></code></pre></div>
+<div class="sourceCode" id="cb686"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb686-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb686-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta CM031199.1:1000001-1000500 CM031200.1:1000001-1000500</span></code></pre></div>
 <p>Note that if you find it difficult to keep track of all those zeroes, you are
 free to put commas into the numbers anywhere that is helpful, for example:</p>
-<div class="sourceCode" id="cb681"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb681-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb681-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta CM031199.1:1,000,001-1,000,500 CM031200.1:1,000,001-1,000,500</span></code></pre></div>
+<div class="sourceCode" id="cb687"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb687-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb687-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta CM031199.1:1,000,001-1,000,500 CM031200.1:1,000,001-1,000,500</span></code></pre></div>
 <p>So, if you ever need to extract a certain sequence from a genome, this is one way
 you can do it!</p>
 </div>
@@ -865,8 +876,8 @@ you can do it!</p>
 <p>Now, before we start rolling along with our example bioinformatic workflow,
 let us take a moment and appreciate how clean and tidy our <code>non-model-wgs-example-data</code>
 directory is. If I do ls on it I see this:</p>
-<div class="sourceCode" id="cb682"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb682-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb682-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls</span>
-<span id="cb682-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb682-2" aria-hidden="true" tabindex="-1"></a><span class="ex">data</span>  fastq  README.nb.html  README.Rmd  resources  samples.tsv  units.tsv</span></code></pre></div>
+<div class="sourceCode" id="cb688"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb688-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb688-1" aria-hidden="true" tabindex="-1"></a><span class="ex">%</span> ls</span>
+<span id="cb688-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb688-2" aria-hidden="true" tabindex="-1"></a><span class="ex">data</span>  fastq  README.nb.html  README.Rmd  resources  samples.tsv  units.tsv</span></code></pre></div>
 <p>That is all right! There are only seven files or directories there and it
 is not a mess.</p>
 <p>As we proceed with a bioinformatic pipeline/workflow, it will behoove us to
@@ -909,12 +920,12 @@ piece of Java software called FASTQC that does a reasonably comprehensive job of
 We will focus on running it interactively for now (we will talk about dispatching
 jobs via SLURM later). So, on the cluster, we will want to get a shell on a compute
 node. If you want to, on SUMMIT, you can get an interactive shell with:</p>
-<div class="sourceCode" id="cb683"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb683-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb683-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sinteractive</span></span></code></pre></div>
+<div class="sourceCode" id="cb689"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb689-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sinteractive</span></span></code></pre></div>
 <p>But, to be honest, <code>sinteractive</code> is a somewhat old-school shell function that uses
 screen to connect you to the interactive shell. This causes some problems for TMUX. So,
 I find a better way to get a shell from the oversubscriped interactive partition on
 SUMMIT to be:</p>
-<div class="sourceCode" id="cb684"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb684-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb684-1" aria-hidden="true" tabindex="-1"></a><span class="ex">srun</span> <span class="at">--partition</span><span class="op">=</span>shas-interactive <span class="at">-t</span> 2:00:00 <span class="at">--pty</span> /bin/bash</span></code></pre></div>
+<div class="sourceCode" id="cb690"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb690-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb690-1" aria-hidden="true" tabindex="-1"></a><span class="ex">srun</span> <span class="at">--partition</span><span class="op">=</span>shas-interactive <span class="at">-t</span> 2:00:00 <span class="at">--pty</span> /bin/bash</span></code></pre></div>
 <p>When you do this, and then reconnect to such a session with TMUX, your scrollback shouldn’t
 be totally messed up (Thanks Caitlin for reminding me of this <code>sinteractive</code> atrocity!).
 I’ve checked with the sys-admins on SUMMIT and they say this is a perfectly acceptable
@@ -923,11 +934,11 @@ way of getting an interactive shell on SUMMIT. Also, the <code>-t 2:00:00</code>
 enough time to get through a whole class session.</p>
 <p>The first thing we will need to do is get FASTQC using mamba. Put it in its own
 environment named <code>fastqc</code>.</p>
-<div class="sourceCode" id="cb685"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb685-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb685-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> fastqc <span class="at">-c</span> bioconda fastqc</span></code></pre></div>
+<div class="sourceCode" id="cb691"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb691-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb691-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> fastqc <span class="at">-c</span> bioconda fastqc</span></code></pre></div>
 <p>Hooray for the wicked speed of mamba!</p>
 <p>Once this is set up, we can get the instructions for using fastqc like this:</p>
-<div class="sourceCode" id="cb686"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb686-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb686-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate fastqc</span>
-<span id="cb686-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb686-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">--help</span></span></code></pre></div>
+<div class="sourceCode" id="cb692"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb692-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb692-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate fastqc</span>
+<span id="cb692-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb692-2" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">--help</span></span></code></pre></div>
 <p>That is a fairly lengthy statement about the syntax of this program,
 so I won’t copy it into the handbook, here, But read through it and you
 shall find that it looks like if we want to just
@@ -935,11 +946,11 @@ put all the fastq files on the command line
 then <code>fastqc</code> ought to gobble them right up and put the output in files that
 are named intelligently. That sounds pretty convenient. Let’s test it out
 on a couple of the smallest files that we have (about 15 Mb each):</p>
-<div class="sourceCode" id="cb687"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb687-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb687-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make some directories to put the results in</span></span>
-<span id="cb687-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb687-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/qc/fastqc results/logs/fastqc</span>
-<span id="cb687-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb687-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb687-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb687-4" aria-hidden="true" tabindex="-1"></a><span class="co"># now, try running fastqc on two small files:</span></span>
-<span id="cb687-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb687-5" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> results/qc/fastqc <span class="at">--noextract</span> fastq/s006---1_R1.fq.gz fastq/s006---1_R2.fq.gz</span></code></pre></div>
+<div class="sourceCode" id="cb693"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb693-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb693-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make some directories to put the results in</span></span>
+<span id="cb693-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb693-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/qc/fastqc results/logs/fastqc</span>
+<span id="cb693-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb693-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb693-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb693-4" aria-hidden="true" tabindex="-1"></a><span class="co"># now, try running fastqc on two small files:</span></span>
+<span id="cb693-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb693-5" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> results/qc/fastqc <span class="at">--noextract</span> fastq/s006---1_R1.fq.gz fastq/s006---1_R2.fq.gz</span></code></pre></div>
 <p>Note that fastqc spits out some output to tell you about the progress that it is making.
 It turns out that is going to both <em>stderr</em> (the percent complete lines) and to
 <em>stdout</em> (the “complete” lines). So, we probably should capture both of those streams
@@ -953,13 +964,13 @@ that we will use later.</p>
 <p>That didn’t take too long. Let’s try the whole schmeer! We can do that easily with
 globbing. Note the redirection of <em>stdout</em> to a log file and the <code>2&gt;&amp;1</code> which means, “send
 <em>stderr</em> to the same place <em>stdout</em> is going to.”</p>
-<div class="sourceCode" id="cb688"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb688-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb688-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> results/qc/fastqc <span class="at">--noextract</span> fastq/<span class="pp">*</span>.fq.gz  <span class="op">&gt;</span> results/logs/fastqc/fastqc.log <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb694"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb694-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb694-1" aria-hidden="true" tabindex="-1"></a><span class="ex">fastqc</span> <span class="at">-o</span> results/qc/fastqc <span class="at">--noextract</span> fastq/<span class="pp">*</span>.fq.gz  <span class="op">&gt;</span> results/logs/fastqc/fastqc.log <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span></code></pre></div>
 <p>Note that if you want to see how much progress is being made on the file
 you can look at the bottom of the log file at <code>results/logs/fastqc/fastqc.log</code>
 using the <code>tail</code> command in another shell (opened for example with tmux, before you started
 the last command). In fact, you can do one better than that by using <code>tail -f</code>.</p>
 <p>Since I had another shell going in tmux, I can do this with it:</p>
-<div class="sourceCode" id="cb689"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb689-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb689-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> results/logs/fastqc/fastqc.log</span></code></pre></div>
+<div class="sourceCode" id="cb695"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb695-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb695-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tail</span> <span class="at">-f</span> results/logs/fastqc/fastqc.log</span></code></pre></div>
 <p>this continuously spits new output to the <code>fastqc.log</code> file to <em>stdout</em>.
 The whole thing should take about 5 to 10 minutes on an interactive shell
 on SUMMIT.</p>
@@ -983,16 +994,16 @@ This program offers an insightful system for summarizing log files and outputs f
 a wide range of different bioinformatics programs. It is capable of summarizing much
 more than just fastqc files, but that is how we will first use it.</p>
 <p>Let’s get it and put it in a conda environment called multiqc.</p>
-<div class="sourceCode" id="cb690"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb690-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb690-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> multiqc <span class="at">-c</span> bioconda multiqc</span></code></pre></div>
+<div class="sourceCode" id="cb696"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb696-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb696-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> multiqc <span class="at">-c</span> bioconda multiqc</span></code></pre></div>
 <p>Once that is done (and if you use <code>conda</code> instead of <code>mamba</code> it might
 never be done) you can activate the environment and get some information
 about how to use multiqc with:</p>
-<div class="sourceCode" id="cb691"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb691-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb691-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
-<span id="cb691-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb691-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">--help</span> </span></code></pre></div>
+<div class="sourceCode" id="cb697"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb697-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb697-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
+<span id="cb697-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb697-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">--help</span> </span></code></pre></div>
 <p>Reading the program syntax, it seems like we should be able to
 point it to the <code>results/qc/fastqc</code> directory and tell it to put its output
 into a <code>results/qc/multiqc</code> directory like this:</p>
-<div class="sourceCode" id="cb692"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb692-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb692-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-v</span> <span class="at">-o</span> results/qc/multiqc results/qc/fastqc</span></code></pre></div>
+<div class="sourceCode" id="cb698"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb698-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-v</span> <span class="at">-o</span> results/qc/multiqc results/qc/fastqc</span></code></pre></div>
 <p>Note that the command line above is using the <code>-v</code> option, which gives us
 <em>verbose</em> output. This is kind of fun because it shows us all the different kinds of
 output file types that MultiQC can parse—a whole boatload of them. All we have
@@ -1020,11 +1031,11 @@ FIGURE 27.3: Running Trimmomatic to clean up our sequencing reads by removing ad
 </div>
 <p>To use Trimmomatic, we will have to get it. If you don’t have it in a conda environment
 yet, you know the drill:</p>
-<div class="sourceCode" id="cb693"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb693-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb693-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> trimmo <span class="at">-c</span> bioconda trimmomatic</span></code></pre></div>
+<div class="sourceCode" id="cb699"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb699-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb699-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> trimmo <span class="at">-c</span> bioconda trimmomatic</span></code></pre></div>
 <p>Once that is installed you can get a terse and somewhat cryptic message about how
 to run the program like this:</p>
-<div class="sourceCode" id="cb694"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb694-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb694-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate trimmo</span>
-<span id="cb694-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb694-2" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span></span></code></pre></div>
+<div class="sourceCode" id="cb700"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb700-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate trimmo</span>
+<span id="cb700-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-2" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span></span></code></pre></div>
 <p>Which tells us this:</p>
 <pre><code>Usage:
        PE [-version] \
@@ -1055,20 +1066,20 @@ Since we have paired-end data, we will run it in paired-end mode.</p>
 manual at <a href="http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf">http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf</a>. This link
 seems to not work very well sometimes…</p>
 <p>We will be running it on a single thread for now so the really relevant syntax is:</p>
-<div class="sourceCode" id="cb696"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb696-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb696-1" aria-hidden="true" tabindex="-1"></a>       <span class="ex">PE</span> <span class="dt">\</span></span>
-<span id="cb696-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb696-2" aria-hidden="true" tabindex="-1"></a>          [-basein <span class="op">&lt;</span>inputBase<span class="op">&gt;</span> <span class="kw">|</span> <span class="op">&lt;</span>inputFile1<span class="op">&gt;</span> <span class="op">&lt;</span>inputFile2<span class="op">&gt;</span>] <span class="dt">\</span></span>
-<span id="cb696-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb696-3" aria-hidden="true" tabindex="-1"></a>          [-baseout <span class="op">&lt;</span>outputBase<span class="op">&gt;</span> <span class="kw">|</span> <span class="op">&lt;</span>outputFile1P<span class="op">&gt;</span> <span class="op">&lt;</span>outputFile1U<span class="op">&gt;</span> <span class="op">&lt;</span>outputFile2P<span class="op">&gt;</span> <span class="op">&lt;</span>outputFile2U<span class="op">&gt;</span>] <span class="dt">\</span></span>
-<span id="cb696-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb696-4" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>trimmer1<span class="op">&gt;</span>...</span></code></pre></div>
+<div class="sourceCode" id="cb702"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb702-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-1" aria-hidden="true" tabindex="-1"></a>       <span class="ex">PE</span> <span class="dt">\</span></span>
+<span id="cb702-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-2" aria-hidden="true" tabindex="-1"></a>          [-basein <span class="op">&lt;</span>inputBase<span class="op">&gt;</span> <span class="kw">|</span> <span class="op">&lt;</span>inputFile1<span class="op">&gt;</span> <span class="op">&lt;</span>inputFile2<span class="op">&gt;</span>] <span class="dt">\</span></span>
+<span id="cb702-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-3" aria-hidden="true" tabindex="-1"></a>          [-baseout <span class="op">&lt;</span>outputBase<span class="op">&gt;</span> <span class="kw">|</span> <span class="op">&lt;</span>outputFile1P<span class="op">&gt;</span> <span class="op">&lt;</span>outputFile1U<span class="op">&gt;</span> <span class="op">&lt;</span>outputFile2P<span class="op">&gt;</span> <span class="op">&lt;</span>outputFile2U<span class="op">&gt;</span>] <span class="dt">\</span></span>
+<span id="cb702-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-4" aria-hidden="true" tabindex="-1"></a>          <span class="op">&lt;</span>trimmer1<span class="op">&gt;</span>...</span></code></pre></div>
 <p>This syntax message signifies that you can either give it a base file prefix
 for the input and output files, like <code>-basein fastq/s001-1  -baseout results/trimmed/s001-1</code>,
 or you can explicitly give it the names of the input and output files. I tend to think that
 the latter is a better way to do it (always good to be explicit).</p>
 <p>So, for example, with our tidy named files in the fastq directory, the first
 two lines there might look like:</p>
-<div class="sourceCode" id="cb697"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb697-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb697-1" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span> PE <span class="dt">\</span></span>
-<span id="cb697-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb697-2" aria-hidden="true" tabindex="-1"></a>  fastq/s001---1_R1.fq.gz  fastq/s001---1_R2.fq.gz   <span class="dt">\</span></span>
-<span id="cb697-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb697-3" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R1_unpaired.fq.gz  <span class="dt">\</span></span>
-<span id="cb697-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb697-4" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R2.fq.gz  results/trimmed/s001---1_R2_unpaired.fq.gz </span></code></pre></div>
+<div class="sourceCode" id="cb703"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb703-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb703-1" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span> PE <span class="dt">\</span></span>
+<span id="cb703-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb703-2" aria-hidden="true" tabindex="-1"></a>  fastq/s001---1_R1.fq.gz  fastq/s001---1_R2.fq.gz   <span class="dt">\</span></span>
+<span id="cb703-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb703-3" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R1_unpaired.fq.gz  <span class="dt">\</span></span>
+<span id="cb703-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb703-4" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R2.fq.gz  results/trimmed/s001---1_R2_unpaired.fq.gz </span></code></pre></div>
 <p>So, the two input files are read 1 and read2, and the four output files are in this order:</p>
 <ol style="list-style-type: decimal">
 <li>Read 1 successfully trimmed.</li>
@@ -1083,25 +1094,25 @@ trimmed ones.</p>
 different types of read trimming modules and their parameters
 (and the order in which they will be applied) that you want to use. Once again, the
 PDF manual is the place to go, but a good place to start will be:</p>
-<div class="sourceCode" id="cb698"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb698-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get path to trimmomatic to find the path to the adapter files.</span></span>
-<span id="cb698-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-2" aria-hidden="true" tabindex="-1"></a><span class="co"># It seems to look for them in a standard /usr/local/share location,</span></span>
-<span id="cb698-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-3" aria-hidden="true" tabindex="-1"></a><span class="co"># which is not where they are if conda installed.</span></span>
-<span id="cb698-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-4" aria-hidden="true" tabindex="-1"></a><span class="va">trim_path=$(</span><span class="fu">which</span> trimmomatic<span class="va">)</span></span>
-<span id="cb698-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-5" aria-hidden="true" tabindex="-1"></a><span class="va">trim_dir=$(</span><span class="fu">dirname</span> <span class="va">$trim_path)</span></span>
-<span id="cb698-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-6" aria-hidden="true" tabindex="-1"></a><span class="va">adapter_fasta=$trim_dir</span>/../share/trimmomatic/adapters/TruSeq3-PE-2.fa</span>
-<span id="cb698-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb698-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-8" aria-hidden="true" tabindex="-1"></a><span class="co"># make a results/trimmed directory to put the outputs into</span></span>
-<span id="cb698-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/trimmed</span>
-<span id="cb698-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb698-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-11" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span> PE <span class="dt">\</span></span>
-<span id="cb698-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-12" aria-hidden="true" tabindex="-1"></a>  fastq/s001---1_R1.fq.gz  fastq/s001---1_R2.fq.gz   <span class="dt">\</span></span>
-<span id="cb698-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-13" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R1_unpaired.fq.gz <span class="dt">\</span></span>
-<span id="cb698-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-14" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R2.fq.gz  results/trimmed/s001---1_R2_unpaired.fq.gz  <span class="dt">\</span></span>
-<span id="cb698-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-15" aria-hidden="true" tabindex="-1"></a>  ILLUMINACLIP:<span class="va">${adapter_fasta}</span>:2:30:10 <span class="dt">\</span></span>
-<span id="cb698-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-16" aria-hidden="true" tabindex="-1"></a>  LEADING:3 <span class="dt">\</span></span>
-<span id="cb698-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-17" aria-hidden="true" tabindex="-1"></a>  TRAILING:3 <span class="dt">\</span></span>
-<span id="cb698-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-18" aria-hidden="true" tabindex="-1"></a>  SLIDINGWINDOW:4:15 <span class="dt">\</span></span>
-<span id="cb698-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb698-19" aria-hidden="true" tabindex="-1"></a>  MINLEN:36</span></code></pre></div>
+<div class="sourceCode" id="cb704"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb704-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get path to trimmomatic to find the path to the adapter files.</span></span>
+<span id="cb704-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-2" aria-hidden="true" tabindex="-1"></a><span class="co"># It seems to look for them in a standard /usr/local/share location,</span></span>
+<span id="cb704-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-3" aria-hidden="true" tabindex="-1"></a><span class="co"># which is not where they are if conda installed.</span></span>
+<span id="cb704-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-4" aria-hidden="true" tabindex="-1"></a><span class="va">trim_path=$(</span><span class="fu">which</span> trimmomatic<span class="va">)</span></span>
+<span id="cb704-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-5" aria-hidden="true" tabindex="-1"></a><span class="va">trim_dir=$(</span><span class="fu">dirname</span> <span class="va">$trim_path)</span></span>
+<span id="cb704-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-6" aria-hidden="true" tabindex="-1"></a><span class="va">adapter_fasta=$trim_dir</span>/../share/trimmomatic/adapters/TruSeq3-PE-2.fa</span>
+<span id="cb704-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb704-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-8" aria-hidden="true" tabindex="-1"></a><span class="co"># make a results/trimmed directory to put the outputs into</span></span>
+<span id="cb704-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/trimmed</span>
+<span id="cb704-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb704-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-11" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span> PE <span class="dt">\</span></span>
+<span id="cb704-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-12" aria-hidden="true" tabindex="-1"></a>  fastq/s001---1_R1.fq.gz  fastq/s001---1_R2.fq.gz   <span class="dt">\</span></span>
+<span id="cb704-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-13" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R1_unpaired.fq.gz <span class="dt">\</span></span>
+<span id="cb704-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-14" aria-hidden="true" tabindex="-1"></a>  results/trimmed/s001---1_R2.fq.gz  results/trimmed/s001---1_R2_unpaired.fq.gz  <span class="dt">\</span></span>
+<span id="cb704-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-15" aria-hidden="true" tabindex="-1"></a>  ILLUMINACLIP:<span class="va">${adapter_fasta}</span>:2:30:10 <span class="dt">\</span></span>
+<span id="cb704-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-16" aria-hidden="true" tabindex="-1"></a>  LEADING:3 <span class="dt">\</span></span>
+<span id="cb704-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-17" aria-hidden="true" tabindex="-1"></a>  TRAILING:3 <span class="dt">\</span></span>
+<span id="cb704-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-18" aria-hidden="true" tabindex="-1"></a>  SLIDINGWINDOW:4:15 <span class="dt">\</span></span>
+<span id="cb704-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-19" aria-hidden="true" tabindex="-1"></a>  MINLEN:36</span></code></pre></div>
 <p>You can go ahead and evaluate those commands and see what happens when
 trimmomatic runs. And while it is running, we can try to unpack those last few lines:</p>
 <ul>
@@ -1141,65 +1152,65 @@ average Phred-scaled quality score of less than 15.</li>
 note that we could have written the above command line by defining a shell variable for the
 file prefix. Lets clean this whole thing up with some shell variables, using
 <code>s002---1</code> as an example</p>
-<div class="sourceCode" id="cb700"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb700-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here is a variable to store all the trimmer directives:</span></span>
-<span id="cb700-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-2" aria-hidden="true" tabindex="-1"></a><span class="va">TRIMMER=</span><span class="st">&quot;ILLUMINACLIP:</span><span class="va">${adapter_fasta}</span><span class="st">:2:30:10 </span><span class="dt">\</span></span>
-<span id="cb700-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-3" aria-hidden="true" tabindex="-1"></a><span class="st">  LEADING:3 </span><span class="dt">\</span></span>
-<span id="cb700-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-4" aria-hidden="true" tabindex="-1"></a><span class="st">  TRAILING:3 </span><span class="dt">\</span></span>
-<span id="cb700-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-5" aria-hidden="true" tabindex="-1"></a><span class="st">  SLIDINGWINDOW:4:15 </span><span class="dt">\</span></span>
-<span id="cb700-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-6" aria-hidden="true" tabindex="-1"></a><span class="st">  MINLEN:36&quot;</span></span>
-<span id="cb700-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-9" aria-hidden="true" tabindex="-1"></a><span class="co"># define a file prefix for s002---1</span></span>
-<span id="cb700-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-10" aria-hidden="true" tabindex="-1"></a><span class="va">FP=</span>s002---1</span>
-<span id="cb700-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-12" aria-hidden="true" tabindex="-1"></a><span class="co"># now get the names of all the input files and output files</span></span>
-<span id="cb700-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-13" aria-hidden="true" tabindex="-1"></a><span class="co"># and store them in a shell variable.  Not the fun shell-fu here.</span></span>
-<span id="cb700-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-14" aria-hidden="true" tabindex="-1"></a><span class="va">INFILES=$(</span><span class="bu">echo</span> fastq/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}</span>.fq.gz<span class="va">)</span></span>
-<span id="cb700-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-15" aria-hidden="true" tabindex="-1"></a><span class="va">OUTFILES=$(</span><span class="bu">echo</span> results/trimmed/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}{</span><span class="op">,</span><span class="dt">_unpaired}</span>.fq.gz<span class="va">)</span></span>
-<span id="cb700-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-17" aria-hidden="true" tabindex="-1"></a><span class="co"># make a Log file too</span></span>
-<span id="cb700-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-18" aria-hidden="true" tabindex="-1"></a><span class="va">LOG=</span>results/logs/trimmomatic/<span class="va">$FP</span>.log</span>
-<span id="cb700-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-20" aria-hidden="true" tabindex="-1"></a><span class="co"># you might want to try &quot;echo $INFILES&quot; and &quot;echo $OUTFILES&quot; </span></span>
-<span id="cb700-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-21" aria-hidden="true" tabindex="-1"></a><span class="co"># and &quot;echo $LOG&quot; to see what those look like.</span></span>
-<span id="cb700-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-23" aria-hidden="true" tabindex="-1"></a><span class="co"># We need to make sure that we have directories to put all those</span></span>
-<span id="cb700-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-24" aria-hidden="true" tabindex="-1"></a><span class="co"># output and log files into.  We can do that with:</span></span>
-<span id="cb700-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-25" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$(</span><span class="fu">dirname</span> <span class="va">$LOG</span> <span class="va">$OUTFILES)</span></span>
-<span id="cb700-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-27" aria-hidden="true" tabindex="-1"></a><span class="co"># now that we have defined those variables, we can write our </span></span>
-<span id="cb700-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-28" aria-hidden="true" tabindex="-1"></a><span class="co"># command line like this:</span></span>
-<span id="cb700-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb700-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb700-30" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span> PE <span class="va">$INFILES</span> <span class="va">$OUTFILES</span> <span class="va">$TRIMMER</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span></code></pre></div>
+<div class="sourceCode" id="cb706"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb706-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here is a variable to store all the trimmer directives:</span></span>
+<span id="cb706-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-2" aria-hidden="true" tabindex="-1"></a><span class="va">TRIMMER=</span><span class="st">&quot;ILLUMINACLIP:</span><span class="va">${adapter_fasta}</span><span class="st">:2:30:10 </span><span class="dt">\</span></span>
+<span id="cb706-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-3" aria-hidden="true" tabindex="-1"></a><span class="st">  LEADING:3 </span><span class="dt">\</span></span>
+<span id="cb706-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-4" aria-hidden="true" tabindex="-1"></a><span class="st">  TRAILING:3 </span><span class="dt">\</span></span>
+<span id="cb706-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-5" aria-hidden="true" tabindex="-1"></a><span class="st">  SLIDINGWINDOW:4:15 </span><span class="dt">\</span></span>
+<span id="cb706-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-6" aria-hidden="true" tabindex="-1"></a><span class="st">  MINLEN:36&quot;</span></span>
+<span id="cb706-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-9" aria-hidden="true" tabindex="-1"></a><span class="co"># define a file prefix for s002---1</span></span>
+<span id="cb706-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-10" aria-hidden="true" tabindex="-1"></a><span class="va">FP=</span>s002---1</span>
+<span id="cb706-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-12" aria-hidden="true" tabindex="-1"></a><span class="co"># now get the names of all the input files and output files</span></span>
+<span id="cb706-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-13" aria-hidden="true" tabindex="-1"></a><span class="co"># and store them in a shell variable.  Not the fun shell-fu here.</span></span>
+<span id="cb706-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-14" aria-hidden="true" tabindex="-1"></a><span class="va">INFILES=$(</span><span class="bu">echo</span> fastq/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}</span>.fq.gz<span class="va">)</span></span>
+<span id="cb706-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-15" aria-hidden="true" tabindex="-1"></a><span class="va">OUTFILES=$(</span><span class="bu">echo</span> results/trimmed/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}{</span><span class="op">,</span><span class="dt">_unpaired}</span>.fq.gz<span class="va">)</span></span>
+<span id="cb706-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-17" aria-hidden="true" tabindex="-1"></a><span class="co"># make a Log file too</span></span>
+<span id="cb706-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-18" aria-hidden="true" tabindex="-1"></a><span class="va">LOG=</span>results/logs/trimmomatic/<span class="va">$FP</span>.log</span>
+<span id="cb706-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-20" aria-hidden="true" tabindex="-1"></a><span class="co"># you might want to try &quot;echo $INFILES&quot; and &quot;echo $OUTFILES&quot; </span></span>
+<span id="cb706-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-21" aria-hidden="true" tabindex="-1"></a><span class="co"># and &quot;echo $LOG&quot; to see what those look like.</span></span>
+<span id="cb706-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-23" aria-hidden="true" tabindex="-1"></a><span class="co"># We need to make sure that we have directories to put all those</span></span>
+<span id="cb706-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-24" aria-hidden="true" tabindex="-1"></a><span class="co"># output and log files into.  We can do that with:</span></span>
+<span id="cb706-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-25" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$(</span><span class="fu">dirname</span> <span class="va">$LOG</span> <span class="va">$OUTFILES)</span></span>
+<span id="cb706-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-27" aria-hidden="true" tabindex="-1"></a><span class="co"># now that we have defined those variables, we can write our </span></span>
+<span id="cb706-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-28" aria-hidden="true" tabindex="-1"></a><span class="co"># command line like this:</span></span>
+<span id="cb706-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb706-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-30" aria-hidden="true" tabindex="-1"></a><span class="ex">trimmomatic</span> PE <span class="va">$INFILES</span> <span class="va">$OUTFILES</span> <span class="va">$TRIMMER</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span></code></pre></div>
 <p>Once we have figured out that whole collection of command lines,
 and have verified that it works for
 our “trial” value of <code>FP</code> (i.e, <code>s002---1</code>), it is time to cycle over all the
 different possible values of <code>FP</code>.</p>
 <p>We can use globbing and the <code>basename</code> utility to get all the file prefixes. Check this
 out:</p>
-<div class="sourceCode" id="cb701"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb701-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb701-1" aria-hidden="true" tabindex="-1"></a><span class="va">FILE_PREFIXES=$(</span><span class="fu">basename</span> <span class="at">-a</span> <span class="at">-s</span> _R1.fq.gz fastq/<span class="pp">*</span>R1.fq.gz<span class="va">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb707"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb707-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb707-1" aria-hidden="true" tabindex="-1"></a><span class="va">FILE_PREFIXES=$(</span><span class="fu">basename</span> <span class="at">-a</span> <span class="at">-s</span> _R1.fq.gz fastq/<span class="pp">*</span>R1.fq.gz<span class="va">)</span></span></code></pre></div>
 <p>Evaluate that and then run <code>echo $FILE_PREFIXES</code> to see what you have.</p>
 <p>With that, we can then define a for loop to run over all 22 pairs of files:</p>
-<div class="sourceCode" id="cb702"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb702-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This stays outside of the for loop:</span></span>
-<span id="cb702-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-2" aria-hidden="true" tabindex="-1"></a><span class="va">TRIMMER=</span><span class="st">&quot;ILLUMINACLIP:</span><span class="va">${adapter_fasta}</span><span class="st">:2:30:10 </span><span class="dt">\</span></span>
-<span id="cb702-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-3" aria-hidden="true" tabindex="-1"></a><span class="st">  LEADING:3 </span><span class="dt">\</span></span>
-<span id="cb702-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-4" aria-hidden="true" tabindex="-1"></a><span class="st">  TRAILING:3 </span><span class="dt">\</span></span>
-<span id="cb702-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-5" aria-hidden="true" tabindex="-1"></a><span class="st">  SLIDINGWINDOW:4:15 </span><span class="dt">\</span></span>
-<span id="cb702-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-6" aria-hidden="true" tabindex="-1"></a><span class="st">  MINLEN:36&quot;</span></span>
-<span id="cb702-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb702-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-8" aria-hidden="true" tabindex="-1"></a><span class="co"># get list of file prefixes</span></span>
-<span id="cb702-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-9" aria-hidden="true" tabindex="-1"></a><span class="va">FILE_PREFIXES=$(</span><span class="fu">basename</span> <span class="at">-a</span> <span class="at">-s</span> _R1.fq.gz fastq/<span class="pp">*</span>R1.fq.gz<span class="va">)</span></span>
-<span id="cb702-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb702-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> FP <span class="kw">in</span> <span class="va">$FILE_PREFIXES</span><span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb702-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-12" aria-hidden="true" tabindex="-1"></a>  <span class="va">INFILES=$(</span><span class="bu">echo</span> fastq/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}</span>.fq.gz<span class="va">)</span></span>
-<span id="cb702-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-13" aria-hidden="true" tabindex="-1"></a>  <span class="va">OUTFILES=$(</span><span class="bu">echo</span> results/trimmed/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}{</span><span class="op">,</span><span class="dt">_unpaired}</span>.fq.gz<span class="va">)</span></span>
-<span id="cb702-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-14" aria-hidden="true" tabindex="-1"></a>  <span class="va">LOG=</span>results/logs/trimmomatic/<span class="va">$FP</span>.log</span>
-<span id="cb702-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb702-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$(</span><span class="fu">dirname</span> <span class="va">$LOG</span> <span class="va">$OUTFILES)</span> <span class="co"># this could be done outside the for loop</span></span>
-<span id="cb702-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb702-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-18" aria-hidden="true" tabindex="-1"></a>  <span class="ex">trimmomatic</span> PE <span class="va">$INFILES</span> <span class="va">$OUTFILES</span> <span class="va">$TRIMMER</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span>
-<span id="cb702-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb702-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb702-20" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb708"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb708-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This stays outside of the for loop:</span></span>
+<span id="cb708-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-2" aria-hidden="true" tabindex="-1"></a><span class="va">TRIMMER=</span><span class="st">&quot;ILLUMINACLIP:</span><span class="va">${adapter_fasta}</span><span class="st">:2:30:10 </span><span class="dt">\</span></span>
+<span id="cb708-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-3" aria-hidden="true" tabindex="-1"></a><span class="st">  LEADING:3 </span><span class="dt">\</span></span>
+<span id="cb708-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-4" aria-hidden="true" tabindex="-1"></a><span class="st">  TRAILING:3 </span><span class="dt">\</span></span>
+<span id="cb708-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-5" aria-hidden="true" tabindex="-1"></a><span class="st">  SLIDINGWINDOW:4:15 </span><span class="dt">\</span></span>
+<span id="cb708-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-6" aria-hidden="true" tabindex="-1"></a><span class="st">  MINLEN:36&quot;</span></span>
+<span id="cb708-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb708-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-8" aria-hidden="true" tabindex="-1"></a><span class="co"># get list of file prefixes</span></span>
+<span id="cb708-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-9" aria-hidden="true" tabindex="-1"></a><span class="va">FILE_PREFIXES=$(</span><span class="fu">basename</span> <span class="at">-a</span> <span class="at">-s</span> _R1.fq.gz fastq/<span class="pp">*</span>R1.fq.gz<span class="va">)</span></span>
+<span id="cb708-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb708-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> FP <span class="kw">in</span> <span class="va">$FILE_PREFIXES</span><span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb708-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-12" aria-hidden="true" tabindex="-1"></a>  <span class="va">INFILES=$(</span><span class="bu">echo</span> fastq/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}</span>.fq.gz<span class="va">)</span></span>
+<span id="cb708-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-13" aria-hidden="true" tabindex="-1"></a>  <span class="va">OUTFILES=$(</span><span class="bu">echo</span> results/trimmed/<span class="va">${FP}</span>_<span class="dt">{R1</span><span class="op">,</span><span class="dt">R2}{</span><span class="op">,</span><span class="dt">_unpaired}</span>.fq.gz<span class="va">)</span></span>
+<span id="cb708-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-14" aria-hidden="true" tabindex="-1"></a>  <span class="va">LOG=</span>results/logs/trimmomatic/<span class="va">$FP</span>.log</span>
+<span id="cb708-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb708-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$(</span><span class="fu">dirname</span> <span class="va">$LOG</span> <span class="va">$OUTFILES)</span> <span class="co"># this could be done outside the for loop</span></span>
+<span id="cb708-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb708-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-18" aria-hidden="true" tabindex="-1"></a>  <span class="ex">trimmomatic</span> PE <span class="va">$INFILES</span> <span class="va">$OUTFILES</span> <span class="va">$TRIMMER</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span>
+<span id="cb708-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb708-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-20" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
 <p>You can run those, and they will likely take 15 to 20 minutues to get through.
 To finish them all, you would typically want to be in a tmux session or something similar
 so that the job is not killed when you logout.</p>
@@ -1216,8 +1227,8 @@ fastqc results, also knows how to make nice summaries of the log (stderr/stdout)
 of Trimmomatic. So, once our Trimmomatic loop is done, we can run Multiqc and
 direct it to <em>both</em> the directory holding the fastqc output <em>and</em> the directory holding the
 Trimmomatic output, so as to get an HTML report that includes both. Witness:</p>
-<div class="sourceCode" id="cb703"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb703-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb703-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
-<span id="cb703-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb703-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-v</span> <span class="at">-f</span> <span class="at">-o</span> results/qc/multiqc results/qc/fastqc results/logs/trimmomatic</span></code></pre></div>
+<div class="sourceCode" id="cb709"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb709-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb709-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
+<span id="cb709-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb709-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-v</span> <span class="at">-f</span> <span class="at">-o</span> results/qc/multiqc results/qc/fastqc results/logs/trimmomatic</span></code></pre></div>
 <p>Note that the above command includes the <code>-f</code> option to <em>force</em> it to overwrite existing
 output.</p>
 <p>As before, you get the results in <code>results/logs/trimmomatic/multiqc_report.html</code>, but you
@@ -1246,15 +1257,15 @@ onto <em>stdout</em>. The standard tool for manipulation such streams is <code>s
 reason, when we define a conda environment for mapping steps, we will typically
 include both the <code>bwa</code> program and the <code>samtools</code> program in it. So, let’s make a
 conda environment called <code>bwasam</code> that has both tools in it:</p>
-<div class="sourceCode" id="cb704"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb704-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb704-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bwasam <span class="at">-c</span> bioconda bwa=0.7.17 samtools=1.11</span></code></pre></div>
+<div class="sourceCode" id="cb710"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb710-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb710-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bwasam <span class="at">-c</span> bioconda bwa=0.7.17 samtools=1.11</span></code></pre></div>
 <p>Once we have that environment, we can activate it and then look at the
 syntax for <code>bwa mem</code> by typing <code>bwa mem</code>:</p>
-<div class="sourceCode" id="cb705"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb705-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb705-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
-<span id="cb705-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb705-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem</span></code></pre></div>
+<div class="sourceCode" id="cb711"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb711-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb711-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
+<span id="cb711-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb711-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem</span></code></pre></div>
 <p>The output of that is quite long. Thankfully, the default program values
 are often a good place to start, and typically work well. So, for our purposes,
 the most germane things to note are the main syntax statement:</p>
-<div class="sourceCode" id="cb706"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb706-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb706-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Usage:</span> bwa mem [options] <span class="op">&lt;</span>idxbase<span class="op">&gt;</span> <span class="op">&lt;</span>in1.fq<span class="op">&gt;</span> [in2.fq]</span></code></pre></div>
+<div class="sourceCode" id="cb712"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb712-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Usage:</span> bwa mem [options] <span class="op">&lt;</span>idxbase<span class="op">&gt;</span> <span class="op">&lt;</span>in1.fq<span class="op">&gt;</span> [in2.fq]</span></code></pre></div>
 <p>This means you can give it options, and then you have to pass it
 the path to the genome (which is also the prefix used for the bwa indexes,
 as we shall see). And then you pass it a fastq file with read 1, and if you have
@@ -1278,7 +1289,7 @@ In order to quickly and efficiently find places in the genome to which reads ali
 it is necessary to <em>index</em> the reference genome. The bwa subcommand <code>index</code> will
 index the reference genome for <code>bwa mem</code> to use.</p>
 <p>To index the genome we do:</p>
-<div class="sourceCode" id="cb708"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb708-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb708-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> index resources/genome.fasta</span></code></pre></div>
+<div class="sourceCode" id="cb714"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb714-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb714-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> index resources/genome.fasta</span></code></pre></div>
 <p>This takes about 40 seconds and creates the files:</p>
 <pre><code>resources/genome.fasta.amb  resources/genome.fasta.bwt  resources/genome.fasta.sa
 resources/genome.fasta.ann  resources/genome.fasta.pac</code></pre>
@@ -1292,9 +1303,9 @@ syntax statement is just prefix for these 5 files: <code>resources/genome.fasta<
 that we trimmed:</p>
 <pre><code>results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz</code></pre>
 <p>and we will just let the output go streaming to our screen:</p>
-<div class="sourceCode" id="cb711"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb711-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb711-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem resources/genome.fasta <span class="dt">\</span></span>
-<span id="cb711-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb711-2" aria-hidden="true" tabindex="-1"></a>   results/trimmed/s001---1_R1.fq.gz  <span class="dt">\</span></span>
-<span id="cb711-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb711-3" aria-hidden="true" tabindex="-1"></a>   results/trimmed/s001---1_R2.fq.gz</span></code></pre></div>
+<div class="sourceCode" id="cb717"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb717-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb717-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-2" aria-hidden="true" tabindex="-1"></a>   results/trimmed/s001---1_R1.fq.gz  <span class="dt">\</span></span>
+<span id="cb717-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-3" aria-hidden="true" tabindex="-1"></a>   results/trimmed/s001---1_R2.fq.gz</span></code></pre></div>
 <p>You should see a whole lot of lines starting with @ come zooming by first,
 then you will see some things that look like progress messages. Eventually,
 a bunch of sequences start zooming by. You can hit cntrl-C to stop that.</p>
@@ -1303,13 +1314,13 @@ into a SAM file, but before we do that, we are going to want to add the <code>-R
 to define the read group for the sequences in this file (we will talk a lot more
 about read groups in a moment).</p>
 <p>So,</p>
-<div class="sourceCode" id="cb712"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb712-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/sam  <span class="co"># a directory in which to put the output from stdout</span></span>
-<span id="cb712-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/bwa  <span class="co"># a directory in which to put the output from stderr</span></span>
-<span id="cb712-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="dt">\</span></span>
-<span id="cb712-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-4" aria-hidden="true" tabindex="-1"></a>-R <span class="st">&#39;@RG\tID:s001_T199967_Lib-1_HY75HDSX2_1_AAGACCGT+CAATCGAC\tSM:T199967\tPL:ILLUMINA\tLB:Lib-1\tPU:HY75HDSX2.1.AAGACCGT+CAATCGAC&#39;</span> <span class="dt">\</span></span>
-<span id="cb712-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-5" aria-hidden="true" tabindex="-1"></a>resources/genome.fasta <span class="dt">\</span></span>
-<span id="cb712-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-6" aria-hidden="true" tabindex="-1"></a>results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz <span class="op">&gt;</span> <span class="dt">\</span></span>
-<span id="cb712-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb712-7" aria-hidden="true" tabindex="-1"></a>results/sam/s001---1.sam <span class="dv">2</span><span class="op">&gt;</span> results/logs/bwa/s001---1.log</span></code></pre></div>
+<div class="sourceCode" id="cb718"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb718-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/sam  <span class="co"># a directory in which to put the output from stdout</span></span>
+<span id="cb718-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/bwa  <span class="co"># a directory in which to put the output from stderr</span></span>
+<span id="cb718-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="dt">\</span></span>
+<span id="cb718-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-4" aria-hidden="true" tabindex="-1"></a>-R <span class="st">&#39;@RG\tID:s001_T199967_Lib-1_HY75HDSX2_1_AAGACCGT+CAATCGAC\tSM:T199967\tPL:ILLUMINA\tLB:Lib-1\tPU:HY75HDSX2.1.AAGACCGT+CAATCGAC&#39;</span> <span class="dt">\</span></span>
+<span id="cb718-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-5" aria-hidden="true" tabindex="-1"></a>resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb718-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-6" aria-hidden="true" tabindex="-1"></a>results/trimmed/s001---1_R1.fq.gz  results/trimmed/s001---1_R2.fq.gz <span class="op">&gt;</span> <span class="dt">\</span></span>
+<span id="cb718-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-7" aria-hidden="true" tabindex="-1"></a>results/sam/s001---1.sam <span class="dv">2</span><span class="op">&gt;</span> results/logs/bwa/s001---1.log</span></code></pre></div>
 <p>While that is running (and it may run for a pretty good long while) let’s just note that the read-group string in there is a horrifying
 bunch of textual gobbledygook. The information that goes into it is in the
 file <code>units.tsv</code>. More on read groups later.</p>
@@ -1326,41 +1337,41 @@ script) in Section <a href="chap-HPCC.html#more-convert-task-ids">8.4.3.5</a>. O
 it use <code>line_assign.sh</code> to choose different files to align to the genome in a
 SLURM job array, according to the SLURM_ARRAY_TASK_ID. Hooray!</p>
 <p>Here is what such a script looks like:</p>
-<div class="sourceCode" id="cb713"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb713-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
-<span id="cb713-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-22</span></span>
-<span id="cb713-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
-<span id="cb713-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=results/slurm_logs/map/map_s002---1-output-%A-%a</span></span>
-<span id="cb713-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=results/slurm_logs/map/map_s002---1-error-%A-%a </span></span>
-<span id="cb713-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL </span></span>
-<span id="cb713-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
-<span id="cb713-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
-<span id="cb713-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-12" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
-<span id="cb713-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-13" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-units.tsv<span class="va">)</span> </span>
-<span id="cb713-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-16" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/bam  <span class="co"># a directory in which to put the output from stdout</span></span>
-<span id="cb713-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-17" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/bwa  <span class="co"># a directory in which to put the output from stderr</span></span>
-<span id="cb713-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-18" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/samtools-sort</span>
-<span id="cb713-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-19" aria-hidden="true" tabindex="-1"></a><span class="va">SU=${sample}</span>---<span class="va">${unit}</span></span>
-<span id="cb713-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-21" aria-hidden="true" tabindex="-1"></a><span class="va">RGID=${sample}</span>_<span class="va">${sample_id}</span>_<span class="va">${library}</span>_<span class="va">${flowcell}</span>_<span class="va">${lane}</span>_<span class="va">${barcode}</span></span>
-<span id="cb713-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-23" aria-hidden="true" tabindex="-1"></a><span class="va">RG=</span><span class="st">&quot;@RG\tID:</span><span class="va">${RGID}</span><span class="st">\tSM:</span><span class="va">${sample}</span><span class="st">\tPL:</span><span class="va">${platform}</span><span class="st">\tLB:</span><span class="va">${library}</span><span class="st">\tPU:</span><span class="va">${flowcell}</span><span class="st">.</span><span class="va">${lane}</span><span class="st">.</span><span class="va">${barcode}</span><span class="st">&quot;</span></span>
-<span id="cb713-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-25" aria-hidden="true" tabindex="-1"></a><span class="va">PREFIX=</span>results/trimmed/<span class="va">$SU</span></span>
-<span id="cb713-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-26" aria-hidden="true" tabindex="-1"></a><span class="va">OUT=</span>results/bam/<span class="va">$SU</span>.bam</span>
-<span id="cb713-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-27" aria-hidden="true" tabindex="-1"></a><span class="va">BWALOG=</span>results/logs/bwa/<span class="va">$SU</span>.log</span>
-<span id="cb713-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-28" aria-hidden="true" tabindex="-1"></a><span class="va">SAMSORTLOG=</span>results/logs/samtools-sort/<span class="va">$SU</span>.log</span>
-<span id="cb713-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb713-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-30" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="dt">\</span></span>
-<span id="cb713-31"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-31" aria-hidden="true" tabindex="-1"></a>-R <span class="va">$RG</span> <span class="dt">\</span></span>
-<span id="cb713-32"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-32" aria-hidden="true" tabindex="-1"></a>resources/genome.fasta <span class="dt">\</span></span>
-<span id="cb713-33"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-33" aria-hidden="true" tabindex="-1"></a><span class="va">${PREFIX}</span>_R1.fq.gz  <span class="va">${PREFIX}</span>_R2.fq.gz <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$BWALOG</span> <span class="kw">|</span>  <span class="dt">\</span></span>
-<span id="cb713-34"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-34" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-u</span> <span class="at">-</span> <span class="kw">|</span>  <span class="dt">\</span></span>
-<span id="cb713-35"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb713-35" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> sort <span class="at">-l</span> 9 <span class="at">-o</span> <span class="va">$OUT</span> <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$SAMSORTLOG</span></span></code></pre></div>
+<div class="sourceCode" id="cb719"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb719-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb719-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-22</span></span>
+<span id="cb719-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb719-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=results/slurm_logs/map/map_s002---1-output-%A-%a</span></span>
+<span id="cb719-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=results/slurm_logs/map/map_s002---1-error-%A-%a </span></span>
+<span id="cb719-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=ALL </span></span>
+<span id="cb719-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
+<span id="cb719-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
+<span id="cb719-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-12" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
+<span id="cb719-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-13" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-units.tsv<span class="va">)</span> </span>
+<span id="cb719-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-16" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/bam  <span class="co"># a directory in which to put the output from stdout</span></span>
+<span id="cb719-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-17" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/bwa  <span class="co"># a directory in which to put the output from stderr</span></span>
+<span id="cb719-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-18" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/logs/samtools-sort</span>
+<span id="cb719-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-19" aria-hidden="true" tabindex="-1"></a><span class="va">SU=${sample}</span>---<span class="va">${unit}</span></span>
+<span id="cb719-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-21" aria-hidden="true" tabindex="-1"></a><span class="va">RGID=${sample}</span>_<span class="va">${sample_id}</span>_<span class="va">${library}</span>_<span class="va">${flowcell}</span>_<span class="va">${lane}</span>_<span class="va">${barcode}</span></span>
+<span id="cb719-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-23" aria-hidden="true" tabindex="-1"></a><span class="va">RG=</span><span class="st">&quot;@RG\tID:</span><span class="va">${RGID}</span><span class="st">\tSM:</span><span class="va">${sample}</span><span class="st">\tPL:</span><span class="va">${platform}</span><span class="st">\tLB:</span><span class="va">${library}</span><span class="st">\tPU:</span><span class="va">${flowcell}</span><span class="st">.</span><span class="va">${lane}</span><span class="st">.</span><span class="va">${barcode}</span><span class="st">&quot;</span></span>
+<span id="cb719-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-25" aria-hidden="true" tabindex="-1"></a><span class="va">PREFIX=</span>results/trimmed/<span class="va">$SU</span></span>
+<span id="cb719-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-26" aria-hidden="true" tabindex="-1"></a><span class="va">OUT=</span>results/bam/<span class="va">$SU</span>.bam</span>
+<span id="cb719-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-27" aria-hidden="true" tabindex="-1"></a><span class="va">BWALOG=</span>results/logs/bwa/<span class="va">$SU</span>.log</span>
+<span id="cb719-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-28" aria-hidden="true" tabindex="-1"></a><span class="va">SAMSORTLOG=</span>results/logs/samtools-sort/<span class="va">$SU</span>.log</span>
+<span id="cb719-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb719-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-30" aria-hidden="true" tabindex="-1"></a><span class="ex">bwa</span> mem <span class="dt">\</span></span>
+<span id="cb719-31"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-31" aria-hidden="true" tabindex="-1"></a>-R <span class="va">$RG</span> <span class="dt">\</span></span>
+<span id="cb719-32"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-32" aria-hidden="true" tabindex="-1"></a>resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb719-33"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-33" aria-hidden="true" tabindex="-1"></a><span class="va">${PREFIX}</span>_R1.fq.gz  <span class="va">${PREFIX}</span>_R2.fq.gz <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$BWALOG</span> <span class="kw">|</span>  <span class="dt">\</span></span>
+<span id="cb719-34"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-34" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-u</span> <span class="at">-</span> <span class="kw">|</span>  <span class="dt">\</span></span>
+<span id="cb719-35"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-35" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> sort <span class="at">-l</span> 9 <span class="at">-o</span> <span class="va">$OUT</span> <span class="at">-</span> <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$SAMSORTLOG</span></span></code></pre></div>
 <p>As you can see, we were able to use most of our original test script. We just
 need to define <code>SU</code> and <code>RG</code> a little differently, according to the
 value of <code>SLURM_ARRAY_TASK_ID</code>, and we added an <code>#SBATCH --array=1-22</code>
@@ -1374,7 +1385,7 @@ it is being run as a SLURM array job by spoofing the variable
 <code>SLURM_ARRAY_TASK_ID</code>. In other words, on an interactive shell
 you can just set a shell variable called <code>SLURM_ARRAY_TASK_ID</code>
 to whatever value you want to (let’s choose 5 here!) like this:</p>
-<div class="sourceCode" id="cb714"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb714-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb714-1" aria-hidden="true" tabindex="-1"></a><span class="va">SLURM_ARRAY_TASK_ID=</span>5</span></code></pre></div>
+<div class="sourceCode" id="cb720"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb720-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb720-1" aria-hidden="true" tabindex="-1"></a><span class="va">SLURM_ARRAY_TASK_ID=</span>5</span></code></pre></div>
 <p>then you can go through the above script line by line and make sure
 that all the variables get set to appropriate values. After evaluating
 each line in which a variable value gets set, check the value of that
@@ -1386,11 +1397,11 @@ the output files and logs looks correct. But, you don’t have to do that now.</
 <div id="put-that-script-into-map-array-job.sh-and-run-it-with---test-only" class="section level4" number="27.6.3.2">
 <h4><span class="header-section-number">27.6.3.2</span> Put that script into <code>map-array-job.sh</code> and run it with <code>--test-only</code></h4>
 <p>Make a new script with nano by doing:</p>
-<div class="sourceCode" id="cb715"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb715-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb715-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> scripts/map-array-job.sh</span></code></pre></div>
+<div class="sourceCode" id="cb721"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb721-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> scripts/map-array-job.sh</span></code></pre></div>
 <p>paste the contents of the above script into it, change the email address
 for notification emails, and the save and exit.</p>
 <p>Then run it under <code>sbatch</code> but use the <code>--test-only</code> option:</p>
-<div class="sourceCode" id="cb716"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb716-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb716-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--test-only</span> scripts/map-array-job.sh</span></code></pre></div>
+<div class="sourceCode" id="cb722"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb722-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb722-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--test-only</span> scripts/map-array-job.sh</span></code></pre></div>
 <p>That works, but note that <code>--test-only</code> doesn’t see to let you know that this
 is an array job. Whatever!</p>
 </div>
@@ -1402,11 +1413,11 @@ launch just the first three jobs.</p>
 <p>Note also that you always want to make sure that you have created any directories
 necessary for storing the slurm_log output.</p>
 <p>Here we go!</p>
-<div class="sourceCode" id="cb717"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb717-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first, make sure the directories are there</span></span>
-<span id="cb717-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/slurm_logs/map/</span>
-<span id="cb717-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb717-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-4" aria-hidden="true" tabindex="-1"></a><span class="co"># then launch the first three jobs</span></span>
-<span id="cb717-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb717-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1-3 scripts/map-array-job.sh</span></code></pre></div>
+<div class="sourceCode" id="cb723"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb723-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-1" aria-hidden="true" tabindex="-1"></a><span class="co"># first, make sure the directories are there</span></span>
+<span id="cb723-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/slurm_logs/map/</span>
+<span id="cb723-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb723-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-4" aria-hidden="true" tabindex="-1"></a><span class="co"># then launch the first three jobs</span></span>
+<span id="cb723-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1-3 scripts/map-array-job.sh</span></code></pre></div>
 <p>Then use your <code>myjobs</code> alias to see when that starts. Once it has started, check the
 file <code>results/logs/bwa/s001---1.log</code> to make sure that stuff is coming out that looks
 like what you expect.</p>
@@ -1415,7 +1426,7 @@ like what you expect.</p>
 <h4><span class="header-section-number">27.6.3.4</span> If the last step looked good, then launch the remaining jobs</h4>
 <p>Once again, the power of overriding the internal SBATCH directives in the script
 come in handy here, setting <code>--array=4-22</code> to do the remaining 19 jobs.</p>
-<div class="sourceCode" id="cb718"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb718-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb718-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>4-22 scripts/map-array-job.sh</span></code></pre></div>
+<div class="sourceCode" id="cb724"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb724-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb724-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>4-22 scripts/map-array-job.sh</span></code></pre></div>
 <p>That should map all those trimmed reads to the genome. Woo-hoo!</p>
 </div>
 </div>
@@ -1445,11 +1456,11 @@ FIGURE 27.5: Marking PCR and optical duplicates and also running samtools stats 
 Picard Tools package. So, our first task is going to be to get those
 with <code>mamba</code>. We will want version 2.26 (which is pretty
 much the latest minor release as of this writing), so we do:</p>
-<div class="sourceCode" id="cb719"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb719-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb719-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> picard <span class="at">-c</span> bioconda picard=2.26</span></code></pre></div>
+<div class="sourceCode" id="cb725"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb725-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb725-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> picard <span class="at">-c</span> bioconda picard=2.26</span></code></pre></div>
 <p>Once that is installed we can activate the environment and
 check out the syntax for the MarkDuplicates tool.</p>
-<div class="sourceCode" id="cb720"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb720-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb720-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate picard</span>
-<span id="cb720-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb720-2" aria-hidden="true" tabindex="-1"></a><span class="ex">picard</span> MarkDuplicates <span class="at">--help</span></span></code></pre></div>
+<div class="sourceCode" id="cb726"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb726-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb726-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate picard</span>
+<span id="cb726-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb726-2" aria-hidden="true" tabindex="-1"></a><span class="ex">picard</span> MarkDuplicates <span class="at">--help</span></span></code></pre></div>
 <p>The help file notes that duplicates are identified as reads in which
 each mate maps to the same location in the genome (i.e. they have the
 same 5’ position) and which have sequences that are similar. It also
@@ -1476,27 +1487,27 @@ arrays to better understand how the following combination of an awk script and t
 <code>sort</code> utility gives us a numbered TSV file that provides a list of bam file paths
 that contain reads from a given sample. The comments
 in the following script also give some detail.</p>
-<div class="sourceCode" id="cb721"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb721-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&quot;\t&quot;</span> <span class="st">&#39;</span></span>
-<span id="cb721-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-2" aria-hidden="true" tabindex="-1"></a><span class="st">  BEGIN {</span></span>
-<span id="cb721-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-3" aria-hidden="true" tabindex="-1"></a><span class="st">    OFS=&quot;\t&quot;;     # separate output fields with TABs </span></span>
-<span id="cb721-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-4" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb721-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-5" aria-hidden="true" tabindex="-1"></a><span class="st">  NR==1 {next;}   # ignore the first line</span></span>
-<span id="cb721-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-6" aria-hidden="true" tabindex="-1"></a><span class="st">  { # in this block, store a space-separated string of &quot;-I filpath.bam&quot; for all the</span></span>
-<span id="cb721-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-7" aria-hidden="true" tabindex="-1"></a><span class="st">    # files that have reads from a give sample.  The variable bams is an</span></span>
-<span id="cb721-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-8" aria-hidden="true" tabindex="-1"></a><span class="st">    # associative or &quot;hash&quot; array (like a &quot;dictionary&quot; in Python) that holds those</span></span>
-<span id="cb721-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-9" aria-hidden="true" tabindex="-1"></a><span class="st">    # strings.</span></span>
-<span id="cb721-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-10" aria-hidden="true" tabindex="-1"></a><span class="st">    bams[$1] = sprintf(&quot;%s -I results/bam/%s---%s.bam&quot;, bams[$1], $1, $2);</span></span>
-<span id="cb721-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-11" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb721-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-12" aria-hidden="true" tabindex="-1"></a><span class="st">  END { # at the end, print out the keys of bams and the paths associated with each</span></span>
-<span id="cb721-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-13" aria-hidden="true" tabindex="-1"></a><span class="st">        # in two columns</span></span>
-<span id="cb721-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-14" aria-hidden="true" tabindex="-1"></a><span class="st">    for(i in bams) print i, bams[i]</span></span>
-<span id="cb721-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-15" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
-<span id="cb721-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-16" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span> units.tsv <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb721-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-17" aria-hidden="true" tabindex="-1"></a><span class="ex">sort</span> <span class="kw">|</span>  <span class="dt">\</span></span>
-<span id="cb721-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-18" aria-hidden="true" tabindex="-1"></a><span class="ex">awk</span> <span class="at">-F</span> <span class="st">&quot;\t&quot;</span> <span class="st">&#39; # print these lines out in a numbered TSV file.</span></span>
-<span id="cb721-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-19" aria-hidden="true" tabindex="-1"></a><span class="st">  BEGIN {printf(&quot;index\tsample\tbamopts\n&quot;);}  # print a header line</span></span>
-<span id="cb721-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-20" aria-hidden="true" tabindex="-1"></a><span class="st">  {printf(&quot;%d\t%s\t%s\n&quot;, ++n, $1, $2, $3)}  # print out each numbered line</span></span>
-<span id="cb721-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb721-21" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span> <span class="op">&gt;</span> numbered-sample-bams.tsv</span></code></pre></div>
+<div class="sourceCode" id="cb727"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb727-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-F</span><span class="st">&quot;\t&quot;</span> <span class="st">&#39;</span></span>
+<span id="cb727-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-2" aria-hidden="true" tabindex="-1"></a><span class="st">  BEGIN {</span></span>
+<span id="cb727-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-3" aria-hidden="true" tabindex="-1"></a><span class="st">    OFS=&quot;\t&quot;;     # separate output fields with TABs </span></span>
+<span id="cb727-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-4" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb727-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-5" aria-hidden="true" tabindex="-1"></a><span class="st">  NR==1 {next;}   # ignore the first line</span></span>
+<span id="cb727-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-6" aria-hidden="true" tabindex="-1"></a><span class="st">  { # in this block, store a space-separated string of &quot;-I filpath.bam&quot; for all the</span></span>
+<span id="cb727-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-7" aria-hidden="true" tabindex="-1"></a><span class="st">    # files that have reads from a give sample.  The variable bams is an</span></span>
+<span id="cb727-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-8" aria-hidden="true" tabindex="-1"></a><span class="st">    # associative or &quot;hash&quot; array (like a &quot;dictionary&quot; in Python) that holds those</span></span>
+<span id="cb727-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-9" aria-hidden="true" tabindex="-1"></a><span class="st">    # strings.</span></span>
+<span id="cb727-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-10" aria-hidden="true" tabindex="-1"></a><span class="st">    bams[$1] = sprintf(&quot;%s -I results/bam/%s---%s.bam&quot;, bams[$1], $1, $2);</span></span>
+<span id="cb727-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-11" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb727-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-12" aria-hidden="true" tabindex="-1"></a><span class="st">  END { # at the end, print out the keys of bams and the paths associated with each</span></span>
+<span id="cb727-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-13" aria-hidden="true" tabindex="-1"></a><span class="st">        # in two columns</span></span>
+<span id="cb727-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-14" aria-hidden="true" tabindex="-1"></a><span class="st">    for(i in bams) print i, bams[i]</span></span>
+<span id="cb727-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-15" aria-hidden="true" tabindex="-1"></a><span class="st">  }</span></span>
+<span id="cb727-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-16" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span> units.tsv <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb727-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-17" aria-hidden="true" tabindex="-1"></a><span class="ex">sort</span> <span class="kw">|</span>  <span class="dt">\</span></span>
+<span id="cb727-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-18" aria-hidden="true" tabindex="-1"></a><span class="ex">awk</span> <span class="at">-F</span> <span class="st">&quot;\t&quot;</span> <span class="st">&#39; # print these lines out in a numbered TSV file.</span></span>
+<span id="cb727-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-19" aria-hidden="true" tabindex="-1"></a><span class="st">  BEGIN {printf(&quot;index\tsample\tbamopts\n&quot;);}  # print a header line</span></span>
+<span id="cb727-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-20" aria-hidden="true" tabindex="-1"></a><span class="st">  {printf(&quot;%d\t%s\t%s\n&quot;, ++n, $1, $2, $3)}  # print out each numbered line</span></span>
+<span id="cb727-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-21" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span> <span class="op">&gt;</span> numbered-sample-bams.tsv</span></code></pre></div>
 <p>The file, <code>numbered-sample-bams.tsv</code> created by this short script looks like this:</p>
 <pre><code>index   sample  bamopts
 1   s001     -I results/bam/s001---1.bam
@@ -1523,22 +1534,22 @@ This index is much like the one created by the <code>samtools index</code> subco
 rather than creating an index file named <code>file-prefix.bam.bai</code>, it creates
 <code>file-prefix.bai</code>. So, we will also instruct MarkDuplicates to create a directory
 for the BAM file, as that will save us a step later on!</p>
-<div class="sourceCode" id="cb723"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb723-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate picard</span>
-<span id="cb723-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/mkdup-merged results/qc/mkdup-merged results/logs/mkdup-merged</span>
-<span id="cb723-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> LINE <span class="kw">in</span> {1..8}<span class="kw">;</span> <span class="cf">do</span></span>
-<span id="cb723-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$LINE</span> numbered-sample-bams.tsv<span class="va">)</span></span>
-<span id="cb723-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Marking duplicates for sample </span><span class="va">$sample</span><span class="st">&quot;</span></span>
-<span id="cb723-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb723-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">OUT=</span>results/mkdup-merged/<span class="va">$sample</span>.bam</span>
-<span id="cb723-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-8" aria-hidden="true" tabindex="-1"></a>  <span class="va">MET=</span>results/qc/mkdup-merged/<span class="va">$sample</span>.metrics</span>
-<span id="cb723-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-9" aria-hidden="true" tabindex="-1"></a>  <span class="va">LOG=</span>results/logs/mkdup-merged/<span class="va">$sample</span>.log</span>
-<span id="cb723-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb723-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">picard</span> MarkDuplicates <span class="va">$bamopts</span> <span class="dt">\</span></span>
-<span id="cb723-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">--OUTPUT</span> <span class="va">$OUT</span> <span class="dt">\</span></span>
-<span id="cb723-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">--METRICS_FILE</span> <span class="va">$MET</span> <span class="dt">\</span></span>
-<span id="cb723-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">--TAGGING_POLICY</span> All <span class="dt">\</span></span>
-<span id="cb723-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">--CREATE_INDEX</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span>
-<span id="cb723-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb723-16" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb729"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb729-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate picard</span>
+<span id="cb729-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/mkdup-merged results/qc/mkdup-merged results/logs/mkdup-merged</span>
+<span id="cb729-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> LINE <span class="kw">in</span> {1..8}<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb729-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-4" aria-hidden="true" tabindex="-1"></a>  <span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$LINE</span> numbered-sample-bams.tsv<span class="va">)</span></span>
+<span id="cb729-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-5" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;Marking duplicates for sample </span><span class="va">$sample</span><span class="st">&quot;</span></span>
+<span id="cb729-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb729-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">OUT=</span>results/mkdup-merged/<span class="va">$sample</span>.bam</span>
+<span id="cb729-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-8" aria-hidden="true" tabindex="-1"></a>  <span class="va">MET=</span>results/qc/mkdup-merged/<span class="va">$sample</span>.metrics</span>
+<span id="cb729-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-9" aria-hidden="true" tabindex="-1"></a>  <span class="va">LOG=</span>results/logs/mkdup-merged/<span class="va">$sample</span>.log</span>
+<span id="cb729-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb729-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">picard</span> MarkDuplicates <span class="va">$bamopts</span> <span class="dt">\</span></span>
+<span id="cb729-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">--OUTPUT</span> <span class="va">$OUT</span> <span class="dt">\</span></span>
+<span id="cb729-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">--METRICS_FILE</span> <span class="va">$MET</span> <span class="dt">\</span></span>
+<span id="cb729-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">--TAGGING_POLICY</span> All <span class="dt">\</span></span>
+<span id="cb729-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">--CREATE_INDEX</span> <span class="op">&gt;</span> <span class="va">$LOG</span> <span class="dv">2</span><span class="op">&gt;&amp;</span><span class="dv">1</span></span>
+<span id="cb729-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-16" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
 <p>That should only take a few minutes.</p>
 <p>Once that is done we will look at the resulting bamfiles with <code>samtools</code>,
 and compare them to the BAM files before duplicates were marked, just to see
@@ -1548,24 +1559,24 @@ in their SAM flags. So, we can look at the sequences marked as duplicates
 with <code>samtools view</code> telling it, with the <code>-f 0x400</code> option to only print
 sequences having that 0x400 bit set.</p>
 <p>For example:</p>
-<div class="sourceCode" id="cb724"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb724-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb724-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
-<span id="cb724-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb724-2" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-f</span> 0x400 results/mkdup-merged/s001.bam <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<div class="sourceCode" id="cb730"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb730-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb730-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
+<span id="cb730-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb730-2" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-f</span> 0x400 results/mkdup-merged/s001.bam <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
 <p>Note that the final column on each row has some information tagged with <code>DT</code>.
 This let’s us know whether the duplicate was a PCR duplicate (formed during
 library prep) or an optical duplicate (a cluster on the sequencing machine
 that was incorrectly split into two spots).</p>
 <p>We can use awk to count up the number of different <code>DT</code> tags in the
 last column of each row having a duplicated sequence in it, like this:</p>
-<div class="sourceCode" id="cb725"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb725-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb725-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here we can count how many of each tag we see</span></span>
-<span id="cb725-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb725-2" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-f</span> 0x400 results/mkdup-merged/s001.bam <span class="kw">|</span> <span class="dt">\</span></span>
-<span id="cb725-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb725-3" aria-hidden="true" tabindex="-1"></a>  awk <span class="st">&#39;{n[$NF]++} END {for(i in n) print i, n[i]}&#39;</span></span></code></pre></div>
+<div class="sourceCode" id="cb731"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb731-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here we can count how many of each tag we see</span></span>
+<span id="cb731-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-2" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-f</span> 0x400 results/mkdup-merged/s001.bam <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb731-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-3" aria-hidden="true" tabindex="-1"></a>  awk <span class="st">&#39;{n[$NF]++} END {for(i in n) print i, n[i]}&#39;</span></span></code></pre></div>
 <p>The <code>DT</code> tag either has an <code>LB</code> if it is a PCR-duplicate (it is a consequence
 of the <em>library</em>, hence the <code>LB</code>) or it has an <code>SQ</code> if it is an optical
 duplicate (it is a consequence of the sequencing platform, hence <code>SQ</code>).</p>
 <p>If you look at any of the original BAM files (before marking duplicates)
 you will find that none of them have any reads marked as duplicates
 (which is not surpring—that is why we ran them through MarkDuplicates.)</p>
-<div class="sourceCode" id="cb726"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb726-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb726-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-f</span> 0x400 results/bam/s001---1.bam <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<div class="sourceCode" id="cb732"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb732-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb732-1" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> view <span class="at">-f</span> 0x400 results/bam/s001---1.bam <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
 <p>When reads are marked as duplicates, they will be automatically ignored during
 variant calling (which we start in the next step!) by GATK’s variant-calling
 programs. They can also be ignored in ANGSD and most other variant calling programs.</p>
@@ -1576,34 +1587,34 @@ a good idea to run <code>samtools stats</code> on them. That utility returns a f
 comprehensive summary of any BAM file.</p>
 <p>This doesn’t take long to run, and we can easily do it with a for loop over
 filenames:</p>
-<div class="sourceCode" id="cb727"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb727-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make a directory for the results</span></span>
-<span id="cb727-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/qc/samtools-stats</span>
-<span id="cb727-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb727-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam  <span class="co"># to have samtools</span></span>
-<span id="cb727-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> FILE <span class="kw">in</span> results/mkdup-merged/<span class="pp">*</span>.bam<span class="kw">;</span> <span class="cf">do</span> </span>
-<span id="cb727-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">j=$(</span><span class="fu">basename</span> <span class="va">$FILE)</span><span class="kw">;</span> </span>
-<span id="cb727-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="va">$j</span><span class="kw">;</span> </span>
-<span id="cb727-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">samtools</span> stats <span class="va">$FILE</span> <span class="op">&gt;</span> results/qc/samtools-stats/<span class="va">${j}</span>_stats  </span>
-<span id="cb727-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb727-9" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb733"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb733-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make a directory for the results</span></span>
+<span id="cb733-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-2" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/qc/samtools-stats</span>
+<span id="cb733-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb733-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam  <span class="co"># to have samtools</span></span>
+<span id="cb733-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> FILE <span class="kw">in</span> results/mkdup-merged/<span class="pp">*</span>.bam<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb733-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-6" aria-hidden="true" tabindex="-1"></a>  <span class="va">j=$(</span><span class="fu">basename</span> <span class="va">$FILE)</span><span class="kw">;</span> </span>
+<span id="cb733-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-7" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="va">$j</span><span class="kw">;</span> </span>
+<span id="cb733-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">samtools</span> stats <span class="va">$FILE</span> <span class="op">&gt;</span> results/qc/samtools-stats/<span class="va">${j}</span>_stats  </span>
+<span id="cb733-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb733-9" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
 <p>When that is done, it is worth looking through all the different summaries. For example:</p>
-<div class="sourceCode" id="cb728"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb728-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb728-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> results/qc/samtools-stats/s008.bam_stats</span></code></pre></div>
+<div class="sourceCode" id="cb734"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb734-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb734-1" aria-hidden="true" tabindex="-1"></a><span class="fu">less</span> results/qc/samtools-stats/s008.bam_stats</span></code></pre></div>
 <p>They give the distribution of a lot of different features of the mapped reads.</p>
 <p>MultiQC has some capability to plot some of the features in the <code>samtools stats</code>
 summaries. You can see those by doing.</p>
-<div class="sourceCode" id="cb729"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb729-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
-<span id="cb729-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb729-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> results/qc/samtools-stats/<span class="pp">*</span>.bam_stats</span></code></pre></div>
+<div class="sourceCode" id="cb735"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb735-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb735-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate multiqc</span>
+<span id="cb735-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb735-2" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> results/qc/samtools-stats/<span class="pp">*</span>.bam_stats</span></code></pre></div>
 <p>and then copying the multiqc_report.html to your laptop and opening it in a browser.
 With as little data as we have in these files, it is not super interesting to look at them.</p>
 <p>MultiQC (at least a suitable new version of it) can also process the “metrics” files from
 MarkDuplicates. So you can do:</p>
-<div class="sourceCode" id="cb730"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb730-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb730-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-f</span> results/qc/samtools-stats/<span class="pp">*</span>.bam_stats results/qc/mkdup-merged/<span class="pp">*</span>.metrics</span></code></pre></div>
+<div class="sourceCode" id="cb736"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb736-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb736-1" aria-hidden="true" tabindex="-1"></a><span class="ex">multiqc</span> <span class="at">-f</span> results/qc/samtools-stats/<span class="pp">*</span>.bam_stats results/qc/mkdup-merged/<span class="pp">*</span>.metrics</span></code></pre></div>
 <p>For that to work, I had to get a newer version of MultiQC than I had, which meant I
 needed to do this first.</p>
-<div class="sourceCode" id="cb731"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb731-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env remove <span class="at">--name</span> multiqc</span>
-<span id="cb731-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels defaults</span>
-<span id="cb731-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
-<span id="cb731-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels bioconda</span>
-<span id="cb731-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb731-5" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> multiqc <span class="at">-c</span> bioconda multiqc=1.12</span></code></pre></div>
+<div class="sourceCode" id="cb737"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb737-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb737-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> env remove <span class="at">--name</span> multiqc</span>
+<span id="cb737-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb737-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels defaults</span>
+<span id="cb737-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb737-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge</span>
+<span id="cb737-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb737-4" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> config <span class="at">--add</span> channels bioconda</span>
+<span id="cb737-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb737-5" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> multiqc <span class="at">-c</span> bioconda multiqc=1.12</span></code></pre></div>
 <hr />
 <p>Now we have 8 BAM files. Each one has all the reads from a single
 individual. Duplicates in them have been marked, and they each have
@@ -1611,8 +1622,198 @@ an index. Therefore, it is time to proceed to the variant calling
 steps.</p>
 </div>
 </div>
-<div id="step-4.-creating-a-gvcf-file-for-each-sample" class="section level2" number="27.8">
+<div id="make-gvcfs" class="section level2" number="27.8">
 <h2><span class="header-section-number">27.8</span> Step 4. Creating a gVCF file for each sample</h2>
+<p>Yay! We are finally going to start turning our alignments into variants.
+But don’t get too excited just yet, because the GATK gVCF workflow involves
+three separate steps to take us from our duplicate-marked BAM files to
+a VCF file with variants. Here we are doing the first step: creating one
+gVCF file for each of our samples.</p>
+Here is our DAG showing what steps we are talking about in this section:
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:make-gvcfs-dag"></span>
+<img src="figs/snakemake-dags/make-gvcfs.svg" alt="Running HaplotypeCaller to create one gVCF file for each sample." width="100%" />
+<p class="caption">
+FIGURE 27.6: Running HaplotypeCaller to create one gVCF file for each sample.
+</p>
+</div>
+<p>This is the first step where we are starting to use the tools of the GATK package,
+so we will have to create a conda environment with GATK. That will be our first
+step. It is important at this time to get GATK version 4.2.5.0, which is the
+latest no-architecture version available on conda as of 3/29/22. The previous version,
+4.2.4.1 had some bugs that caused problems when genotyping gVCFs from the
+genomics data bases for some of my non-human data (details <a href="https://github.com/broadinstitute/gatk/issues/7639#issuecomment-1014180059">here</a>).
+There might be some residual problems left in 4.2.5.0 (see <a href="https://github.com/broadinstitute/gatk/issues/7639#issuecomment-1049126046">here</a>),
+but it should work for our small example data set, today.</p>
+<p>By now we know the drill:</p>
+<div class="sourceCode" id="cb738"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb738-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb738-1" aria-hidden="true" tabindex="-1"></a><span class="co"># on scompile</span></span>
+<span id="cb738-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb738-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> gatk4.2.5.0 <span class="at">-c</span> bioconda gatk4=4.2.5.0</span>
+<span id="cb738-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb738-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb738-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb738-4" aria-hidden="true" tabindex="-1"></a><span class="co"># when that is done, activate it</span></span>
+<span id="cb738-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb738-5" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span></code></pre></div>
+<p>Since this is our first time with GATK, it is worth getting a glimpse of all the
+tools available from the GATK package:</p>
+<div class="sourceCode" id="cb739"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb739-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb739-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--list</span></span></code></pre></div>
+<p>Holy Moly! That is a lot of different programs!</p>
+<p>To get the syntax and documentation for any particular tool you can use
+<code>gatk ToolName --help</code>, so, for our case:</p>
+<div class="sourceCode" id="cb740"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb740-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb740-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> HaplotypeCaller <span class="at">--help</span></span></code></pre></div>
+<p>Whoa! That spits out a lot of options. At this juncture, it is worth noting
+that the GATK tools have comprehensive documentation available
+on the web, too. Sometimes it is easier to read the docs there than on your Unix
+terminal. A Google search of <em>GATK toolname</em>, like “GATK HaplotypeCaller” will typically
+return the documentation as the first hit. Here is a link to the
+<a href="https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller">HaplotypeCaller documentation</a>.</p>
+<p>The documentation on the web also provides a nice example for how
+HaplotypeCaller should be called for this first step in the gVCF
+workflow. It looks like this:</p>
+<blockquote>
+<p>Single-sample GVCF calling (outputs intermediate GVCF)</p>
+</blockquote>
+<div class="sourceCode" id="cb741"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb741-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb741-1" aria-hidden="true" tabindex="-1"></a> <span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Xmx4g&quot;</span> HaplotypeCaller  <span class="dt">\</span></span>
+<span id="cb741-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb741-2" aria-hidden="true" tabindex="-1"></a>   <span class="at">-R</span> Homo_sapiens_assembly38.fasta <span class="dt">\</span></span>
+<span id="cb741-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb741-3" aria-hidden="true" tabindex="-1"></a>   <span class="at">-I</span> input.bam <span class="dt">\</span></span>
+<span id="cb741-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb741-4" aria-hidden="true" tabindex="-1"></a>   <span class="at">-O</span> output.g.vcf.gz <span class="dt">\</span></span>
+<span id="cb741-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb741-5" aria-hidden="true" tabindex="-1"></a>   <span class="at">-ERC</span> GVCF</span></code></pre></div>
+<p>So, we need as input:</p>
+<ol style="list-style-type: decimal">
+<li>The reference genome the reads were mapped to</li>
+<li>The input BAM which must be sorted and preferably has been duplicate marked. It
+also needs to be indexed, i.e. there must be a <code>.bai</code> file associated with each.</li>
+<li>The name of the output file</li>
+<li>The option <code>-ERC GVCF</code>. This tells HaplotypeCaller to make a gVCF, rather than
+to attempt to got “direct-to-VCF.”</li>
+</ol>
+<div id="thats-a-dict-thing-to-do" class="section level3" number="27.8.1">
+<h3><span class="header-section-number">27.8.1</span> That’s a dict thing to do!</h3>
+<p>What isn’t mentioned in the documentation is that HaplotypeCaller also requires that
+the reference genome be indexed in two different ways. It must have a <code>.fai</code> file (for
+example created using <code>samtools faidx</code>) and it must have a <code>.dict</code> or “dictionary” file
+for the genome. This can also be create with samtools using <code>samtools dict</code>. These
+steps are visible in our workflow DAG. Let’s make sure that we both of those
+necessary indexes by doing this:</p>
+<div class="sourceCode" id="cb742"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb742-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bwasam</span>
+<span id="cb742-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb742-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-3" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> faidx resources/genome.fasta</span>
+<span id="cb742-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-4" aria-hidden="true" tabindex="-1"></a><span class="ex">samtools</span> dict resources/genome.fasta <span class="op">&gt;</span> resources/genome.dict</span>
+<span id="cb742-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb742-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-6" aria-hidden="true" tabindex="-1"></a><span class="co"># and when done, reactivate our gatk4 environment</span></span>
+<span id="cb742-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb742-7" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span></code></pre></div>
+</div>
+<div id="setting-up-a-slurm-job-array-for-this" class="section level3" number="27.8.2">
+<h3><span class="header-section-number">27.8.2</span> Setting up a SLURM job array for this</h3>
+<p>We are going to run these jobs using a SLURM job array.
+Each task will be given one CPU. Because of this, we also
+want to tell HaplotypeCaller to only use a single thread for
+its pair hidden Markov model (by default it uses 4 threads, which is not
+helpful if we have allocated only a single core for the job). So, the
+command line will include the line <code>--native-pair-hmm-threads 1</code>.</p>
+<p>Additionally, since all the GATK tools are implemented in Java, they run
+under the Java virtual machine on our computers. We can specify how much
+memory (RAM) is allocated to the Java virtual machine in order to host GATK.
+We have about 4848 Mb of RAM per core on SUMMIT, so we will give 4000 Mb, or 4Gb of
+RAM to the Java virtual machine. This should be more than enough. But it is worth
+noting that sometimes you can run out of memory, in which case you would
+have to re-run the job and give it more memory. To provide a certain amount of
+memory to the Java virtual machine, or, in fact, to supply any particular
+options to Java, we will use the <code>--java-opts</code> option to <code>gatk</code>. This goes
+before the tool name, like this: <code>gatk --java-opts "quoted string of options to pass to Java" ToolName</code>. In our case, that quoted string of options to pass to Java
+will look like: <code>"-Xmx4g"</code> which basically says “give me 4 Gb of memory.”</p>
+<p>We have 8 jobs to run (one for each of our samples). We first make a simple
+tab-separated file called <code>numbered-samples.tsv</code> that we can read with our
+<code>line-assign.sh</code> script. Here is some Unix fun to make such a file from
+our <code>units.tsv</code> file:</p>
+<div class="sourceCode" id="cb743"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb743-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb743-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cut</span> <span class="at">-f</span> 1 units.tsv <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb743-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb743-2" aria-hidden="true" tabindex="-1"></a><span class="ex">awk</span> <span class="st">&#39;</span></span>
+<span id="cb743-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb743-3" aria-hidden="true" tabindex="-1"></a><span class="st">    NR==1 {printf(&quot;index\tsample\n&quot;); next} </span></span>
+<span id="cb743-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb743-4" aria-hidden="true" tabindex="-1"></a><span class="st">    {printf(&quot;%d\t%s\n&quot;, ++n, $1);}</span></span>
+<span id="cb743-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb743-5" aria-hidden="true" tabindex="-1"></a><span class="st">&#39;</span> <span class="op">&gt;</span> numbered-samples.tsv</span></code></pre></div>
+<p>Then we need to have a script that we can pass to <code>sbatch</code>. The following
+should be copied into <code>scripts/gvcf-array-job.sh</code>.</p>
+<div class="sourceCode" id="cb744"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb744-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb744-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-8</span></span>
+<span id="cb744-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb744-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=results/slurm_logs/gvcf/make-gvcf-output-%A-%a</span></span>
+<span id="cb744-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=results/slurm_logs/gvcf/make-gvcf-error-%A-%a </span></span>
+<span id="cb744-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=FAIL</span></span>
+<span id="cb744-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
+<span id="cb744-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-11" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
+<span id="cb744-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-12" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span>
+<span id="cb744-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-14" aria-hidden="true" tabindex="-1"></a><span class="co"># this sets the shell variable &quot;sample&quot; to s001, s002, etc.</span></span>
+<span id="cb744-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-15" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-samples.tsv<span class="va">)</span> </span>
+<span id="cb744-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-17" aria-hidden="true" tabindex="-1"></a><span class="va">outdir=</span>results/gvcf                      <span class="co"># a directory in which to put the output gVFC file</span></span>
+<span id="cb744-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-18" aria-hidden="true" tabindex="-1"></a><span class="va">logdir=</span>results/logs/haplotype-caller     <span class="co"># a directory in which to put the output from stderr</span></span>
+<span id="cb744-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-20" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure those directories exist</span></span>
+<span id="cb744-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-21" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$outdir</span>  </span>
+<span id="cb744-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-22" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$logdir</span>  </span>
+<span id="cb744-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb744-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-25" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Xmx4g&quot;</span> HaplotypeCaller <span class="dt">\</span></span>
+<span id="cb744-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">-R</span> resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb744-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">-I</span> results/mkdup-merged/<span class="va">$sample</span>.bam <span class="dt">\</span></span>
+<span id="cb744-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> <span class="va">$outdir</span>/<span class="va">$sample</span>.g.vcf.gz <span class="dt">\</span></span>
+<span id="cb744-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">--native-pair-hmm-threads</span> 1 <span class="dt">\</span></span>
+<span id="cb744-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">-ERC</span> GVCF <span class="op">&gt;</span> <span class="va">$logdir</span>/<span class="va">$sample</span>.stdout  <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$logdir</span>/<span class="va">$sample</span>.stderr</span>
+<span id="cb744-31"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb744-31" aria-hidden="true" tabindex="-1"></a>  </span></code></pre></div>
+</div>
+<div id="running-interactively-to-watch-the-output" class="section level3" number="27.8.3">
+<h3><span class="header-section-number">27.8.3</span> Running interactively to watch the output</h3>
+<p>If you haven’t run any GATK tools before, it is worth doing a short run
+to watch the progress meter log go by (this is what gets written
+to <em>stderr</em> when you run GATK tools).</p>
+<p>So, <em>get an interactive shell</em>, then spoof the SLURM_ARRAY_TASK_ID (i.e.
+just make a variable named <code>SLURM_ARRAY_TASK_ID</code> and set it to 1), and
+run one iteration as follows:</p>
+<div class="sourceCode" id="cb745"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb745-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-3" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span>
+<span id="cb745-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-5" aria-hidden="true" tabindex="-1"></a><span class="va">SLURM_ARRAY_TASK_ID=</span>1</span>
+<span id="cb745-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-7" aria-hidden="true" tabindex="-1"></a><span class="co"># this sets the shell variable &quot;sample&quot; to s001, s002, etc.</span></span>
+<span id="cb745-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-8" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-samples.tsv<span class="va">)</span> </span>
+<span id="cb745-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-10" aria-hidden="true" tabindex="-1"></a><span class="va">outdir=</span>results/gvcf                      <span class="co"># a directory in which to put the output gVFC file</span></span>
+<span id="cb745-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-11" aria-hidden="true" tabindex="-1"></a><span class="va">logdir=</span>results/logs/haplotype-caller     <span class="co"># a directory in which to put the output from stderr</span></span>
+<span id="cb745-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-13" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure those directories exist</span></span>
+<span id="cb745-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-14" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$outdir</span>  </span>
+<span id="cb745-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-15" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$logdir</span>  </span>
+<span id="cb745-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb745-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-18" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Xmx4g&quot;</span> HaplotypeCaller <span class="dt">\</span></span>
+<span id="cb745-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">-R</span> resources/genome.fasta <span class="dt">\</span></span>
+<span id="cb745-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">-I</span> results/mkdup-merged/<span class="va">$sample</span>.bam <span class="dt">\</span></span>
+<span id="cb745-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">-O</span> <span class="va">$outdir</span>/<span class="va">$sample</span>.g.vcf.gz <span class="dt">\</span></span>
+<span id="cb745-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">--native-pair-hmm-threads</span> 1 <span class="dt">\</span></span>
+<span id="cb745-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb745-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">-ERC</span> GVCF </span></code></pre></div>
+<p>Note that we are not redirecting stdout or stderr to any files, so it
+just come to our screen.</p>
+<p>The “ProgressMeter” that comes flying out of GATK tools can be quite helpful for
+estimating how long a particular run on a particular data set might require.</p>
+<p>When you have seen enough, kill that job with <code>cntrl-c</code> and then we will launch
+our jobs for real.</p>
+</div>
+<div id="launch-the-first-3-jobs-of-our-array" class="section level3" number="27.8.4">
+<h3><span class="header-section-number">27.8.4</span> Launch the first 3 jobs of our array</h3>
+<p>As always, it is wise to launch just the first few jobs of an array
+to make sure things are set up correctly.</p>
+<p>Before we start this, we <em>must</em> create the directories that we are
+redirecting the SLURM logs to:</p>
+<div class="sourceCode" id="cb746"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb746-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb746-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/slurm_logs/gvcf</span></code></pre></div>
+<p>Then, start the first three:</p>
+<div class="sourceCode" id="cb747"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb747-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb747-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1-3 scripts/gvcf-array-job.sh</span></code></pre></div>
+<p>Once you are convinced that those are doing just fine, you can start up the
+remaining 5:</p>
+<div class="sourceCode" id="cb748"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb748-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb748-1" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>4-8 scripts/gvcf-array-job.sh</span></code></pre></div>
+<p>While those are running would be a good time to go back and review
+what a gVCF file is all about (Section <a href="variant-calling.html#gvcf-format">20.2.2</a>).</p>
+</div>
 </div>
 <div id="step-5.-importing-the-gvcf-files-into-a-genomicsdatabase" class="section level2" number="27.9">
 <h2><span class="header-section-number">27.9</span> Step 5. Importing the gVCF files into a GenomicsDatabase</h2>

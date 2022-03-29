@@ -31,6 +31,7 @@ fig:fastqc-multiqc-dag
 fig:trimmo-dag
 fig:bwa-map-dag
 fig:mark-dup-dag
+fig:make-gvcfs-dag
 intro
 erics-notes-of-what-he-might-do
 table-of-topics
@@ -314,6 +315,9 @@ gatk
 bcftools-mpileup
 angsd
 a-directed-acyclic-graph-for-genotype-likelihoods
+gatks-gvcf-workflow
+step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample
+gvcf-format
 boneyard-1
 basic-handling-of-vcf-files
 bcftools
@@ -354,7 +358,11 @@ run-just-the-first-job
 if-the-last-step-looked-good-then-launch-the-remaining-jobs
 step-3.-mark-duplicates-in-bam-files-from-each-individual-and-run-samtools-stats-on-the-results
 run-samtools-stats-on-the-results
-step-4.-creating-a-gvcf-file-for-each-sample
+make-gvcfs
+thats-a-dict-thing-to-do
+setting-up-a-slurm-job-array-for-this
+running-interactively-to-watch-the-output
+launch-the-first-3-jobs-of-our-array
 step-5.-importing-the-gvcf-files-into-a-genomicsdatabase
 step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase
 step-7.-filtering-variants

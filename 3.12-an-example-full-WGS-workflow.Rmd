@@ -1285,7 +1285,235 @@ steps.
 
 
 
-## Step 4. Creating a gVCF file for each sample
+## Step 4. Creating a gVCF file for each sample {#make-gvcfs}
+
+Yay! We are finally going to start turning our alignments into variants.
+But don't get too excited just yet, because the GATK gVCF workflow involves
+three separate steps to take us from our duplicate-marked BAM files to
+a VCF file with variants.  Here we are doing the first step: creating one
+gVCF file for each of our samples.  
+
+Here is our DAG showing what steps we are talking about in this section:
+```{r make-gvcfs-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Running HaplotypeCaller to create one gVCF file for each sample.'}
+knitr::include_graphics("figs/snakemake-dags/make-gvcfs.svg", auto_pdf = TRUE)
+```
+
+This is the first step where we are starting to use the tools of the GATK package,
+so we will have to create a conda environment with GATK.  That will be our first
+step.  It is important at this time to get GATK version 4.2.5.0, which is the
+latest no-architecture version available on conda as of 3/29/22.  The previous version,
+4.2.4.1 had some bugs that caused problems when genotyping gVCFs from the
+genomics data bases for some of my non-human data (details [here](https://github.com/broadinstitute/gatk/issues/7639#issuecomment-1014180059)). 
+There might be some residual problems left in 4.2.5.0 (see [here](https://github.com/broadinstitute/gatk/issues/7639#issuecomment-1049126046)),
+but it should work for our small example data set, today.
+
+By now we know the drill:
+```sh
+# on scompile
+mamba create -n gatk4.2.5.0 -c bioconda gatk4=4.2.5.0
+
+# when that is done, activate it
+conda activate gatk4.2.5.0
+```
+
+Since this is our first time with GATK, it is worth getting a glimpse of all the
+tools available from the GATK package:
+```sh
+gatk --list
+```
+Holy Moly! That is a lot of different programs!
+
+To get the syntax and documentation for any particular tool you can use
+`gatk ToolName --help`, so, for our case:
+```sh
+gatk HaplotypeCaller --help
+```
+
+Whoa! That spits out a lot of options.  At this juncture, it is worth noting
+that the GATK tools have comprehensive documentation available
+on the web, too. Sometimes it is easier to read the docs there than on your Unix
+terminal.  A Google search of _GATK toolname_, like "GATK HaplotypeCaller" will typically
+return the documentation as the first hit.  Here is a link to the
+[HaplotypeCaller documentation](https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller).
+
+The documentation on the web also provides a nice example for how
+HaplotypeCaller should be called for this first step in the gVCF
+workflow. It looks like this:
+
+>Single-sample GVCF calling (outputs intermediate GVCF)
+
+```sh
+ gatk --java-options "-Xmx4g" HaplotypeCaller  \
+   -R Homo_sapiens_assembly38.fasta \
+   -I input.bam \
+   -O output.g.vcf.gz \
+   -ERC GVCF
+```
+So, we need as input:
+
+1. The reference genome the reads were mapped to
+2. The input BAM which must be sorted and preferably has been duplicate marked. It
+also needs to be indexed, i.e. there must be a `.bai` file associated with each.
+3. The name of the output file
+4. The option `-ERC GVCF`.  This tells HaplotypeCaller to make a gVCF, rather than
+to attempt to got "direct-to-VCF."
+
+### That's a dict thing to do!
+
+What isn't mentioned in the documentation is that HaplotypeCaller also requires that
+the reference genome be indexed in two different ways.  It must have a `.fai` file (for 
+example created using `samtools faidx`) and it must have a `.dict` or "dictionary" file
+for the genome.  This can also be create with samtools using `samtools dict`.  These
+steps are visible in our workflow DAG.  Let's make sure that we both of those
+necessary indexes by doing this:
+```sh
+conda activate bwasam
+
+samtools faidx resources/genome.fasta
+samtools dict resources/genome.fasta > resources/genome.dict
+
+# and when done, reactivate our gatk4 environment
+conda activate gatk4.2.5.0
+```
+
+### Setting up a SLURM job array for this
+
+We are going to run these jobs using a SLURM job array.
+Each task will be given one CPU.  Because of this, we also
+want to tell HaplotypeCaller to only use a single thread for
+its pair hidden Markov model (by default it uses 4 threads, which is not
+helpful if we have allocated only a single core for the job).  So, the
+command line will include the line `--native-pair-hmm-threads 1`.
+
+Additionally, since all the GATK tools are implemented in Java, they run
+under the Java virtual machine on our computers.  We can specify how much
+memory (RAM) is allocated to the Java virtual machine in order to host GATK.
+We have about 4848 Mb of RAM per core on SUMMIT, so we will give 4000 Mb, or 4Gb of
+RAM to the Java virtual machine.  This should be more than enough.  But it is worth
+noting that sometimes you can run out of memory, in which case you would
+have to re-run the job and give it more memory.  To provide a certain amount of
+memory to the Java virtual machine, or, in fact, to supply any particular
+options to Java, we will use the `--java-opts` option to `gatk`.  This goes
+before the tool name, like this: `gatk --java-opts "quoted string of options to pass
+to Java" ToolName`. In our case, that quoted string of options to pass to Java
+will look like: `"-Xmx4g"` which basically says "give me 4 Gb of memory."
+
+We have 8 jobs to run (one for each of our samples).  We first make a simple
+tab-separated file called `numbered-samples.tsv` that we can read with our
+`line-assign.sh` script. Here is some Unix fun to make such a file from
+our `units.tsv` file:
+```sh
+cut -f 1 units.tsv | uniq | \
+awk '
+    NR==1 {printf("index\tsample\n"); next} 
+    {printf("%d\t%s\n", ++n, $1);}
+' > numbered-samples.tsv
+```
+
+Then we need to have a script that we can pass to `sbatch`.  The following
+should be copied into `scripts/gvcf-array-job.sh`.
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-8
+#SBATCH --time=02:00:00
+#SBATCH --output=results/slurm_logs/gvcf/make-gvcf-output-%A-%a
+#SBATCH --error=results/slurm_logs/gvcf/make-gvcf-error-%A-%a 
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+source ~/.bashrc
+conda activate gatk4.2.5.0
+
+# this sets the shell variable "sample" to s001, s002, etc.
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-samples.tsv) 
+
+outdir=results/gvcf                      # a directory in which to put the output gVFC file
+logdir=results/logs/haplotype-caller     # a directory in which to put the output from stderr
+
+# make sure those directories exist
+mkdir -p $outdir  
+mkdir -p $logdir  
+
+
+gatk --java-options "-Xmx4g" HaplotypeCaller \
+  -R resources/genome.fasta \
+  -I results/mkdup-merged/$sample.bam \
+  -O $outdir/$sample.g.vcf.gz \
+  --native-pair-hmm-threads 1 \
+  -ERC GVCF > $logdir/$sample.stdout  2> $logdir/$sample.stderr
+  
+```
+
+### Running interactively to watch the output
+
+If you haven't run any GATK tools before, it is worth doing a short run
+to watch the progress meter log go by (this is what gets written
+to _stderr_ when you run GATK tools).
+
+So, _get an interactive shell_, then spoof the SLURM_ARRAY_TASK_ID (i.e.
+just make a variable named `SLURM_ARRAY_TASK_ID` and set it to 1), and
+run one iteration as follows:
+```sh
+
+
+conda activate gatk4.2.5.0
+
+SLURM_ARRAY_TASK_ID=1
+
+# this sets the shell variable "sample" to s001, s002, etc.
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-samples.tsv) 
+
+outdir=results/gvcf                      # a directory in which to put the output gVFC file
+logdir=results/logs/haplotype-caller     # a directory in which to put the output from stderr
+
+# make sure those directories exist
+mkdir -p $outdir  
+mkdir -p $logdir  
+
+
+gatk --java-options "-Xmx4g" HaplotypeCaller \
+  -R resources/genome.fasta \
+  -I results/mkdup-merged/$sample.bam \
+  -O $outdir/$sample.g.vcf.gz \
+  --native-pair-hmm-threads 1 \
+  -ERC GVCF 
+
+```
+Note that we are not redirecting stdout or stderr to any files, so it
+just come to our screen.  
+
+The "ProgressMeter" that comes flying out of GATK tools can be quite helpful for
+estimating how long a particular run on a particular data set might require.
+
+When you have seen enough, kill that job with `cntrl-c` and then we will launch
+our jobs for real.
+
+### Launch the first 3 jobs of our array
+
+As always, it is wise to launch just the first few jobs of an array
+to make sure things are set up correctly.
+
+Before we start this, we _must_ create the directories that we are
+redirecting the SLURM logs to:
+```sh
+mkdir -p results/slurm_logs/gvcf
+```
+Then, start the first three:
+```sh
+sbatch --array=1-3 scripts/gvcf-array-job.sh
+```
+
+Once you are convinced that those are doing just fine, you can start up the
+remaining 5:
+```sh
+sbatch --array=4-8 scripts/gvcf-array-job.sh
+```
+
+While those are running would be a good time to go back and review
+what a gVCF file is all about (Section \@ref(gvcf-format)).
+
 
 ## Step 5. Importing the gVCF files into a GenomicsDatabase
 
