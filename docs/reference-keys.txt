@@ -318,6 +318,7 @@ a-directed-acyclic-graph-for-genotype-likelihoods
 gatks-gvcf-workflow
 step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample
 gvcf-format
+genomics-db
 boneyard-1
 basic-handling-of-vcf-files
 bcftools
@@ -363,7 +364,8 @@ thats-a-dict-thing-to-do
 setting-up-a-slurm-job-array-for-this
 running-interactively-to-watch-the-output
 launch-the-first-3-jobs-of-our-array
-step-5.-importing-the-gvcf-files-into-a-genomicsdatabase
+use-genomicsdbimport
+job-array-script-for-the-chromosomes
 step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase
 step-7.-filtering-variants
 bioinformatic-analysis-on-variant-data

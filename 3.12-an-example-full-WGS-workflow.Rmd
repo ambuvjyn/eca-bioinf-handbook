@@ -1515,7 +1515,124 @@ While those are running would be a good time to go back and review
 what a gVCF file is all about (Section \@ref(gvcf-format)).
 
 
-## Step 5. Importing the gVCF files into a GenomicsDatabase
+## Step 5. Importing the gVCF files into a GenomicsDatabase {#use-genomicsdbimport}
+
+Section \@ref(genomics-db) provides some background on the genomics data base
+used by GATK, and it also outlined all of the options to the GATK program
+`GenomicsDBImport`.  Here we will launch a series of jobs in a SLURM
+array, each one requesting 2 CPUs (so we can use 2 reader threads, effectively)
+to import all of our gVCF files made in the last step into a genomics
+data base.  
+
+As mentioned in Section \@ref(genomics-db), these jobs parallelize over
+chromosomes; however, for non-model organisms with more fragmented reference
+genomes, for the unplaced scaffolds we will be parallelizing over the
+_scaffold groups_.  These are just groups of short scaffolds that have been
+lumped together so that they can be merged together and treated by
+`GenomicsDBImport` as a single "pseudo-chromosome."
+
+The length of all the chromosomes and the unplaced scaffolds 
+in the reference genome are easily found in the `.fai` file created
+by `samtools faidx`.  We have one of those in `resources/genome.fasta.fai`.
+It is fairly straightforward to operate on this file with R to
+create a file of chromsomes and a file of scaffold groups. In fact,
+a simple R script that does that can be viewed [here](https://github.com/eriqande/mega-non-model-wgs-snakeflow/blob/main/workflow/prepare/make_chromosomes_and_scaffolds.R).
+Rather than go through that process, we are just going to download the resulting
+files `chromosomes.tsv` and `scaffold_groups.tsv`, in order to use them.  To
+download these to our example workflow directory, you can give these two simple
+commands (from that example workflow directory!):
+```sh
+wget https://raw.githubusercontent.com/eriqande/mega-non-model-wgs-snakeflow/main/.test/config/chromosomes.tsv
+wget https://raw.githubusercontent.com/eriqande/mega-non-model-wgs-snakeflow/main/.test/config/scaffold_groups.tsv
+```
+
+Look at those files to see how they are structured.
+
+The documentation for GenomicsDBImport can be gotten using `gatk GenomicsDBImport --help`, or
+it can be found [on the web](https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport).
+
+
+### Job array script for the chromosomes
+
+First, we need to turn `chromosomes.tsv` into something that we can use with `line_assign.sh`.
+So let's do that:
+```sh
+awk 'NR == 1 {printf("index\tchrom\n"); next} {printf("%d\t%s\n", ++n, $1);}' chromosomes.tsv  > numbered-chromosomes.tsv
+```
+That gives us `numbered-chromosomes.tsv`, that looks like this:
+```
+index	chrom
+1	CM031199.1
+2	CM031200.1
+3	CM031201.1
+4	CM031202.1
+```
+
+First we prepare a job array script for the chromosomes that uses `numbered-chromosomes.tsv`. 
+We can just copy the one for making gVCFs, and then modify it as appropriate. 
+
+
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-4
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --output=results/slurm_logs/gdb_import/output-%A-%a
+#SBATCH --error=results/slurm_logs/gdb_import/error-%A-%a 
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+source ~/.bashrc
+conda activate gatk4.2.5.0
+
+# this sets the shell variable "chrom" to the chromosome names etc.
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-chromosomes.tsv) 
+
+outdir=results/genomics_db/$chrom                      # a directory in which the genomics DB will go
+logdir=results/logs/genomics_db_import                   # a directory in which to put the output from stderr and stdout
+
+# make sure those directories exist
+mkdir -p $(dirname $outdir)  # make the directory for this output directory to go into
+mkdir -p $logdir  
+
+# here are the standard options that you will typically use
+standard_opts=" --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations "
+
+
+gatk --java-options "-Xmx4g" GenomicsDBImport \
+      $standard_opts \
+      $(awk 'NR>1 {printf(" -V results/gvcf/%s.g.vcf.gz ", $2);}' numbered-samples.tsv) \
+      --intervals $chrom \
+      --genomicsdb-workspace-path $outdir > $logdir/stdout_$chrom.txt  2> $logdir/stderr_$chrom.txt
+      
+
+```
+
+Note that call to awk.  That puts all the samples on the
+command line with a -V before each one.
+
+Now! Before we launch that, we must create the directories for the
+slurm_logs.  Otherwise, SLURM will kill the jobs immediately upon
+submitting them without any sort of reasonable error message indicating
+why it failed.
+```sh
+mkdir -p results/slurm_logs/gdb_import
+
+# normally we would test a few, but since there are only
+# four jobs in this array, let's launch them all...
+sbatch  scripts/genomics-db-array.sh
+```
+
+At this juncture, it is worth mentioning that the output of GenomicsDBImport goes
+into a directory (named `$outdir` in the above script).  If that directory already
+exists, and you call GenomicsDBImport with the `--genomicsdb-workspace-path` option,
+then you will get an error.  The tool is careful not to overwrite an
+existing data base.  So, if you tried a run that failed after creating the output
+directory, you will need to remove that before you try to relaunch the job.
+
+
 
 ## Step 6. Calling variants and creating VCF files from the GenomicsDatabase
 

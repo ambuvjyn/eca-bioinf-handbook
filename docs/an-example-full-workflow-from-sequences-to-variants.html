@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-29" />
+<meta name="date" content="2022-03-31" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -462,6 +462,7 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="20.2.1" data-path="variant-calling.html"><a href="variant-calling.html#step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample"><i class="fa fa-check"></i><b>20.2.1</b> Step 1. Running HaplotypeCaller and getting one gVCF for each sample</a></li>
 <li class="chapter" data-level="20.2.2" data-path="variant-calling.html"><a href="variant-calling.html#gvcf-format"><i class="fa fa-check"></i><b>20.2.2</b> gVCF files</a></li>
+<li class="chapter" data-level="20.2.3" data-path="variant-calling.html"><a href="variant-calling.html#genomics-db"><i class="fa fa-check"></i><b>20.2.3</b> The Genomics Data Base</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="21" data-path="boneyard-1.html"><a href="boneyard-1.html"><i class="fa fa-check"></i><b>21</b> Boneyard</a></li>
@@ -524,7 +525,10 @@ div.csl-indent {
 <li class="chapter" data-level="27.8.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#running-interactively-to-watch-the-output"><i class="fa fa-check"></i><b>27.8.3</b> Running interactively to watch the output</a></li>
 <li class="chapter" data-level="27.8.4" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#launch-the-first-3-jobs-of-our-array"><i class="fa fa-check"></i><b>27.8.4</b> Launch the first 3 jobs of our array</a></li>
 </ul></li>
-<li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a></li>
+<li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#use-genomicsdbimport"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a>
+<ul>
+<li class="chapter" data-level="27.9.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#job-array-script-for-the-chromosomes"><i class="fa fa-check"></i><b>27.9.1</b> Job array script for the chromosomes</a></li>
+</ul></li>
 <li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.11" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-7.-filtering-variants"><i class="fa fa-check"></i><b>27.11</b> Step 7. Filtering variants</a></li>
 </ul></li>
@@ -1815,8 +1819,100 @@ remaining 5:</p>
 what a gVCF file is all about (Section <a href="variant-calling.html#gvcf-format">20.2.2</a>).</p>
 </div>
 </div>
-<div id="step-5.-importing-the-gvcf-files-into-a-genomicsdatabase" class="section level2" number="27.9">
+<div id="use-genomicsdbimport" class="section level2" number="27.9">
 <h2><span class="header-section-number">27.9</span> Step 5. Importing the gVCF files into a GenomicsDatabase</h2>
+<p>Section <a href="variant-calling.html#genomics-db">20.2.3</a> provides some background on the genomics data base
+used by GATK, and it also outlined all of the options to the GATK program
+<code>GenomicsDBImport</code>. Here we will launch a series of jobs in a SLURM
+array, each one requesting 2 CPUs (so we can use 2 reader threads, effectively)
+to import all of our gVCF files made in the last step into a genomics
+data base.</p>
+<p>As mentioned in Section <a href="variant-calling.html#genomics-db">20.2.3</a>, these jobs parallelize over
+chromosomes; however, for non-model organisms with more fragmented reference
+genomes, for the unplaced scaffolds we will be parallelizing over the
+<em>scaffold groups</em>. These are just groups of short scaffolds that have been
+lumped together so that they can be merged together and treated by
+<code>GenomicsDBImport</code> as a single “pseudo-chromosome.”</p>
+<p>The length of all the chromosomes and the unplaced scaffolds
+in the reference genome are easily found in the <code>.fai</code> file created
+by <code>samtools faidx</code>. We have one of those in <code>resources/genome.fasta.fai</code>.
+It is fairly straightforward to operate on this file with R to
+create a file of chromsomes and a file of scaffold groups. In fact,
+a simple R script that does that can be viewed <a href="https://github.com/eriqande/mega-non-model-wgs-snakeflow/blob/main/workflow/prepare/make_chromosomes_and_scaffolds.R">here</a>.
+Rather than go through that process, we are just going to download the resulting
+files <code>chromosomes.tsv</code> and <code>scaffold_groups.tsv</code>, in order to use them. To
+download these to our example workflow directory, you can give these two simple
+commands (from that example workflow directory!):</p>
+<div class="sourceCode" id="cb749"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb749-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb749-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://raw.githubusercontent.com/eriqande/mega-non-model-wgs-snakeflow/main/.test/config/chromosomes.tsv</span>
+<span id="cb749-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb749-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://raw.githubusercontent.com/eriqande/mega-non-model-wgs-snakeflow/main/.test/config/scaffold_groups.tsv</span></code></pre></div>
+<p>Look at those files to see how they are structured.</p>
+<p>The documentation for GenomicsDBImport can be gotten using <code>gatk GenomicsDBImport --help</code>, or
+it can be found <a href="https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport">on the web</a>.</p>
+<div id="job-array-script-for-the-chromosomes" class="section level3" number="27.9.1">
+<h3><span class="header-section-number">27.9.1</span> Job array script for the chromosomes</h3>
+<p>First, we need to turn <code>chromosomes.tsv</code> into something that we can use with <code>line_assign.sh</code>.
+So let’s do that:</p>
+<div class="sourceCode" id="cb750"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb750-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb750-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;NR == 1 {printf(&quot;index\tchrom\n&quot;); next} {printf(&quot;%d\t%s\n&quot;, ++n, $1);}&#39;</span> chromosomes.tsv  <span class="op">&gt;</span> numbered-chromosomes.tsv</span></code></pre></div>
+<p>That gives us <code>numbered-chromosomes.tsv</code>, that looks like this:</p>
+<pre><code>index   chrom
+1   CM031199.1
+2   CM031200.1
+3   CM031201.1
+4   CM031202.1</code></pre>
+<p>First we prepare a job array script for the chromosomes that uses <code>numbered-chromosomes.tsv</code>.
+We can just copy the one for making gVCFs, and then modify it as appropriate.</p>
+<div class="sourceCode" id="cb752"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb752-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb752-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-4</span></span>
+<span id="cb752-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb752-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=2</span></span>
+<span id="cb752-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=results/slurm_logs/gdb_import/output-%A-%a</span></span>
+<span id="cb752-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=results/slurm_logs/gdb_import/error-%A-%a </span></span>
+<span id="cb752-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=FAIL</span></span>
+<span id="cb752-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-9" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
+<span id="cb752-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-12" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
+<span id="cb752-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-13" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span>
+<span id="cb752-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-15" aria-hidden="true" tabindex="-1"></a><span class="co"># this sets the shell variable &quot;chrom&quot; to the chromosome names etc.</span></span>
+<span id="cb752-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-16" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-chromosomes.tsv<span class="va">)</span> </span>
+<span id="cb752-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-18" aria-hidden="true" tabindex="-1"></a><span class="va">outdir=</span>results/genomics_db/<span class="va">$chrom</span>                      <span class="co"># a directory in which the genomics DB will go</span></span>
+<span id="cb752-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-19" aria-hidden="true" tabindex="-1"></a><span class="va">logdir=</span>results/logs/genomics_db_import                   <span class="co"># a directory in which to put the output from stderr and stdout</span></span>
+<span id="cb752-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-21" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure those directories exist</span></span>
+<span id="cb752-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-22" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$(</span><span class="fu">dirname</span> <span class="va">$outdir)</span>  <span class="co"># make the directory for this output directory to go into</span></span>
+<span id="cb752-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-23" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$logdir</span>  </span>
+<span id="cb752-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-25" aria-hidden="true" tabindex="-1"></a><span class="co"># here are the standard options that you will typically use</span></span>
+<span id="cb752-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-26" aria-hidden="true" tabindex="-1"></a><span class="va">standard_opts=</span><span class="st">&quot; --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations &quot;</span></span>
+<span id="cb752-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb752-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-29" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Xmx4g&quot;</span> GenomicsDBImport <span class="dt">\</span></span>
+<span id="cb752-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-30" aria-hidden="true" tabindex="-1"></a>      <span class="va">$standard_opts</span> <span class="dt">\</span></span>
+<span id="cb752-31"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-31" aria-hidden="true" tabindex="-1"></a>      <span class="va">$(</span><span class="fu">awk</span> <span class="st">&#39;NR&gt;1 {printf(&quot; -V results/gvcf/%s.g.vcf.gz &quot;, $2);}&#39;</span> numbered-samples.tsv<span class="va">)</span> <span class="dt">\</span></span>
+<span id="cb752-32"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">--intervals</span> <span class="va">$chrom</span> <span class="dt">\</span></span>
+<span id="cb752-33"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">--genomicsdb-workspace-path</span> <span class="va">$outdir</span> <span class="op">&gt;</span> <span class="va">$logdir</span>/stdout_<span class="va">$chrom</span>.txt  <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$logdir</span>/stderr_<span class="va">$chrom</span>.txt</span>
+<span id="cb752-34"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-34" aria-hidden="true" tabindex="-1"></a>      </span></code></pre></div>
+<p>Note that call to awk. That puts all the samples on the
+command line with a -V before each one.</p>
+<p>Now! Before we launch that, we must create the directories for the
+slurm_logs. Otherwise, SLURM will kill the jobs immediately upon
+submitting them without any sort of reasonable error message indicating
+why it failed.</p>
+<div class="sourceCode" id="cb753"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb753-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb753-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/slurm_logs/gdb_import</span>
+<span id="cb753-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb753-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb753-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb753-3" aria-hidden="true" tabindex="-1"></a><span class="co"># normally we would test a few, but since there are only</span></span>
+<span id="cb753-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb753-4" aria-hidden="true" tabindex="-1"></a><span class="co"># four jobs in this array, let&#39;s launch them all...</span></span>
+<span id="cb753-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb753-5" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span>  scripts/genomics-db-array.sh</span></code></pre></div>
+<p>At this juncture, it is worth mentioning that the output of GenomicsDBImport goes
+into a directory (named <code>$outdir</code> in the above script). If that directory already
+exists, and you call GenomicsDBImport with the <code>--genomicsdb-workspace-path</code> option,
+then you will get an error. The tool is careful not to overwrite an
+existing data base. So, if you tried a run that failed after creating the output
+directory, you will need to remove that before you try to relaunch the job.</p>
+</div>
 </div>
 <div id="step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase" class="section level2" number="27.10">
 <h2><span class="header-section-number">27.10</span> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</h2>

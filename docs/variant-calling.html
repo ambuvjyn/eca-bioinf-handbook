@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-29" />
+<meta name="date" content="2022-03-31" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -462,6 +462,7 @@ div.csl-indent {
 <ul>
 <li class="chapter" data-level="20.2.1" data-path="variant-calling.html"><a href="variant-calling.html#step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample"><i class="fa fa-check"></i><b>20.2.1</b> Step 1. Running HaplotypeCaller and getting one gVCF for each sample</a></li>
 <li class="chapter" data-level="20.2.2" data-path="variant-calling.html"><a href="variant-calling.html#gvcf-format"><i class="fa fa-check"></i><b>20.2.2</b> gVCF files</a></li>
+<li class="chapter" data-level="20.2.3" data-path="variant-calling.html"><a href="variant-calling.html#genomics-db"><i class="fa fa-check"></i><b>20.2.3</b> The Genomics Data Base</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="21" data-path="boneyard-1.html"><a href="boneyard-1.html"><i class="fa fa-check"></i><b>21</b> Boneyard</a></li>
@@ -524,7 +525,10 @@ div.csl-indent {
 <li class="chapter" data-level="27.8.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#running-interactively-to-watch-the-output"><i class="fa fa-check"></i><b>27.8.3</b> Running interactively to watch the output</a></li>
 <li class="chapter" data-level="27.8.4" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#launch-the-first-3-jobs-of-our-array"><i class="fa fa-check"></i><b>27.8.4</b> Launch the first 3 jobs of our array</a></li>
 </ul></li>
-<li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-5.-importing-the-gvcf-files-into-a-genomicsdatabase"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a></li>
+<li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#use-genomicsdbimport"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a>
+<ul>
+<li class="chapter" data-level="27.9.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#job-array-script-for-the-chromosomes"><i class="fa fa-check"></i><b>27.9.1</b> Job array script for the chromosomes</a></li>
+</ul></li>
 <li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.11" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-7.-filtering-variants"><i class="fa fa-check"></i><b>27.11</b> Step 7. Filtering variants</a></li>
 </ul></li>
@@ -1141,6 +1145,86 @@ likelihoods for all the different possible genotypes, ordered as:</p>
 <p>This turns out to be all the information needed to eventually come back to this information
 in light of what was found at all the other individuals, and then <em>jointly</em> call
 variants using information from all the individuals.</p>
+</div>
+<div id="genomics-db" class="section level3" number="20.2.3">
+<h3><span class="header-section-number">20.2.3</span> The Genomics Data Base</h3>
+<p>The use of a genomics data base in order to speed up joint calling of variants and
+genotypes across all samples is still fairly new and seems to still be evolving, somewhat,
+as a part of the GATK ecosystem.</p>
+<p>One thing that is worth understanding is “Why do we have to load all this stuff into a database? Why
+can’t we just zip through all the gVCF files to do joint variant calling?” The answer to that question
+is that it is fairly inefficient to have a program open multiple files (for example 100s of gVCF files)
+and then inch one’s way through each of them, constantly stopping and circling back when a variant
+position is found in one of the files which must be inspected in all the other files.</p>
+<p>The old way of solving this problem was to combine all the gVCF files (one for each sample) into a single gVCF
+file that included all the individuals—one column for each. This can be done with GATK’s
+CombineGVCFs tool. That tool still sees some use in situations where you might only want to focus
+on a few intervals on different chromosomes that you know of ahead of time. However, when you want
+to call variants across the whole genome, it is preferable to load the information in the gVCFs into
+a specialized data base that makes it quick and efficient to garner information at a single position
+in the genome across all the individuals.</p>
+<p>This is achieved in GATK by using a specialized variant of the TileDB system. TileDB is a data base
+that was designed to work well with sparse data—meaning that there are lots of possible values that
+the data can be associated with, but only a small number of those values have different values for the data.
+In this case, those values are the base positions in the genome, and the data are information from the
+different individuals (available in the gVCFs for each sample) about whether there is a variant at that
+position or not. One of the nice features of the TileDB system is that it is computationally economical to
+update the data base with new information, even if it is necessary to assign new information to a base position
+that is between two base positions that already have information, and that information can still be
+accessed quickly. This structure, once it is set up, makes it efficient to work one’s way through
+the genome base by base and combine information about possible variation from all the individuals,
+without having to laboriously go through each separate file.</p>
+<p>The drawback of using this genomics data base is that it is something of a black box: it’s a little
+mysterious and it is hard to look at anything inside of it unless you are a computer scientist that specializes
+in these types of data bases—in fact, the GenomicsDB format and associated tools are the product of
+a collaboration between the computer scientists at Intel and the bioinformaticians at the Broad Institute.</p>
+<p>As of this writing, there are two important documents on the GATK website for understanding
+how to use the GenomicsDBImport tool to import gVCF files into this genomics data base. The first
+is <a href="https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport">here</a> and the
+second one, that goes more into performance considerations is
+<a href="https://gatk.broadinstitute.org/hc/en-us/articles/360056138571-GenomicsDBImport-usage-and-performance-guidelines">here</a>.</p>
+<p>From the perspective of conservations genomicists who are working on non-model organisms, the most important
+thing to understand is that GenomicsDBImport is designed parallelize well by working on a single chromosome at a time—so
+you would typically launch multiple jobs, one for each chromosome, specified with the <code>--interval</code> option.
+For example using <code>--interval CM031199.1</code> would make <code>GenomicsDBImport</code> create a data base that
+included only the chromosome <code>CM031199.1</code>. In the end, after doing that you get a completely
+separate data base (that occupies its own separate directory) for each chromosome. This is all fine and well if you are using
+a well-assembled human genome with all the DNA in chromosomes. However, in non-model organisms, an appreciable
+fraction of the reference genome might be recorded in thousands of short scaffolds. There is so much
+overhead involved in setting up these genomic data bases, that it does not make sense to set up a separate
+data base for each of the thousands of scaffolds that might only be 5 to 10 kb long (or even shorter!).
+Fortunately, there is an option to mash all these short scaffolds together into a single data base that
+treats all these scaffolds catenated together as if they were a single chromosome. This uses the
+<code>--merge-contigs-into-num-partitions</code> option.</p>
+<p>My approach to using the <code>--merge-contigs-into-num-partitions</code> is to break the scaffolds down into
+<em>scaffold_groups</em> such that each of those scaffold groups has total length (the sum of the lengths of
+the scaffolds) is about 1/3 to 1/2 the average length of a chromosome. Then each separate scaffold group
+can be fed into GenomicsDBImport as a separate job, using <code>--merge-contigs-into-num-partitions 1</code> to make
+sure that all of those scaffolds get merged into a single “pseudo-chromosome.” After these data bases
+are made, when you use them to call variants and create VCF files, they will produce a sinble VCF file that
+properly indicates which scaffold each variant was from—it doesn’t rename the scaffolds with some sort
+of pseudo-chromosome name.</p>
+<p>The other particularly germane option to <code>GenomicsDBImport</code> is <code>--genomicsdb-shared-posixfs-optimizations</code>. This
+is recommended any time that your computer uses a shared POSIX filesystem, which, I believe, is going to
+almost always be the case when you are using an HPCC. So, if you are working on a cluster, you should
+always use this option.</p>
+<p>If you have hundreds of samples, <code>GenomicsDBImport</code> can start to bog down if it opens
+connections to hundreds of gVCF files at the same time. In this case it is recommended that you
+tell <code>GenomicsDBImport</code> to import the gVCF files in batches of 50 using the option
+<code>--batch-size 50</code>. This imports the first 50 samples, then closes all their files, and then
+updates the data base by importing the next 50, and so on.</p>
+<p>The program <code>GenomicsDBImport</code> can use multiple threads while reading the files; however, in my experience,
+there is little advantage above two threads. So, it can be useful to set the option
+<code>--reader-threads 2</code>.</p>
+<p>By default, <code>GenomicsDBImport</code> will</p>
+<p>Finally, since this is a GATK program written in Java, we can allocate memory to the Java Virtual Machine.
+However, with <code>GenomicsDBImport</code> we have to be a little careful, because much of the work
+in loading the data base is done using calls to compiled C++ libraries from the Java program.
+These libraries, themselves, can consume memory as well. So, you want to be careful not
+to give more than 80% or so of the available memory (i.e., the memory that you reqested
+from SLURM) to the Java Virtual Machine.</p>
+<p>We can bring all of these together by running GenomicsDBImport in our example
+workflow. See Section <a href="an-example-full-workflow-from-sequences-to-variants.html#use-genomicsdbimport">27.9</a>.</p>
 </div>
 </div>
 </div>
