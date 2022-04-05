@@ -319,6 +319,7 @@ gatks-gvcf-workflow
 step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample
 gvcf-format
 genomics-db
+gdb-update
 boneyard-1
 basic-handling-of-vcf-files
 bcftools
@@ -366,6 +367,8 @@ running-interactively-to-watch-the-output
 launch-the-first-3-jobs-of-our-array
 use-genomicsdbimport
 job-array-script-for-the-chromosomes
+job-array-script-for-the-scaffold-groups
+hey-lets-try-updating-the-genomic-data-base
 step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase
 step-7.-filtering-variants
 bioinformatic-analysis-on-variant-data

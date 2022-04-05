@@ -749,6 +749,48 @@ from SLURM) to the Java Virtual Machine.
 We can bring all of these together by running GenomicsDBImport in our example
 workflow.  See Section \@ref(use-genomicsdbimport).
 
+### Updating the GenomicsDatabase {#gdb-update}
+
+One of the advantages of using a sparse data base format like TileDB is that
+it is possible to expand the data base without completely rearranging
+the existing content and without creating a new data base in which access to
+all the elements has been slowed considerably.  
+
+In fact, this is one of the big selling points of the GenomicsDB approach, expecially
+as concerns the "$N+1$" problem: if you have kept your genomics data bases, then adding
+one or a few individuals to them can be quite quick.  Of course, as we will see, the following
+step of creating a VCF file from the genomics data base still has to be done, and that can
+take a long time; however, at least when everything is stored in the genomics data base, that step should
+scale almost linearly with the number of samples, rather than quadratically (as we say above with the
+"direct-to-vcf" approach).
+
+In principle, updating a GenomicsDB by adding information from new samples should be as easy as
+running GenomicsDBImport with a `--genomicsdb-update-workspace-path path_to_dir` option rather than
+the `--genomicsdb-workspace-path path_do_dir` option (where `path_to_dir` is simply the path to the
+existing genomics database directory, in the first case, and it is the path where you want
+the genomics database directory to be created, in the second case).  Interestingly, when you run
+GenomicsDBImport to update an existing data base, you don't supply the "--intervals` option,
+because the program will simply use the contents of the existing data base (that is being updated)
+to figure out which genomic intervals (i.e., which chromosome or which scaffold group) to
+import.  This makes sense: you wouldn't want to import the new samples at a different interval
+within the genomics data base---that simply wouldn't work.
+
+One thing that is important to note about GenomicsDBImport, as it stands today, is that
+you can only ever import a sample into it once.  Thus, if, after creating a genomics data base
+with data from 50 individuals, you decide to do more sequencing on 10 of those individuals that
+didn't have enough sequence depth, then you can't just make new VCFs for those 10 individuals from the
+new sequencing and add it into the data base. Rather, you would have to merge the new data at the BAM
+file stage and then make new gVCFs and then import those 10 new gVCFs and the 40 existing ones into a
+new genomics data base.  
+
+Finally, a word of caution: the documentation for GenomicsDBImport is replete with warnings about
+how you should backup your genomics data bases before trying to update them.  Apparently there
+is a good chance that any little glitch during the updating process could corrupt the entire data
+base and render it useless.  Joy!
+
+With that as a preamble, it does seem that we should try creating some data bases and
+then adding samples to them.
+
 
 
 

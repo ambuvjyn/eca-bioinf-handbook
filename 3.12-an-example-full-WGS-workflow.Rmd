@@ -1569,7 +1569,9 @@ index	chrom
 ```
 
 First we prepare a job array script for the chromosomes that uses `numbered-chromosomes.tsv`. 
-We can just copy the one for making gVCFs, and then modify it as appropriate. 
+We can just copy the one for making gVCFs, and then modify it as appropriate.  After reading
+and understanding the following chunk of code, use a text editor like `nano` to paste it into
+the file `scripts/genomics-db-array.sh`.
 
 
 ```sh
@@ -1633,6 +1635,253 @@ existing data base.  So, if you tried a run that failed after creating the outpu
 directory, you will need to remove that before you try to relaunch the job.
 
 
+### Job array script for the scaffold groups
+
+Recall that GenomicsDBImport can use the `--merge-contigs-into-num-partitions 1` "trick" to
+put many short scaffolds into a single genomics data base.  We still have to do that.
+Making a script for that involves two steps that were different than what we did with the
+chromosomes, above:
+
+1. We need to specify all the scaffolds in each scaffold group
+2. We need to use the `--merge-contigs-into-num-partitions 1` option
+
+Note that we have a _lot_ of scaffolds in some scaffold groups, so that if we
+tried to specify them all on the command line, we would end up with a very long
+command line.  Although Unix, today, is reasonably tolerant of long and convoluted
+command lines, some flavors of Unix will hiccup or barf on very long command lines.
+Accordingly, we will use a GATK feature that lets us specify genomic regions in a file---so
+long as it is named with the extension `.list`---rather than on the command line for this job.
+
+First, we need to make a file `numbered-scaff-groups.tsv` that will translate
+a `SLURM_ARRAY_TASK_ID` into the name of a scaffold group.  We can do that with a little
+Unix and awk:
+```sh
+awk 'NR>1 {print $1}' scaffold_groups.tsv | uniq | awk 'BEGIN {printf("index\tsg\n")} {printf("%d\t%s\n", ++n, $1)}' > numbered-scaff-groups.tsv
+```
+
+If you looks at the file created there, you will see that it looks like this:
+```
+index	sg
+1	scaff_group_001
+2	scaff_group_002
+```
+so, we can use it to turn the `SLURM_ARRAY_TASK_ID` into a shell variable
+`sg` that holds the name of the scaffold group we are dealing with.
+
+
+The following code block contains a shell script that you should
+paste into a new file called `scripts/genomics-db-scaffold-array.sh`:
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-2
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --output=results/slurm_logs/gdb_import_scaff_groups/output-%A-%a
+#SBATCH --error=results/slurm_logs/gdb_import_scaff_groups/error-%A-%a 
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+source ~/.bashrc
+conda activate gatk4.2.5.0
+
+# this sets the shell variable "sg" to the scaffold group name
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-scaff-groups.tsv) 
+
+outdir=results/genomics_db/$sg                # a directory in which the genomics DB will go
+logdir=results/logs/genomics_db_import        # a directory in which to put the output from stderr and stdout
+
+# make sure those directories exist
+mkdir -p $(dirname $outdir)  # make the directory for this output directory to go into
+mkdir -p $logdir  
+
+# here are the standard options that you will typically use
+standard_opts=" --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations "
+
+# now, some new stuff for the scaffold group lists.  We are going to make a file
+# called results/sg_lists/$sg.list that contains the names of all the scaffolds in this
+# scaffold group $sg.
+mkdir -p results/sg_lists # make sure that this directory exists
+sglist=results/sg_lists/$sg.list  # file name for the scaffold names
+awk -v sg=$sg 'NR >1 && $1==sg {print $2}' scaffold_groups.tsv > $sglist 
+
+# now, we call this with the name of the file having 
+gatk --java-options "-Xmx4g" GenomicsDBImport \
+      $standard_opts \
+      $(awk 'NR>1 {printf(" -V results/gvcf/%s.g.vcf.gz ", $2);}' numbered-samples.tsv) \
+      --intervals $sglist \
+      --merge-contigs-into-num-partitions 1 \
+      --genomicsdb-workspace-path $outdir > $logdir/stdout_$chrom.txt  2> $logdir/stderr_$chrom.txt
+      
+
+```
+
+Then, since there are only two scaffold groups, we can run that as an array from 1 to 2.
+Of course, as always, be sure to create the slurm log output directories _before_
+you launch the job:
+```sh
+mkdir -p results/slurm_logs/gdb_import_scaff_groups
+sbatch --array=1-2 scripts/genomics-db-scaffold-array.sh
+```
+
+### Hey!  Let's try updating the genomic data base
+
+Recall from Section \@ref(gdb-update), that it is possible to add new
+individuals to a genomics data base.  It is worth giving that a whirl.
+What we shall do here is create the data base with the first six samples, and then
+update it by adding the last two sample to the existing data bases.
+
+Before we do this, we might note that it is a bit of a hassle that
+we are starting to see such a proliferation of different "array" scripts
+in this section.  We already have one script for chromosomes and one script
+for scaffold groups.  Geez! If we now also have to make a separate script for
+updating chromosome and scaffold group data bases, that is going to be four
+separate scripts.  Not only that, but the names of the files of numbered chromsomes and
+numbered scaffold groups that they use are hard-wired into the scripts, and if
+we are going to be doing some building of data bases and then, later, updating them, we
+might want to be able to tell the script which `numbered-XX` file to use.
+
+So, here we will write a single, general script that can deal with these different
+use cases by taking options and positional parameters.  It will make the script a little
+longer, but it will be nice to have it all in one place.  This is a general theme
+in computer programming: if you can reduce the number of places (i.e., files or scripts) the same block of code
+appears (by using variables and options) then it is typically a lot easier to maintain the
+code base.
+
+So, here is our big general script.  You should paste this into:
+`scripts/general-genomics-db-array.sh`
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-2
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=2
+#SBATCH --output=results/slurm_logs/gdb_import_scaff_groups/output-%A-%a
+#SBATCH --error=results/slurm_logs/gdb_import_scaff_groups/error-%A-%a 
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+### Define default values for variables here.  By default we are going to 
+### Be doing "by chromosome", but the options we give can update these
+OUTPARENT=results/genomics_db
+DOING_SCAFF=0 # default is to do chromosomes
+UPDATING=0    # default is to create a new data base
+EXTRA=" "
+
+
+### Here is a lot of stuff for usage "help" messages and options processing 
+function usage {
+      echo Syntax:
+      echo "  $(basename $0) [-h -u -s ScaffGroupFile -o OutputDirectory ] NumberedSeqsFile NumberedSamplesFile "
+      echo
+      echo "    -h:  print help and exit."
+      echo "    -o:  put the genomicsDB within OutputDirectory (and make that dir if needed)."
+      echo "         Default is results/genomics_db"
+      echo "    -s:  process scaffold groups given in ScaffGroupFile."
+      echo "    -u:  update the genomics data base instead of creating it."
+      echo
+}
+
+if [ $# -eq 0 ]; then
+    usage;
+    exit 1;
+fi;
+
+while getopts "ho:s:u" opt; do
+    case $opt in
+	h    )
+	    usage
+	    exit 1
+	    ;;
+	o    )  
+		OUTPARENT=$OPTARG;
+	    ;;
+	s    )  
+		SCAFF_GROUP_FILE=$OPTARG;
+		DOING_SCAFF=1
+	    ;;
+	u    )  
+		UPDATING=1;
+	    ;;    
+	
+    esac
+done
+
+shift $((OPTIND-1));
+
+
+# uncomment to test for right number of required args
+if [ $# -ne 2 ]; then
+    usage;
+    exit 1;
+fi
+
+NUMBERED_FILE=$1
+NUMBERED_SAMPLES_FILE=$2
+
+
+#### Done processing options and getting down to work
+
+source ~/.bashrc
+conda activate gatk4.2.5.0
+
+logdir=results/logs/genomics_db_import        # a directory in which to put the output from stderr and stdout
+# make sure the directories exist
+mkdir -p $OUTPARENT  # make the directory for this output directory to go into
+mkdir -p $logdir  
+
+
+# this sets the shell variable "sg" to the scaffold group name
+# or the variable "chrom" to the chromosome name
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID $NUMBERED_FILE) 
+
+### Now we process things differently if we are doing scaff_groups or chromosomes
+if [ $DOING_SCAFF = 0 ]; then
+	outdir=results/genomics_db/$chrom
+	INTERVALS=" --intervals $chrom "
+	STDOUT=$logdir/stdout_$chrom.txt
+	STDERR=$logdir/stderr_$chrom.txt
+else 
+    outdir=results/genomics_db/$sg
+    mkdir -p results/sg_lists # make sure that this directory exists
+	sglist=results/sg_lists/$sg.list  # file name for the scaffold names
+	awk -v sg=$sg 'NR >1 && $1==sg {print $2}' $SCAFF_GROUP_FILE > $sglist 
+	INTERVALS=" --intervals $sglist "
+	EXTRA=" --merge-contigs-into-num-partitions 1 "
+	STDOUT=$logdir/stdout_$sg.txt
+	STDERR=$logdir/stderr_$sg.txt
+fi
+
+
+### Now, change options if updating vs creating a data base
+if [ $UPDATING = 0 ]; then
+	DB_OPT=" --genomicsdb-workspace-path "
+else
+	DB_OPT=" --genomicsdb-update-workspace-path "
+	INTERVALS=""
+fi
+
+
+
+# here are the standard options that you will typically use
+standard_opts=" --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations "
+
+
+exit 1
+
+# here is where we make the call
+# now, we call this with the name of the file having 
+echo "gatk --java-options "-Xmx4g" GenomicsDBImport \ "
+echo    "$standard_opts \ "
+echo    "$(awk 'NR>1 {printf(" -V results/gvcf/%s.g.vcf.gz ", $2);}' $NUMBERED_SAMPLES_FILE) \ "
+echo    "$INTERVALS \ "
+echo    "  $EXTRA \ "
+echo    "$DB_OPT $outdir > $STDOUT  2> $STDERR "
+      
+
+```
 
 ## Step 6. Calling variants and creating VCF files from the GenomicsDatabase
 

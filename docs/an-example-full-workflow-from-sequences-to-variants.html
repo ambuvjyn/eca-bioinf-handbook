@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-03-31" />
+<meta name="date" content="2022-04-05" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -463,6 +463,7 @@ div.csl-indent {
 <li class="chapter" data-level="20.2.1" data-path="variant-calling.html"><a href="variant-calling.html#step-1.-running-haplotypecaller-and-getting-one-gvcf-for-each-sample"><i class="fa fa-check"></i><b>20.2.1</b> Step 1. Running HaplotypeCaller and getting one gVCF for each sample</a></li>
 <li class="chapter" data-level="20.2.2" data-path="variant-calling.html"><a href="variant-calling.html#gvcf-format"><i class="fa fa-check"></i><b>20.2.2</b> gVCF files</a></li>
 <li class="chapter" data-level="20.2.3" data-path="variant-calling.html"><a href="variant-calling.html#genomics-db"><i class="fa fa-check"></i><b>20.2.3</b> The Genomics Data Base</a></li>
+<li class="chapter" data-level="20.2.4" data-path="variant-calling.html"><a href="variant-calling.html#gdb-update"><i class="fa fa-check"></i><b>20.2.4</b> Updating the GenomicsDatabase</a></li>
 </ul></li>
 </ul></li>
 <li class="chapter" data-level="21" data-path="boneyard-1.html"><a href="boneyard-1.html"><i class="fa fa-check"></i><b>21</b> Boneyard</a></li>
@@ -528,6 +529,8 @@ div.csl-indent {
 <li class="chapter" data-level="27.9" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#use-genomicsdbimport"><i class="fa fa-check"></i><b>27.9</b> Step 5. Importing the gVCF files into a GenomicsDatabase</a>
 <ul>
 <li class="chapter" data-level="27.9.1" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#job-array-script-for-the-chromosomes"><i class="fa fa-check"></i><b>27.9.1</b> Job array script for the chromosomes</a></li>
+<li class="chapter" data-level="27.9.2" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#job-array-script-for-the-scaffold-groups"><i class="fa fa-check"></i><b>27.9.2</b> Job array script for the scaffold groups</a></li>
+<li class="chapter" data-level="27.9.3" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#hey-lets-try-updating-the-genomic-data-base"><i class="fa fa-check"></i><b>27.9.3</b> Hey! Let’s try updating the genomic data base</a></li>
 </ul></li>
 <li class="chapter" data-level="27.10" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase"><i class="fa fa-check"></i><b>27.10</b> Step 6. Calling variants and creating VCF files from the GenomicsDatabase</a></li>
 <li class="chapter" data-level="27.11" data-path="an-example-full-workflow-from-sequences-to-variants.html"><a href="an-example-full-workflow-from-sequences-to-variants.html#step-7.-filtering-variants"><i class="fa fa-check"></i><b>27.11</b> Step 7. Filtering variants</a></li>
@@ -1860,7 +1863,9 @@ So let’s do that:</p>
 3   CM031201.1
 4   CM031202.1</code></pre>
 <p>First we prepare a job array script for the chromosomes that uses <code>numbered-chromosomes.tsv</code>.
-We can just copy the one for making gVCFs, and then modify it as appropriate.</p>
+We can just copy the one for making gVCFs, and then modify it as appropriate. After reading
+and understanding the following chunk of code, use a text editor like <code>nano</code> to paste it into
+the file <code>scripts/genomics-db-array.sh</code>.</p>
 <div class="sourceCode" id="cb752"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb752-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
 <span id="cb752-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb752-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb752-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-4</span></span>
@@ -1912,6 +1917,234 @@ exists, and you call GenomicsDBImport with the <code>--genomicsdb-workspace-path
 then you will get an error. The tool is careful not to overwrite an
 existing data base. So, if you tried a run that failed after creating the output
 directory, you will need to remove that before you try to relaunch the job.</p>
+</div>
+<div id="job-array-script-for-the-scaffold-groups" class="section level3" number="27.9.2">
+<h3><span class="header-section-number">27.9.2</span> Job array script for the scaffold groups</h3>
+<p>Recall that GenomicsDBImport can use the <code>--merge-contigs-into-num-partitions 1</code> “trick” to
+put many short scaffolds into a single genomics data base. We still have to do that.
+Making a script for that involves two steps that were different than what we did with the
+chromosomes, above:</p>
+<ol style="list-style-type: decimal">
+<li>We need to specify all the scaffolds in each scaffold group</li>
+<li>We need to use the <code>--merge-contigs-into-num-partitions 1</code> option</li>
+</ol>
+<p>Note that we have a <em>lot</em> of scaffolds in some scaffold groups, so that if we
+tried to specify them all on the command line, we would end up with a very long
+command line. Although Unix, today, is reasonably tolerant of long and convoluted
+command lines, some flavors of Unix will hiccup or barf on very long command lines.
+Accordingly, we will use a GATK feature that lets us specify genomic regions in a file—so
+long as it is named with the extension <code>.list</code>—rather than on the command line for this job.</p>
+<p>First, we need to make a file <code>numbered-scaff-groups.tsv</code> that will translate
+a <code>SLURM_ARRAY_TASK_ID</code> into the name of a scaffold group. We can do that with a little
+Unix and awk:</p>
+<div class="sourceCode" id="cb754"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb754-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb754-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;NR&gt;1 {print $1}&#39;</span> scaffold_groups.tsv <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;BEGIN {printf(&quot;index\tsg\n&quot;)} {printf(&quot;%d\t%s\n&quot;, ++n, $1)}&#39;</span> <span class="op">&gt;</span> numbered-scaff-groups.tsv</span></code></pre></div>
+<p>If you looks at the file created there, you will see that it looks like this:</p>
+<pre><code>index   sg
+1   scaff_group_001
+2   scaff_group_002</code></pre>
+<p>so, we can use it to turn the <code>SLURM_ARRAY_TASK_ID</code> into a shell variable
+<code>sg</code> that holds the name of the scaffold group we are dealing with.</p>
+<p>The following code block contains a shell script that you should
+paste into a new file called <code>scripts/genomics-db-scaffold-array.sh</code>:</p>
+<div class="sourceCode" id="cb756"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb756-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb756-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-2</span></span>
+<span id="cb756-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb756-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=2</span></span>
+<span id="cb756-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=results/slurm_logs/gdb_import_scaff_groups/output-%A-%a</span></span>
+<span id="cb756-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=results/slurm_logs/gdb_import_scaff_groups/error-%A-%a </span></span>
+<span id="cb756-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=FAIL</span></span>
+<span id="cb756-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-9" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
+<span id="cb756-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-12" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
+<span id="cb756-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-13" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span>
+<span id="cb756-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-15" aria-hidden="true" tabindex="-1"></a><span class="co"># this sets the shell variable &quot;sg&quot; to the scaffold group name</span></span>
+<span id="cb756-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-16" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> numbered-scaff-groups.tsv<span class="va">)</span> </span>
+<span id="cb756-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-18" aria-hidden="true" tabindex="-1"></a><span class="va">outdir=</span>results/genomics_db/<span class="va">$sg</span>                <span class="co"># a directory in which the genomics DB will go</span></span>
+<span id="cb756-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-19" aria-hidden="true" tabindex="-1"></a><span class="va">logdir=</span>results/logs/genomics_db_import        <span class="co"># a directory in which to put the output from stderr and stdout</span></span>
+<span id="cb756-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-21" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure those directories exist</span></span>
+<span id="cb756-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-22" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$(</span><span class="fu">dirname</span> <span class="va">$outdir)</span>  <span class="co"># make the directory for this output directory to go into</span></span>
+<span id="cb756-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-23" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$logdir</span>  </span>
+<span id="cb756-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-25" aria-hidden="true" tabindex="-1"></a><span class="co"># here are the standard options that you will typically use</span></span>
+<span id="cb756-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-26" aria-hidden="true" tabindex="-1"></a><span class="va">standard_opts=</span><span class="st">&quot; --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations &quot;</span></span>
+<span id="cb756-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-28" aria-hidden="true" tabindex="-1"></a><span class="co"># now, some new stuff for the scaffold group lists.  We are going to make a file</span></span>
+<span id="cb756-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-29" aria-hidden="true" tabindex="-1"></a><span class="co"># called results/sg_lists/$sg.list that contains the names of all the scaffolds in this</span></span>
+<span id="cb756-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-30" aria-hidden="true" tabindex="-1"></a><span class="co"># scaffold group $sg.</span></span>
+<span id="cb756-31"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-31" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/sg_lists <span class="co"># make sure that this directory exists</span></span>
+<span id="cb756-32"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-32" aria-hidden="true" tabindex="-1"></a><span class="va">sglist=</span>results/sg_lists/<span class="va">$sg</span>.list  <span class="co"># file name for the scaffold names</span></span>
+<span id="cb756-33"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-33" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="at">-v</span> sg=<span class="va">$sg</span> <span class="st">&#39;NR &gt;1 &amp;&amp; $1==sg {print $2}&#39;</span> scaffold_groups.tsv <span class="op">&gt;</span> <span class="va">$sglist</span> </span>
+<span id="cb756-34"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb756-35"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-35" aria-hidden="true" tabindex="-1"></a><span class="co"># now, we call this with the name of the file having </span></span>
+<span id="cb756-36"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-36" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Xmx4g&quot;</span> GenomicsDBImport <span class="dt">\</span></span>
+<span id="cb756-37"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-37" aria-hidden="true" tabindex="-1"></a>      <span class="va">$standard_opts</span> <span class="dt">\</span></span>
+<span id="cb756-38"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-38" aria-hidden="true" tabindex="-1"></a>      <span class="va">$(</span><span class="fu">awk</span> <span class="st">&#39;NR&gt;1 {printf(&quot; -V results/gvcf/%s.g.vcf.gz &quot;, $2);}&#39;</span> numbered-samples.tsv<span class="va">)</span> <span class="dt">\</span></span>
+<span id="cb756-39"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">--intervals</span> <span class="va">$sglist</span> <span class="dt">\</span></span>
+<span id="cb756-40"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">--merge-contigs-into-num-partitions</span> 1 <span class="dt">\</span></span>
+<span id="cb756-41"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-41" aria-hidden="true" tabindex="-1"></a>      <span class="at">--genomicsdb-workspace-path</span> <span class="va">$outdir</span> <span class="op">&gt;</span> <span class="va">$logdir</span>/stdout_<span class="va">$chrom</span>.txt  <span class="dv">2</span><span class="op">&gt;</span> <span class="va">$logdir</span>/stderr_<span class="va">$chrom</span>.txt</span>
+<span id="cb756-42"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb756-42" aria-hidden="true" tabindex="-1"></a>      </span></code></pre></div>
+<p>Then, since there are only two scaffold groups, we can run that as an array from 1 to 2.
+Of course, as always, be sure to create the slurm log output directories <em>before</em>
+you launch the job:</p>
+<div class="sourceCode" id="cb757"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb757-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb757-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> results/slurm_logs/gdb_import_scaff_groups</span>
+<span id="cb757-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb757-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sbatch</span> <span class="at">--array</span><span class="op">=</span>1-2 scripts/genomics-db-scaffold-array.sh</span></code></pre></div>
+</div>
+<div id="hey-lets-try-updating-the-genomic-data-base" class="section level3" number="27.9.3">
+<h3><span class="header-section-number">27.9.3</span> Hey! Let’s try updating the genomic data base</h3>
+<p>Recall from Section <a href="variant-calling.html#gdb-update">20.2.4</a>, that it is possible to add new
+individuals to a genomics data base. It is worth giving that a whirl.
+What we shall do here is create the data base with the first six samples, and then
+update it by adding the last two sample to the existing data bases.</p>
+<p>Before we do this, we might note that it is a bit of a hassle that
+we are starting to see such a proliferation of different “array” scripts
+in this section. We already have one script for chromosomes and one script
+for scaffold groups. Geez! If we now also have to make a separate script for
+updating chromosome and scaffold group data bases, that is going to be four
+separate scripts. Not only that, but the names of the files of numbered chromsomes and
+numbered scaffold groups that they use are hard-wired into the scripts, and if
+we are going to be doing some building of data bases and then, later, updating them, we
+might want to be able to tell the script which <code>numbered-XX</code> file to use.</p>
+<p>So, here we will write a single, general script that can deal with these different
+use cases by taking options and positional parameters. It will make the script a little
+longer, but it will be nice to have it all in one place. This is a general theme
+in computer programming: if you can reduce the number of places (i.e., files or scripts) the same block of code
+appears (by using variables and options) then it is typically a lot easier to maintain the
+code base.</p>
+<p>So, here is our big general script. You should paste this into:
+<code>scripts/general-genomics-db-array.sh</code></p>
+<div class="sourceCode" id="cb758"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb758-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/bin/bash</span></span>
+<span id="cb758-2"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-3"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-3" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --array=1-2</span></span>
+<span id="cb758-4"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-4" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --time=02:00:00</span></span>
+<span id="cb758-5"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-5" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --cpus-per-task=2</span></span>
+<span id="cb758-6"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-6" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --output=results/slurm_logs/gdb_import_scaff_groups/output-%A-%a</span></span>
+<span id="cb758-7"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-7" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --error=results/slurm_logs/gdb_import_scaff_groups/error-%A-%a </span></span>
+<span id="cb758-8"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-8" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-type=FAIL</span></span>
+<span id="cb758-9"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-9" aria-hidden="true" tabindex="-1"></a><span class="co">#SBATCH --mail-user=yourname@yourmail.edu</span></span>
+<span id="cb758-10"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-11"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-12"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-12" aria-hidden="true" tabindex="-1"></a><span class="co">### Define default values for variables here.  By default we are going to </span></span>
+<span id="cb758-13"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-13" aria-hidden="true" tabindex="-1"></a><span class="co">### Be doing &quot;by chromosome&quot;, but the options we give can update these</span></span>
+<span id="cb758-14"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-14" aria-hidden="true" tabindex="-1"></a><span class="va">OUTPARENT=</span>results/genomics_db</span>
+<span id="cb758-15"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-15" aria-hidden="true" tabindex="-1"></a><span class="va">DOING_SCAFF=</span>0 <span class="co"># default is to do chromosomes</span></span>
+<span id="cb758-16"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-16" aria-hidden="true" tabindex="-1"></a><span class="va">UPDATING=</span>0    <span class="co"># default is to create a new data base</span></span>
+<span id="cb758-17"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-17" aria-hidden="true" tabindex="-1"></a><span class="va">EXTRA=</span><span class="st">&quot; &quot;</span></span>
+<span id="cb758-18"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-19"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-20"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-20" aria-hidden="true" tabindex="-1"></a><span class="co">### Here is a lot of stuff for usage &quot;help&quot; messages and options processing </span></span>
+<span id="cb758-21"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-21" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span><span class="fu"> usage</span> <span class="kw">{</span></span>
+<span id="cb758-22"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-22" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> Syntax:</span>
+<span id="cb758-23"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-23" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;  </span><span class="va">$(</span><span class="fu">basename</span> <span class="va">$0)</span><span class="st"> [-h -u -s ScaffGroupFile -o OutputDirectory ] NumberedSeqsFile NumberedSamplesFile &quot;</span></span>
+<span id="cb758-24"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-24" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span></span>
+<span id="cb758-25"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-25" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;    -h:  print help and exit.&quot;</span></span>
+<span id="cb758-26"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-26" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;    -o:  put the genomicsDB within OutputDirectory (and make that dir if needed).&quot;</span></span>
+<span id="cb758-27"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-27" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;         Default is results/genomics_db&quot;</span></span>
+<span id="cb758-28"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-28" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;    -s:  process scaffold groups given in ScaffGroupFile.&quot;</span></span>
+<span id="cb758-29"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-29" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span> <span class="st">&quot;    -u:  update the genomics data base instead of creating it.&quot;</span></span>
+<span id="cb758-30"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-30" aria-hidden="true" tabindex="-1"></a>      <span class="bu">echo</span></span>
+<span id="cb758-31"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-31" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span>
+<span id="cb758-32"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-33"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-33" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-eq</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb758-34"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-34" aria-hidden="true" tabindex="-1"></a>    <span class="ex">usage</span><span class="kw">;</span></span>
+<span id="cb758-35"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-35" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1<span class="kw">;</span></span>
+<span id="cb758-36"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-36" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span><span class="kw">;</span></span>
+<span id="cb758-37"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-38"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-38" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="bu">getopts</span> <span class="st">&quot;ho:s:u&quot;</span> opt<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb758-39"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="va">$opt</span> <span class="kw">in</span></span>
+<span id="cb758-40"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-40" aria-hidden="true" tabindex="-1"></a>    h    <span class="kw">)</span></span>
+<span id="cb758-41"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-41" aria-hidden="true" tabindex="-1"></a>        <span class="ex">usage</span></span>
+<span id="cb758-42"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-42" aria-hidden="true" tabindex="-1"></a>        exit 1</span>
+<span id="cb758-43"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-43" aria-hidden="true" tabindex="-1"></a>        ;;</span>
+<span id="cb758-44"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-44" aria-hidden="true" tabindex="-1"></a>    o    <span class="kw">)</span>  </span>
+<span id="cb758-45"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-45" aria-hidden="true" tabindex="-1"></a>        <span class="va">OUTPARENT=$OPTARG</span><span class="kw">;</span></span>
+<span id="cb758-46"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb758-47"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-47" aria-hidden="true" tabindex="-1"></a>    s    <span class="kw">)</span>  </span>
+<span id="cb758-48"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-48" aria-hidden="true" tabindex="-1"></a>        <span class="va">SCAFF_GROUP_FILE=$OPTARG</span><span class="kw">;</span></span>
+<span id="cb758-49"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-49" aria-hidden="true" tabindex="-1"></a>        <span class="va">DOING_SCAFF=</span>1</span>
+<span id="cb758-50"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span></span>
+<span id="cb758-51"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-51" aria-hidden="true" tabindex="-1"></a>    u    <span class="kw">)</span>  </span>
+<span id="cb758-52"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-52" aria-hidden="true" tabindex="-1"></a>        <span class="va">UPDATING=</span>1<span class="kw">;</span></span>
+<span id="cb758-53"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">;;</span>    </span>
+<span id="cb758-54"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-54" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb758-55"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-55" aria-hidden="true" tabindex="-1"></a>    <span class="cf">esac</span></span>
+<span id="cb758-56"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-56" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span>
+<span id="cb758-57"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-58"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-58" aria-hidden="true" tabindex="-1"></a><span class="bu">shift</span> <span class="va">$((OPTIND</span><span class="op">-</span><span class="dv">1</span><span class="va">))</span><span class="kw">;</span></span>
+<span id="cb758-59"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-60"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-61"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-61" aria-hidden="true" tabindex="-1"></a><span class="co"># uncomment to test for right number of required args</span></span>
+<span id="cb758-62"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-62" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$#</span> <span class="ot">-ne</span> 2 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb758-63"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-63" aria-hidden="true" tabindex="-1"></a>    <span class="ex">usage</span><span class="kw">;</span></span>
+<span id="cb758-64"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-64" aria-hidden="true" tabindex="-1"></a>    <span class="bu">exit</span> 1<span class="kw">;</span></span>
+<span id="cb758-65"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-65" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb758-66"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-67"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-67" aria-hidden="true" tabindex="-1"></a><span class="va">NUMBERED_FILE=$1</span></span>
+<span id="cb758-68"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-68" aria-hidden="true" tabindex="-1"></a><span class="va">NUMBERED_SAMPLES_FILE=$2</span></span>
+<span id="cb758-69"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-70"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-71"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-71" aria-hidden="true" tabindex="-1"></a><span class="co">#### Done processing options and getting down to work</span></span>
+<span id="cb758-72"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-73"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-73" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc</span>
+<span id="cb758-74"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-74" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate gatk4.2.5.0</span>
+<span id="cb758-75"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-76"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-76" aria-hidden="true" tabindex="-1"></a><span class="va">logdir=</span>results/logs/genomics_db_import        <span class="co"># a directory in which to put the output from stderr and stdout</span></span>
+<span id="cb758-77"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-77" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure the directories exist</span></span>
+<span id="cb758-78"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-78" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$OUTPARENT</span>  <span class="co"># make the directory for this output directory to go into</span></span>
+<span id="cb758-79"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-79" aria-hidden="true" tabindex="-1"></a><span class="fu">mkdir</span> <span class="at">-p</span> <span class="va">$logdir</span>  </span>
+<span id="cb758-80"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-81"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-82"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-82" aria-hidden="true" tabindex="-1"></a><span class="co"># this sets the shell variable &quot;sg&quot; to the scaffold group name</span></span>
+<span id="cb758-83"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-83" aria-hidden="true" tabindex="-1"></a><span class="co"># or the variable &quot;chrom&quot; to the chromosome name</span></span>
+<span id="cb758-84"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-84" aria-hidden="true" tabindex="-1"></a><span class="bu">eval</span> <span class="va">$(</span><span class="ex">line_assign.sh</span> <span class="va">$SLURM_ARRAY_TASK_ID</span> <span class="va">$NUMBERED_FILE)</span> </span>
+<span id="cb758-85"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-86"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-86" aria-hidden="true" tabindex="-1"></a><span class="co">### Now we process things differently if we are doing scaff_groups or chromosomes</span></span>
+<span id="cb758-87"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-87" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$DOING_SCAFF</span> <span class="ot">=</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb758-88"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-88" aria-hidden="true" tabindex="-1"></a>    <span class="va">outdir=</span>results/genomics_db/<span class="va">$chrom</span></span>
+<span id="cb758-89"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-89" aria-hidden="true" tabindex="-1"></a>    <span class="va">INTERVALS=</span><span class="st">&quot; --intervals </span><span class="va">$chrom</span><span class="st"> &quot;</span></span>
+<span id="cb758-90"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-90" aria-hidden="true" tabindex="-1"></a>    <span class="va">STDOUT=$logdir</span>/stdout_<span class="va">$chrom</span>.txt</span>
+<span id="cb758-91"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-91" aria-hidden="true" tabindex="-1"></a>    <span class="va">STDERR=$logdir</span>/stderr_<span class="va">$chrom</span>.txt</span>
+<span id="cb758-92"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-92" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span> </span>
+<span id="cb758-93"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-93" aria-hidden="true" tabindex="-1"></a>    <span class="va">outdir=</span>results/genomics_db/<span class="va">$sg</span></span>
+<span id="cb758-94"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-94" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mkdir</span> <span class="at">-p</span> results/sg_lists <span class="co"># make sure that this directory exists</span></span>
+<span id="cb758-95"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-95" aria-hidden="true" tabindex="-1"></a>    <span class="va">sglist=</span>results/sg_lists/<span class="va">$sg</span>.list  <span class="co"># file name for the scaffold names</span></span>
+<span id="cb758-96"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-96" aria-hidden="true" tabindex="-1"></a>    <span class="fu">awk</span> <span class="at">-v</span> sg=<span class="va">$sg</span> <span class="st">&#39;NR &gt;1 &amp;&amp; $1==sg {print $2}&#39;</span> <span class="va">$SCAFF_GROUP_FILE</span> <span class="op">&gt;</span> <span class="va">$sglist</span> </span>
+<span id="cb758-97"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-97" aria-hidden="true" tabindex="-1"></a>    <span class="va">INTERVALS=</span><span class="st">&quot; --intervals </span><span class="va">$sglist</span><span class="st"> &quot;</span></span>
+<span id="cb758-98"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-98" aria-hidden="true" tabindex="-1"></a>    <span class="va">EXTRA=</span><span class="st">&quot; --merge-contigs-into-num-partitions 1 &quot;</span></span>
+<span id="cb758-99"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-99" aria-hidden="true" tabindex="-1"></a>    <span class="va">STDOUT=$logdir</span>/stdout_<span class="va">$sg</span>.txt</span>
+<span id="cb758-100"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-100" aria-hidden="true" tabindex="-1"></a>    <span class="va">STDERR=$logdir</span>/stderr_<span class="va">$sg</span>.txt</span>
+<span id="cb758-101"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-101" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb758-102"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-103"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-104"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-104" aria-hidden="true" tabindex="-1"></a><span class="co">### Now, change options if updating vs creating a data base</span></span>
+<span id="cb758-105"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-105" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">[</span> <span class="va">$UPDATING</span> <span class="ot">=</span> 0 <span class="bu">]</span><span class="kw">;</span> <span class="cf">then</span></span>
+<span id="cb758-106"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-106" aria-hidden="true" tabindex="-1"></a>    <span class="va">DB_OPT=</span><span class="st">&quot; --genomicsdb-workspace-path &quot;</span></span>
+<span id="cb758-107"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-107" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span></span>
+<span id="cb758-108"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-108" aria-hidden="true" tabindex="-1"></a>    <span class="va">DB_OPT=</span><span class="st">&quot; --genomicsdb-update-workspace-path &quot;</span></span>
+<span id="cb758-109"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-109" aria-hidden="true" tabindex="-1"></a>    <span class="va">INTERVALS=</span><span class="st">&quot;&quot;</span></span>
+<span id="cb758-110"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-110" aria-hidden="true" tabindex="-1"></a><span class="cf">fi</span></span>
+<span id="cb758-111"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-112"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-113"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-114"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-114" aria-hidden="true" tabindex="-1"></a><span class="co"># here are the standard options that you will typically use</span></span>
+<span id="cb758-115"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-115" aria-hidden="true" tabindex="-1"></a><span class="va">standard_opts=</span><span class="st">&quot; --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations &quot;</span></span>
+<span id="cb758-116"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-117"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-118"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-118" aria-hidden="true" tabindex="-1"></a><span class="bu">exit</span> 1</span>
+<span id="cb758-119"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb758-120"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-120" aria-hidden="true" tabindex="-1"></a><span class="co"># here is where we make the call</span></span>
+<span id="cb758-121"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-121" aria-hidden="true" tabindex="-1"></a><span class="co"># now, we call this with the name of the file having </span></span>
+<span id="cb758-122"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-122" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;gatk --java-options &quot;</span>-Xmx4g<span class="st">&quot; GenomicsDBImport \ &quot;</span></span>
+<span id="cb758-123"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-123" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span>    <span class="st">&quot;</span><span class="va">$standard_opts</span><span class="st"> \ &quot;</span></span>
+<span id="cb758-124"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-124" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span>    <span class="st">&quot;</span><span class="va">$(</span><span class="fu">awk</span> <span class="st">&#39;NR&gt;1 {printf(&quot; -V results/gvcf/%s.g.vcf.gz &quot;, $2);}&#39;</span> <span class="va">$NUMBERED_SAMPLES_FILE)</span><span class="st"> \ &quot;</span></span>
+<span id="cb758-125"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-125" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span>    <span class="st">&quot;</span><span class="va">$INTERVALS</span><span class="st"> \ &quot;</span></span>
+<span id="cb758-126"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-126" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span>    <span class="st">&quot;  </span><span class="va">$EXTRA</span><span class="st"> \ &quot;</span></span>
+<span id="cb758-127"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-127" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span>    <span class="st">&quot;</span><span class="va">$DB_OPT</span><span class="st"> </span><span class="va">$outdir</span><span class="st"> &gt; </span><span class="va">$STDOUT</span><span class="st">  2&gt; </span><span class="va">$STDERR</span><span class="st"> &quot;</span></span>
+<span id="cb758-128"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb758-128" aria-hidden="true" tabindex="-1"></a>      </span></code></pre></div>
 </div>
 </div>
 <div id="step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase" class="section level2" number="27.10">
