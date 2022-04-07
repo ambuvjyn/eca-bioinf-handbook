@@ -1712,7 +1712,7 @@ gatk --java-options "-Xmx4g" GenomicsDBImport \
       $(awk 'NR>1 {printf(" -V results/gvcf/%s.g.vcf.gz ", $2);}' numbered-samples.tsv) \
       --intervals $sglist \
       --merge-contigs-into-num-partitions 1 \
-      --genomicsdb-workspace-path $outdir > $logdir/stdout_$chrom.txt  2> $logdir/stderr_$chrom.txt
+      --genomicsdb-workspace-path $outdir > $logdir/stdout_$sg.txt  2> $logdir/stderr_$sg.txt
       
 
 ```
@@ -1757,30 +1757,38 @@ So, here is our big general script.  You should paste this into:
 #SBATCH --array=1-2
 #SBATCH --time=02:00:00
 #SBATCH --cpus-per-task=2
-#SBATCH --output=results/slurm_logs/gdb_import_scaff_groups/output-%A-%a
-#SBATCH --error=results/slurm_logs/gdb_import_scaff_groups/error-%A-%a 
+#SBATCH --output=results/slurm_logs/gdb_import_general/output-%A-%a
+#SBATCH --error=results/slurm_logs/gdb_import_general/error-%A-%a
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=yourname@yourmail.edu
 
 
-### Define default values for variables here.  By default we are going to 
+### Define default values for variables here.  By default we are going to
 ### Be doing "by chromosome", but the options we give can update these
 OUTPARENT=results/genomics_db
 DOING_SCAFF=0 # default is to do chromosomes
 UPDATING=0    # default is to create a new data base
 EXTRA=" "
+logdir=results/logs/genomics_db_import        # a directory in which to put the output from stderr and stdout
 
 
-### Here is a lot of stuff for usage "help" messages and options processing 
+
+### Here is a lot of stuff for usage "help" messages and options processing
 function usage {
       echo Syntax:
-      echo "  $(basename $0) [-h -u -s ScaffGroupFile -o OutputDirectory ] NumberedSeqsFile NumberedSamplesFile "
+      echo "  $(basename $0) [-h -u -s ScaffGroupFile -o OutputDirectory -l LogDirectory] NumberedSeqsFile NumberedSamplesFile "
       echo
       echo "    -h:  print help and exit."
+      echo "    -l:  put the resulting logs (from stderr and stdout) in directory LogDirectory."
+      echo "         Default is results/logs/genomics_db_import"
       echo "    -o:  put the genomicsDB within OutputDirectory (and make that dir if needed)."
       echo "         Default is results/genomics_db"
       echo "    -s:  process scaffold groups given in ScaffGroupFile."
       echo "    -u:  update the genomics data base instead of creating it."
+      echo
+      echo "   ScaffGroupFile is like scaffold_groups.tsv"
+      echo "   NumberedSeqsFile is either like numbered-chromosomes.tsv or numbered-scaff-groups.tsv"
+      echo "   NumberedSamplesFile is like numbered-samples.tsv"
       echo
 }
 
@@ -1789,23 +1797,26 @@ if [ $# -eq 0 ]; then
     exit 1;
 fi;
 
-while getopts "ho:s:u" opt; do
+while getopts "hl:o:s:u" opt; do
     case $opt in
-	h    )
-	    usage
-	    exit 1
-	    ;;
-	o    )  
-		OUTPARENT=$OPTARG;
-	    ;;
-	s    )  
-		SCAFF_GROUP_FILE=$OPTARG;
-		DOING_SCAFF=1
-	    ;;
-	u    )  
-		UPDATING=1;
-	    ;;    
-	
+    h    )
+        usage
+        exit 1
+        ;;
+    l    )
+        logdir=$OPTARG;
+        ;;
+    o    )
+        OUTPARENT=$OPTARG;
+        ;;
+    s    )
+        SCAFF_GROUP_FILE=$OPTARG;
+        DOING_SCAFF=1
+        ;;
+    u    )
+        UPDATING=1;
+        ;;
+
     esac
 done
 
@@ -1827,40 +1838,39 @@ NUMBERED_SAMPLES_FILE=$2
 source ~/.bashrc
 conda activate gatk4.2.5.0
 
-logdir=results/logs/genomics_db_import        # a directory in which to put the output from stderr and stdout
 # make sure the directories exist
 mkdir -p $OUTPARENT  # make the directory for this output directory to go into
-mkdir -p $logdir  
+mkdir -p $logdir
 
 
 # this sets the shell variable "sg" to the scaffold group name
 # or the variable "chrom" to the chromosome name
-eval $(line_assign.sh $SLURM_ARRAY_TASK_ID $NUMBERED_FILE) 
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID $NUMBERED_FILE)
 
 ### Now we process things differently if we are doing scaff_groups or chromosomes
 if [ $DOING_SCAFF = 0 ]; then
-	outdir=results/genomics_db/$chrom
-	INTERVALS=" --intervals $chrom "
-	STDOUT=$logdir/stdout_$chrom.txt
-	STDERR=$logdir/stderr_$chrom.txt
-else 
-    outdir=results/genomics_db/$sg
+    outdir=$OUTPARENT/$chrom
+    INTERVALS=" --intervals $chrom "
+    STDOUT=$logdir/stdout_$chrom.txt
+    STDERR=$logdir/stderr_$chrom.txt
+else
+    outdir=$OUTPARENT/$sg
     mkdir -p results/sg_lists # make sure that this directory exists
-	sglist=results/sg_lists/$sg.list  # file name for the scaffold names
-	awk -v sg=$sg 'NR >1 && $1==sg {print $2}' $SCAFF_GROUP_FILE > $sglist 
-	INTERVALS=" --intervals $sglist "
-	EXTRA=" --merge-contigs-into-num-partitions 1 "
-	STDOUT=$logdir/stdout_$sg.txt
-	STDERR=$logdir/stderr_$sg.txt
+    sglist=results/sg_lists/$sg.list  # file name for the scaffold names
+    awk -v sg=$sg 'NR >1 && $1==sg {print $2}' $SCAFF_GROUP_FILE > $sglist
+    INTERVALS=" --intervals $sglist "
+    EXTRA=" --merge-contigs-into-num-partitions 1 "
+    STDOUT=$logdir/stdout_$sg.txt
+    STDERR=$logdir/stderr_$sg.txt
 fi
 
 
 ### Now, change options if updating vs creating a data base
 if [ $UPDATING = 0 ]; then
-	DB_OPT=" --genomicsdb-workspace-path "
+    DB_OPT=" --genomicsdb-workspace-path "
 else
-	DB_OPT=" --genomicsdb-update-workspace-path "
-	INTERVALS=""
+    DB_OPT=" --genomicsdb-update-workspace-path "
+    INTERVALS=""
 fi
 
 
@@ -1869,20 +1879,273 @@ fi
 standard_opts=" --batch-size 50 --reader-threads 2 --genomicsdb-shared-posixfs-optimizations "
 
 
-## CURRENTLY THIS IS SET UP TO JUST PRINT THE COMMAND LINES
 # here is where we make the call
-# now, we call this with the name of the file having 
-echo "gatk --java-options "-Xmx4g" GenomicsDBImport \ "
-echo    "$standard_opts \ "
-echo    "$(awk 'NR>1 {printf(" -V results/gvcf/%s.g.vcf.gz ", $2);}' $NUMBERED_SAMPLES_FILE) \ "
-echo    "$INTERVALS \ "
-echo    "  $EXTRA \ "
-echo    "$DB_OPT $outdir > $STDOUT  2> $STDERR "
-      
+# now, we call this with the name of the file having
+gatk --java-options "-Xmx4g" GenomicsDBImport \
+  $standard_opts \
+  $(awk 'NR>1 {printf(" -V results/gvcf/%s.g.vcf.gz ", $2);}' $NUMBERED_SAMPLES_FILE) $INTERVALS $EXTRA \
+  $DB_OPT $outdir > $STDOUT  2> $STDERR
+
+```
+
+Once we have that script, we are going to use it to create genomics data bases from
+the the first six samples for chromosomes and scaffold groups, and then we
+are going to update each of those data bases by adding the next two individuals
+into the data bases.  
+
+We start by making some numbered-samples type of files.
+```sh
+awk 'BEGIN {OFS="\t"} NR==1 {print; next} $1 <= 6 {print}' numbered-samples.tsv > numbered-first-six-samples.tsv
+awk 'BEGIN {OFS="\t"} NR==1 {print; next} $1 > 6 {printf("%d\t%s\n", ++n, $2);}' numbered-samples.tsv > numbered-last-two-samples.tsv
+```
+
+Then we start our jobs to create the data bases for the four chromosomes and for the two scaffold groups
+with the first six samples.  We will put these into the directory `results/stepwise_genomics_db`
+```sh
+# make sure the slurm logs directory exists!!
+mkdir -p results/slurm_logs/gdb_import_general
+
+# create 4 chromosome databases with the first six samples
+sbatch --array=1-4 scripts/general-genomics-db-array.sh  \
+  -l results/logs/stepwise_gdb_import/first-six  \
+  -o results/stepwise_genomics_db \
+  numbered-chromosomes.tsv \
+  numbered-first-six-samples.tsv
+
+
+# create 2 scaffold-group databases with the first six samples
+sbatch --array=1-2 scripts/general-genomics-db-array.sh  \
+  -l results/logs/stepwise_gdb_import/first-six  \
+  -o results/stepwise_genomics_db \
+  -s scaffold_groups.tsv \
+  numbered-scaff-groups.tsv \
+  numbered-first-six-samples.tsv
+
+```
+
+We have to wait until each of those runs has completed.  Once they do, check that
+all the genomics data bases have been created, by, for example:
+```sh
+# making sure that all the log files are there:
+ls  results/logs/stepwise_gdb_import/first-six/
+
+# looking at the last ten lines of each of the log files
+tail results/logs/stepwise_gdb_import/first-six/stderr*
+
+# listing the directories of the data bases:
+ls results/stepwise_genomics_db
+
+# listing all the contents of those data bases
+ls -R results/stepwise_genomics_db
+```
+
+If that all looks good, then it is time to update each of those data bases
+by adding the last two individuals to them.  To do so, we give our
+script the `-u` option, give it the path to the existing data base directory
+with the `-o` option.  And we also change the log file directory (with the `-l`
+option) so that the new logs go to a new place.
+```sh
+# update 4 chromosome databases by adding the last two samples to them
+sbatch --array=1-4 scripts/general-genomics-db-array.sh \
+  -l results/logs/stepwise_gdb_import/last-two \
+  -o results/stepwise_genomics_db \
+  -u \
+  numbered-chromosomes.tsv numbered-last-two-samples.tsv
+
+# update 2 scaffold-group databases by adding the last two samples to them
+sbatch --array=1-2 scripts/general-genomics-db-array.sh \
+  -l results/logs/stepwise_gdb_import/last-two \
+  -o results/stepwise_genomics_db \
+  -s scaffold_groups.tsv \
+  -u \
+  numbered-scaff-groups.tsv numbered-last-two-samples.tsv
+```
+
+When those are done, you can check the log files to make sure that they
+look like they ran all right:
+```sh
+tail results/logs/stepwise_gdb_import/last-two/stderr_*
+```
+
+If they say something like:
+```
+08:31:11.156 INFO  GenomicsDBImport - Importing batch 1 with 2 samples
+08:31:19.147 INFO  GenomicsDBImport - Done importing batch 1/1
+08:31:19.155 INFO  GenomicsDBImport - Import of all batches to GenomicsDB completed!
+08:31:19.157 INFO  GenomicsDBImport - Shutting down engine
+[April 7, 2022 at 8:31:19 AM MDT] org.broadinstitute.hellbender.tools.genomicsdb.GenomicsDBImport done. Elapsed time: 0.15 minutes.
+Runtime.totalMemory()=385875968
+```
+then it has all worked according to plan!
+
+
+
+## Step 6. Calling variants and creating VCF files from the GenomicsDatabase
+
+The final step to getting a VCF file with variants for all your samples
+is to run GenotypeGVCFs.  This GATK tool can take a variety of things as input,
+but, for our purposes, the most useful is that it can take a genomics data base
+as input.  
+
+Recall that we now have six genomics data bases: one for each of the four
+chromosomes in our reference genome file, and two for each of the scaffold groups.  Each
+of these scaffold groups includes a large number of unplaced scaffolds that exist
+in our reference genome.
+
+Each of those data bases knows exactly which chromosomes or scaffolds are included in it---and
+also it has information about all the samples.  In other words, it has all the information it
+needs to make a VCF file for the chromosome or scaffold group that it encompasses.
+Accordingly, it is pretty easy to run the GenotypeGVCFs tool on a genomics data base.
+
+The webpage describing how this tools works can be found [here](https://gatk.broadinstitute.org/hc/en-us/articles/4418054384027-GenotypeGVCFs).
+
+The basic command, for the chromosome `CM031202.1` (the shortest one!) in our example workflow looks like:
+```sh
+gatk --java-options "-Xmx4g" GenotypeGVCFs \
+   -R resources/genome.fasta \
+   -V gendb://results/genomics_db/CM031202.1 \
+   -O results/vcf_parts/CM031202.1.vcf
+```
+
+There are some other options, but none that we will explore today.  The main
+thing to note in the command line is that the path to the genomics data base
+is preceded by `gendb://` which is the way you would specify the location of a
+data base as a URL.  
+
+Run the above command on a compute shell to see what happens.  It is set up
+to use the genomics data bases that we created in `results/genomics_db`.
+
+So, all we need to do now is make some simple array scripts.  We could
+make a general purpose one that can be used with both the scaffold groups
+or the chromosomes, or just write two separate scripts.  We will do the latter
+here.
+
+### Array script for the four chromosomes
+
+The contents of our first script is below and should be copied into
+`scripts/gdb2vcf-chromo-array.sh`:
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-4
+#SBATCH --time=01:00:00
+#SBATCH --output=results/slurm_logs/gdb2vcf/output-%A-%a
+#SBATCH --error=results/slurm_logs/gdb2vcf/error-%A-%a 
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+source ~/.bashrc
+conda activate gatk4.2.5.0
+
+# this sets the shell variable "chrom" to the chromosome name
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-chromosomes.tsv) 
+
+outdir=results/vcf_parts                      # a directory in which to put the output gVFC file
+logdir=results/logs/genotype-gvcfs     # a directory in which to put the output from stderr
+
+# make sure those directories exist
+mkdir -p $outdir  
+mkdir -p $logdir  
+
+
+gatk --java-options "-Xmx4g" GenotypeGVCFs \
+   -R resources/genome.fasta \
+   -V gendb://results/genomics_db/$chrom \
+   -O results/vcf_parts/$chrom.vcf.gz > $logdir/stdout.$chrom 2> $logdir/stderr.$chrom 
+
+
+```
+Note that when you name the output file with a `.gz` extension, GATK will automatically
+gzip the output.
+
+Launch that job array.
+```sh
+# create slurm logs directory
+mkdir -p results/slurm_logs/gdb2vcf
+
+# try just the first job
+sbatch --array=1 scripts/gdb2vcf-chromo-array.sh
+
+# if it looks like that is working (check the stderr log output)
+# then launch the remaining ones
+sbatch --array=2-4 scripts/gdb2vcf-chromo-array.sh
+
+```
+
+### Array script for the two scaffold groups
+
+The contents of our scaffold group script is below and should be copied into
+`scripts/gdb2vcf-sg-array.sh`:
+```sh
+#!/bin/bash
+
+#SBATCH --array=1-2
+#SBATCH --time=01:00:00
+#SBATCH --output=results/slurm_logs/gdb2vcf/output-%A-%a
+#SBATCH --error=results/slurm_logs/gdb2vcf/error-%A-%a 
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=yourname@yourmail.edu
+
+
+source ~/.bashrc
+conda activate gatk4.2.5.0
+
+# this sets the shell variable "sg" to the chromosome name
+eval $(line_assign.sh $SLURM_ARRAY_TASK_ID numbered-scaff-groups.tsv) 
+
+outdir=results/vcf_parts                      # a directory in which to put the output gVFC file
+logdir=results/logs/genotype-gvcfs     # a directory in which to put the output from stderr
+
+# make sure those directories exist
+mkdir -p $outdir  
+mkdir -p $logdir  
+
+
+gatk --java-options "-Xmx4g" GenotypeGVCFs \
+   -R resources/genome.fasta \
+   -V gendb://results/genomics_db/$sg \
+   -O results/vcf_parts/$chrom.vcf.gz > $logdir/stdout.$sg 2> $logdir/stderr.$sg 
 
 
 ```
 
-## Step 6. Calling variants and creating VCF files from the GenomicsDatabase
+Launch that job array.
+```sh
+# create slurm logs directory (we already did, above, but
+# it is always good to think about this before launching a slurm job)
+mkdir -p results/slurm_logs/gdb2vcf
+
+# try just the first job
+sbatch --array=1 scripts/gdb2vcf-sg-array.sh
+
+# if it looks like that is working (check the stderr log output)
+# then launch the remaining ones
+sbatch --array=2 scripts/gdb2vcf-sg-array.sh
+
+```
+
+### Have a look at the products
+
+You can take a look at the resulting VCF files like this:
+```sh
+zcat results/vcf_parts/CM031199.1.vcf.gz | less
+```
+
+Have a look at them and see if it seems everything is in order!
+
+
+### Homework
+
+Modify the two array scripts used above so that they use the genomics
+data bases that we put in `results/stepwise_genomics_db` while testing
+the sequential updating of the data bases. Put the output files
+into `results/stepwise_vcf_parts`.  See if you get the same variants
+out of it (you should!).
 
 ## Step 7. Filtering variants
+
+## Step 8. Base Quality Score Recalibration
+
+
+

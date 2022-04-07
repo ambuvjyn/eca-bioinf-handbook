@@ -370,7 +370,12 @@ job-array-script-for-the-chromosomes
 job-array-script-for-the-scaffold-groups
 hey-lets-try-updating-the-genomic-data-base
 step-6.-calling-variants-and-creating-vcf-files-from-the-genomicsdatabase
+array-script-for-the-four-chromosomes
+array-script-for-the-two-scaffold-groups
+have-a-look-at-the-products
+homework
 step-7.-filtering-variants
+step-8.-base-quality-score-recalibration
 bioinformatic-analysis-on-variant-data
 topics-in-pop-gen
 coalescent
