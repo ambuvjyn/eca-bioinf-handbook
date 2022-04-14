@@ -32,6 +32,8 @@ fig:trimmo-dag
 fig:bwa-map-dag
 fig:mark-dup-dag
 fig:make-gvcfs-dag
+fig:gdb-import-dag
+fig:gdb2vcf-dag
 intro
 erics-notes-of-what-he-might-do
 table-of-topics
@@ -321,9 +323,11 @@ gvcf-format
 genomics-db
 gdb-update
 boneyard-1
-basic-handling-of-vcf-files
+handle-vcf
 bcftools
+index-my-vcf-file
 tell-me-about-my-vcf-file
+rename-the-samplesindividuals-in-the-file
 get-fragmentsparts-of-my-vcf-file
 combine-vcf-files-in-various-ways
 filter-out-variants-for-a-variety-of-reasons
@@ -338,7 +342,7 @@ try-on-the-chinook-chromosomes
 explore-the-other-parameters-more
 repeat-masking-the-coho-genome
 multiz-maf2fasta
-an-example-full-workflow-from-sequences-to-variants
+example-wgs-flow
 an-overview-of-the-whole-workflow
 lets-have-a-look-at-the-reference-genome
 first-off-make-sure-that-you-have-added-mamba-to-your-base-environment
@@ -374,6 +378,7 @@ array-script-for-the-four-chromosomes
 array-script-for-the-two-scaffold-groups
 have-a-look-at-the-products
 homework
+catenate-all-the-vcf.gz-files-into-a-single-vcf-file-and-index-it
 step-7.-filtering-variants
 step-8.-base-quality-score-recalibration
 bioinformatic-analysis-on-variant-data

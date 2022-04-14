@@ -4,11 +4,11 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</title>
+  <title>Chapter 22 Basic Handling of VCF files | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</title>
   <meta name="description" content="A book example for a Chapman &amp; Hall book." />
   <meta name="generator" content="bookdown 0.24 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
+  <meta property="og:title" content="Chapter 22 Basic Handling of VCF files | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
   <meta property="og:type" content="book" />
   
   
@@ -16,7 +16,7 @@
   <meta name="github-repo" content="yihui/bookdown-crc" />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
+  <meta name="twitter:title" content="Chapter 22 Basic Handling of VCF files | Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics" />
   
   <meta name="twitter:description" content="A book example for a Chapman &amp; Hall book." />
   
@@ -31,8 +31,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-
-<link rel="next" href="intro.html"/>
+<link rel="prev" href="boneyard-1.html"/>
+<link rel="next" href="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"/>
 <script src="libs/header-attrs/header-attrs.js"></script>
 <script src="libs/jquery/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
@@ -581,28 +581,312 @@ div.csl-indent {
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="header">
-<h1 class="title">Practical Computing and Bioinformatics for Conservation and Evolutionary Genomics</h1>
-<p class="author"><em>Eric C. Anderson</em></p>
-<p class="date"><em>2022-04-14</em></p>
+<div id="handle-vcf" class="section level1" number="22">
+<h1><span class="header-section-number">Chapter 22</span> Basic Handling of VCF files</h1>
+<p>As we saw in the section on bioinformatic formats, VCF files can be
+large and unwieldy. The format specification is also such that fields
+might have different numbers of subfields, depending, for example, on the
+number of alleles found at a variant. Both of these features make it
+hard to directly read a VCF file into a, say, R, or some other program
+that may wish to treat it purely as tabular data.</p>
+<p>This is not to say that you couldn’t just read a VCF file into R directly
+as a TAB delimited text file, and then start splitting fields up on it.
+However, there are specialized tools for doing operations of VCF files,
+and becoming familiar with them can relieve a lot
+of the pain of dealing with VCF files.</p>
+<p>To have an example VCF file to play with, you can
+download one to your Unix workstation with the following commands.
+You should put these files in your <code>scratch</code> directory somewhere, perhaps
+creating a directory called <code>bcftools-play</code> to put them into. All the following
+commands assume that the two example files are in the current working directory.</p>
+<p>First we download the <code>vcf.gz</code> version of the VCF file, called <code>all.vcf.gz</code>. This
+is the unfiltered VCF file created by our example WGS workflow in Section <a href="example-wgs-flow.html#example-wgs-flow">27</a>:</p>
+<div class="sourceCode" id="cb624"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb624-1"><a href="handle-vcf.html#cb624-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">--load-cookies</span> /tmp/cookies.txt <span class="st">&quot;https://docs.google.com/uc?export=download&amp;confirm=</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">--quiet</span> <span class="at">--save-cookies</span> /tmp/cookies.txt <span class="at">--keep-session-cookies</span> <span class="at">--no-check-certificate</span> <span class="st">&#39;https://docs.google.com/uc?export=download&amp;id=1zgFyYbfWU85O4JzmOX7-MOKQs4oXv4fm&#39;</span> <span class="at">-O-</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-rn</span> <span class="st">&#39;s/.*confirm=([0-9A-Za-z_]+).*/\1\n/p&#39;</span><span class="va">)</span><span class="st">&amp;id=1zgFyYbfWU85O4JzmOX7-MOKQs4oXv4fm&quot;</span> <span class="at">-O</span> all.vcf.gz <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/cookies.txt</span></code></pre></div>
+<p>After that, we also download the BCF version of the same file, just so that everyone
+gets familiar with the fact that BCF files can be treated equivalently
+to VCF files with <code>bcftools</code>.</p>
+<div class="sourceCode" id="cb625"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb625-1"><a href="handle-vcf.html#cb625-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">--load-cookies</span> /tmp/cookies.txt <span class="st">&quot;https://docs.google.com/uc?export=download&amp;confirm=</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">--quiet</span> <span class="at">--save-cookies</span> /tmp/cookies.txt <span class="at">--keep-session-cookies</span> <span class="at">--no-check-certificate</span> <span class="st">&#39;https://docs.google.com/uc?export=download&amp;id=1iUP_UstnmuLSGuBIfb0EYXs1Gw1z-z0o&#39;</span> <span class="at">-O-</span> <span class="kw">|</span> <span class="fu">sed</span> <span class="at">-rn</span> <span class="st">&#39;s/.*confirm=([0-9A-Za-z_]+).*/\1\n/p&#39;</span><span class="va">)</span><span class="st">&amp;id=1iUP_UstnmuLSGuBIfb0EYXs1Gw1z-z0o&quot;</span> <span class="at">-O</span> all.bcf <span class="kw">&amp;&amp;</span> <span class="fu">rm</span> <span class="at">-rf</span> /tmp/cookies.txt</span></code></pre></div>
+<p>To repeat, BCF and vcf.gz are two formats serving similar purposes. I will be using both
+<code>all.bcf</code> and <code>all.vcf.gz</code> interchangeably in the following examples.</p>
+<p>There are two main, well-known programs for handling VCF files: <code>vcftools</code> and <code>bcftools</code>. Both
+of these grew out of the 1000 Genomes effort starting about a decade ago. It seems
+that <code>vcftools</code> may have been developed first, but, currently, <code>bcftools</code> is being
+more actively developed, with new versions and new features being added to it
+regularly. <code>vcftools</code> provides some very specific commands for particular analyses
+or operations, some of which are not available from <code>bcftools</code>. On the other hand,
+<code>bcftools</code> provides a more general interface for operations on VCF files. By this
+interface, a great number of the operations done in <code>vcftools</code> are available, but
+a little extra knowledge is required to implement them. That said, the range of
+possible operations seems much larger in <code>bcftools</code> than in <code>vcftools</code>.</p>
+<p>Further, <code>bcftools</code> behaves like a typical Unix utility, allowing data to be streamed
+to stdout, and data can be streamed <em>into</em> <code>bcftools</code> (by using the <code>-</code> as the
+input file name) from stdin. This lets you pipe output into it the way you
+can with most Unix tools. This makes it far more versatile than <code>vcftools</code>.</p>
+<div id="bcftools" class="section level2" number="22.1">
+<h2><span class="header-section-number">22.1</span> bcftools</h2>
+<p>If you don’t already have <code>bcftools</code>, you can use <code>mamba</code> to create a conda
+environment called <code>bcftools</code> that has it:</p>
+<div class="sourceCode" id="cb626"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb626-1"><a href="handle-vcf.html#cb626-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bcftools <span class="at">-c</span> bioconda bcftools=1.15.1</span>
+<span id="cb626-2"><a href="handle-vcf.html#cb626-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bcftools</span></code></pre></div>
+<p>Here, we just want to give everyone the chance to run through a few
+operations with <code>bcftools</code>, to start to get familiar with its interface.
+The first thing to note is that, like <code>samtools</code> (which is maintained by
+the same group of people), <code>bcftools</code> possesses a number of different
+<em>subcommands</em>. So, the syntax is always like:</p>
+<ul>
+<li><code>bcftools</code> <em>subcommand</em> options file(s)</li>
+</ul>
+<p>Also like <code>samtools</code>, <code>bcftools</code> will take input from <em>stdin</em> rather than
+from a file—you just pass it <code>-</code> instead of a file name.</p>
+<p>The full documentation/manual for <code>bcftools</code> is maintained at:
+<a href="http://samtools.github.io/bcftools/bcftools.html">http://samtools.github.io/bcftools/bcftools.html</a>. It is well worth reading through this whole documentation, though it
+can be quite terse and intimidating. A friendlier “tutorial” introduction to the
+software can be found at <a href="https://samtools.github.io/bcftools/howtos/index.html">https://samtools.github.io/bcftools/howtos/index.html</a>.</p>
+<p>Here we are going to get our feet with with a few operations.</p>
+<p>First, we will look at the “onboard” documentation. By just entering <code>bcftools</code> you get a
+list of all the subcommands that are available:</p>
+<div class="sourceCode" id="cb627"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb627-1"><a href="handle-vcf.html#cb627-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span></span></code></pre></div>
+<p>If you want the onboard documentation for any of the particular subcommands, you can
+just give a naked <code>bctools subcommand</code> command, like:</p>
+<div class="sourceCode" id="cb628"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb628-1"><a href="handle-vcf.html#cb628-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index</span></code></pre></div>
+<p>or, for a more daunting set of documentation:</p>
+<div class="sourceCode" id="cb629"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb629-1"><a href="handle-vcf.html#cb629-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> roh</span></code></pre></div>
+<div id="index-my-vcf-file" class="section level3" number="22.1.1">
+<h3><span class="header-section-number">22.1.1</span> Index my VCF file!</h3>
+<p>The first thing we are going to do is index our VCF files.
+We create the default index, a <em>coordinate sorted index</em> which
+has the <code>.csi</code> extension. If your VCF file is not in coordinate-sorted
+order, you might have to sort it before you do this. However,
+<code>all.vcf.gz</code> and <code>all.bcf</code> are already sorted. So:</p>
+<div class="sourceCode" id="cb630"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb630-1"><a href="handle-vcf.html#cb630-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index all.vcf.gz</span>
+<span id="cb630-2"><a href="handle-vcf.html#cb630-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index all.bcf</span></code></pre></div>
+<p>Use <code>ls</code> to see the new files created by that operation.</p>
+<p>The index allows for rapid access to different parts of the files that
+correspond to specific locations in the genome.</p>
 </div>
-<div id="preface" class="section level1 unnumbered">
-<h1>Preface</h1>
-<p>This is a collection of blurbs Eric started writing in the last year to
-help remind himself and others of some useful things to know for bioinformatics.</p>
-<p>It was started during an extended government shutdown, when it seemed like writing a book
-might be in order. Fortunately, the shutdown ended eventually. It is not clear whether a
-book will ever come of it, but these notes shall be up on the web indefinitely, so feel free to use
-them!</p>
+<div id="tell-me-about-my-vcf-file" class="section level3" number="22.1.2">
+<h3><span class="header-section-number">22.1.2</span> Tell me about my VCF file!</h3>
+<p>VCF files are a little daunting. Especially when they are gzipped
+(or are BCF files!) they
+can seem particularly opaque—learning anything about them in the traditional
+manner of uncompressing them and then searching for lines within them
+or counting up the number of records can be time consuming. Here are some
+<code>bcftools</code> solutions to a few different questions you might have.</p>
+<p><strong>Who is in this file?</strong> You can always try to find the last header line
+in a VCF file using grep or awk and parse the individuals out yourself, but
+it turns out to be faster and safer to use the <code>query</code> subcommand from <code>bcftools</code>
+with the <code>-l</code> option. Do it here:</p>
+<div class="sourceCode" id="cb631"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb631-1"><a href="handle-vcf.html#cb631-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> all.vcf.gz</span>
+<span id="cb631-2"><a href="handle-vcf.html#cb631-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb631-3"><a href="handle-vcf.html#cb631-3" aria-hidden="true" tabindex="-1"></a><span class="co"># And, of course, you can do the same with the BCF file</span></span>
+<span id="cb631-4"><a href="handle-vcf.html#cb631-4" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-l</span> all.bcf</span></code></pre></div>
+<p>Then read about it on the manual page. Find the part that describes it.</p>
+<p><strong>How many variants are in this file?</strong> This question can be answered quickly with
+<code>bcftools stats</code>, which also returns to you a plethora of information about the variants.</p>
+<div class="sourceCode" id="cb632"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb632-1"><a href="handle-vcf.html#cb632-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats all.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>The top part of the output tells you how many SNPs and indels (and other types
+of variants) there are. Then it tells you about Ts/Tv ratios, then it essentially
+gives histogram summaries for allele frequencies,
+variant quality scores (QUAL), insertion-deletion sizes, substitution types, read depths, etc.</p>
+<p><strong>Where are these variants?</strong> There are several ways to answer this question.
+One might be simply to print the CHROM and the POS for each row in the VCF file:</p>
+<div class="sourceCode" id="cb633"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb633-1"><a href="handle-vcf.html#cb633-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> all.vcf.gz</span></code></pre></div>
+<p>If you want to see where it starts and where it finishes you can do:</p>
+<div class="sourceCode" id="cb634"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb634-1"><a href="handle-vcf.html#cb634-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> all.vcf.gz <span class="kw">|</span> <span class="fu">head</span> </span>
+<span id="cb634-2"><a href="handle-vcf.html#cb634-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> all.vcf.gz <span class="kw">|</span> <span class="fu">tail</span></span></code></pre></div>
+<p>If we wanted to quickly see how many variants were on each of the
+chromosomes/scaffolds, sorted by number of variants, we could do:</p>
+<div class="sourceCode" id="cb635"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb635-1"><a href="handle-vcf.html#cb635-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\n&#39;</span> all.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{n[$1]++} END {for(i in n) print i, n[i]}&#39;</span> <span class="kw">|</span> <span class="fu">sort</span> <span class="at">-nbr</span> <span class="at">-k</span> 2 <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>This shows one use of the subcommand <code>query</code>, which is quite useful.
+Even though it is named <code>query</code> its main purpose is simply extracting fields
+of information from a VCF file and spitting them out in a new, user-specified,
+typically tabular format.</p>
+<p><strong>Give me a glimpse of the file</strong> You can use <code>bcftools view</code> for a number
+of things, but at its simplest, you can merely look at the file in VCF format.
+(In this manner, it behaves much like <code>samtools view</code> for VCF files).</p>
+<div class="sourceCode" id="cb636"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb636-1"><a href="handle-vcf.html#cb636-1" aria-hidden="true" tabindex="-1"></a><span class="co"># show the whole file from the top</span></span>
+<span id="cb636-2"><a href="handle-vcf.html#cb636-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view all.bcf <span class="kw">|</span> <span class="fu">less</span></span>
+<span id="cb636-3"><a href="handle-vcf.html#cb636-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb636-4"><a href="handle-vcf.html#cb636-4" aria-hidden="true" tabindex="-1"></a><span class="co"># of course, this works with either bcf or vcf or vcf.gz</span></span>
+<span id="cb636-5"><a href="handle-vcf.html#cb636-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view all.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span>
+<span id="cb636-6"><a href="handle-vcf.html#cb636-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb636-7"><a href="handle-vcf.html#cb636-7" aria-hidden="true" tabindex="-1"></a><span class="co"># show just the header with -h.  Here we look at just the last 10 lines of the header</span></span>
+<span id="cb636-8"><a href="handle-vcf.html#cb636-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-h</span> all.bcf  <span class="kw">|</span> <span class="fu">tail</span></span>
+<span id="cb636-9"><a href="handle-vcf.html#cb636-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb636-10"><a href="handle-vcf.html#cb636-10" aria-hidden="true" tabindex="-1"></a><span class="co"># show the variants themselves (no header) with -H</span></span>
+<span id="cb636-11"><a href="handle-vcf.html#cb636-11" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> all.vcf.gz <span class="kw">|</span> <span class="fu">head</span></span></code></pre></div>
+<p>Just like you can with <code>samtools view</code> you can convert formats with <code>bcftools view</code>.
+Pipe a VCF into it and then use the <code>-O</code> (Big-O, not a zero) option:</p>
+<ul>
+<li><code>-O z</code>: bgzipped VCF (vcf.gz)</li>
+<li><code>-O v</code>: uncompressed VCF (the default)</li>
+<li><code>-O u</code>: uncompressed BCF</li>
+<li><code>-O b</code>: compressed BCF</li>
+</ul>
+</div>
+<div id="rename-the-samplesindividuals-in-the-file" class="section level3" number="22.1.3">
+<h3><span class="header-section-number">22.1.3</span> Rename the samples/individuals in the file</h3>
+<p>We saw above that the names of the samples in the file are like <code>s001</code>, <code>s002</code>.
+This was not actually what I had intended! The names in here are set by the
+<code>SM</code> field of the read groups in the BAM files from which variants are called.
+In Section <a href="example-wgs-flow.html#map-with-array">27.6.3</a>, where those BAM files were made, I
+screwed up and used the wrong column from the <code>numbered-units.tsv</code> file to
+set the <code>SM</code> value in the read groups. I wanted to use <code>sample_id</code> not <code>sample</code>.
+However, all is not lost. We don’t have to go all the way back to the beginning
+and remap everything and call variants. We simply rename the samples in the file.
+For this we can use <code>bcftools reheader</code>. First, look at the documentation for that,
+both on the web, and with:</p>
+<div class="sourceCode" id="cb637"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb637-1"><a href="handle-vcf.html#cb637-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> reheader</span></code></pre></div>
+<p>Aha! we see that the web-based documentation is a little more complete, and it tells
+us what format to use for a sample-renaming file for the <code>-s</code> option.
+Copy the following contents (using <code>nano</code>, for example) into a file called <code>sample-renames.txt</code></p>
+<pre><code>s001    T199967
+s002    T199968
+s003    T199969
+s004    T199970
+s005    T199971
+s006    T199972
+s007    T199973
+s008    T199974</code></pre>
+<p>Then we can make a renamed <code>bcf</code> file with:</p>
+<div class="sourceCode" id="cb639"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb639-1"><a href="handle-vcf.html#cb639-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> reheader <span class="at">-s</span> sample-renames.txt all.bcf  <span class="op">&gt;</span> renamed-all.bcf</span></code></pre></div>
+<p>and a renamed <code>vcf.gz</code> file with:</p>
+<div class="sourceCode" id="cb640"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb640-1"><a href="handle-vcf.html#cb640-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> reheader <span class="at">-s</span> sample-renames.txt all.vcf.gz  <span class="op">&gt;</span> renamed-all.vcf.gz</span></code></pre></div>
+<p>In this case, the type of output file (bcf or vcf.gz) is the same
+as the type of the input file.</p>
+<p><strong>Exercise</strong> Use <code>bcftools view</code> and <code>tail</code> to see that the names have really been
+changed. Then use <code>bcftools query</code> to do the same.</p>
+</div>
+<div id="get-fragmentsparts-of-my-vcf-file" class="section level3" number="22.1.4">
+<h3><span class="header-section-number">22.1.4</span> Get fragments/parts of my VCF file</h3>
+<p>There are lots of ways to extract desired bits of information
+from a VCF file into a more manageable format.</p>
+<p><strong>Extract keyed values from the INFO field</strong> When we did this:</p>
+<div class="sourceCode" id="cb641"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb641-1"><a href="handle-vcf.html#cb641-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>we saw that there is a lot of information in the INFO
+field. What if we wanted to extract that? It looks like it could be
+hard to parse because the fields are in semi-colon-separated
+key-value pairs.</p>
+<p>This is another job for <code>bcftools query</code>.
+You pass a <em>format string</em> to the <code>-f</code> option that tells the program which fields you want
+to extract and how you want to format it. In general, the values are preceded by
+a <code>%</code> and subfields of the INFO column can be named described
+like <code>%INFO/SUBFIELD</code>. You can ask for TABs between fields with
+<code>\t</code> and for line endings with <code>\n</code>. In general you need to wrap all of these format
+specifications in single quotes so that the shell does not get confused by them.</p>
+<p>Check out some examples:</p>
+<div class="sourceCode" id="cb642"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb642-1"><a href="handle-vcf.html#cb642-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract CHROM POS and BaseQRankSum, separated by TABs</span></span>
+<span id="cb642-2"><a href="handle-vcf.html#cb642-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%INFO/BaseQRankSum\n&#39;</span> all.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span>
+<span id="cb642-3"><a href="handle-vcf.html#cb642-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb642-4"><a href="handle-vcf.html#cb642-4" aria-hidden="true" tabindex="-1"></a><span class="co"># extract CHROM POS and total read depth DP</span></span>
+<span id="cb642-5"><a href="handle-vcf.html#cb642-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t%INFO/DP\n&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>You can even extract information from each of the genotype columns. If you want to print
+CHROM and POS and then all of the PHRED-scaled genotype likelihoods for all the samples, separated
+by TABs, you can do:</p>
+<div class="sourceCode" id="cb643"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb643-1"><a href="handle-vcf.html#cb643-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t[%PL\t]\n&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Note that FORMAT values (i.e., those in the genotype columns) must be wrapped in
+<code>[ ]</code> to get all the values to be printed out.</p>
+<p><strong>EXERCISE</strong> Extract the CHROM, POS, Maximum Likelihood-estimated Allele Frequency (MLEAF in the INFO
+column) for each variant, along with the allele depths (AD) of each individual, all TAB separated, from the
+file <code>all.vcf.gz</code>.</p>
+<p><strong>View data from specified regions</strong></p>
+<p>What if we want to look at variants only in two 10 Kb regions, like
+<code>CM031199.1:1-10000</code> and <code>CM031200.1:1000000-1005000</code>? Pass those,
+separated by commas, to the <code>-r</code> option (which is an option that applies to many
+of the subcommands):</p>
+<div class="sourceCode" id="cb644"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb644-1"><a href="handle-vcf.html#cb644-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-r</span> CM031199.1:1-10000,CM031200.1:1000000-1005000 all.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>You can also specify those regions in a file with the <code>-R</code> option.</p>
+<p><strong>View data from specified individuals</strong></p>
+<p>You can give the sample names (comma separated) to the <code>-s</code> option:</p>
+<div class="sourceCode" id="cb645"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb645-1"><a href="handle-vcf.html#cb645-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-s</span> s001,s002,s003 all.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Or, if you wanted to view all <em>but</em> those two individuals, precede them with a <code>^</code>:</p>
+<div class="sourceCode" id="cb646"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb646-1"><a href="handle-vcf.html#cb646-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-s</span> ^s001,s002,s003 all.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>You can also supply a text file with sample names (one-per-line) to the capital letter <code>-S</code> option.</p>
+<p>You can combine options, like <code>-r</code> and <code>-s</code>, as well.</p>
+</div>
+<div id="combine-vcf-files-in-various-ways" class="section level3" number="22.1.5">
+<h3><span class="header-section-number">22.1.5</span> Combine VCF files in various ways</h3>
+<p><strong>Catenate VCF files</strong></p>
+<p>If you have VCF files called from the same reference genome filled with
+the same samples, it is easy to catenate them together with <code>bcftools concat</code>:</p>
+<div class="sourceCode" id="cb647"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb647-1"><a href="handle-vcf.html#cb647-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make two files from different regions</span></span>
+<span id="cb647-2"><a href="handle-vcf.html#cb647-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-O</span> z <span class="at">-r</span> CM031199.1:1-10000 all.vcf.gz  <span class="op">&gt;</span> A.vcf.gz</span>
+<span id="cb647-3"><a href="handle-vcf.html#cb647-3" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-O</span> z <span class="at">-r</span> CM031200.1:1000000-1005000 all.vcf.gz  <span class="op">&gt;</span> B.vcf.gz</span>
+<span id="cb647-4"><a href="handle-vcf.html#cb647-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb647-5"><a href="handle-vcf.html#cb647-5" aria-hidden="true" tabindex="-1"></a><span class="co"># how many variants in each of those?</span></span>
+<span id="cb647-6"><a href="handle-vcf.html#cb647-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats A.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span>
+<span id="cb647-7"><a href="handle-vcf.html#cb647-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats B.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span>
+<span id="cb647-8"><a href="handle-vcf.html#cb647-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb647-9"><a href="handle-vcf.html#cb647-9" aria-hidden="true" tabindex="-1"></a><span class="co"># catenate the back together</span></span>
+<span id="cb647-10"><a href="handle-vcf.html#cb647-10" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> concat <span class="at">-Oz</span>  A.vcf.gz B.vcf.gz <span class="op">&gt;</span> CAT.vcf.gz</span>
+<span id="cb647-11"><a href="handle-vcf.html#cb647-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb647-12"><a href="handle-vcf.html#cb647-12" aria-hidden="true" tabindex="-1"></a><span class="co"># how many variants in that?</span></span>
+<span id="cb647-13"><a href="handle-vcf.html#cb647-13" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats CAT.vcf.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<p>Note that when using the <code>-O</code> (capital “o”) option to specify the output
+type: <code>v</code> = VCF, <code>b</code> = BCF, <code>u</code> = uncompressed BCF, <code>z</code> = bgzipped VCF, you
+don’t need a space after the <code>-O</code>.</p>
+<p><strong>Merge VCF files</strong></p>
+<p>If you have files with different samples in them you
+can easily combine them:</p>
+<div class="sourceCode" id="cb648"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb648-1"><a href="handle-vcf.html#cb648-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make file with first three samples</span></span>
+<span id="cb648-2"><a href="handle-vcf.html#cb648-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-s</span> s001,s002,s003 all.vcf.gz <span class="op">&gt;</span> first3.vcf.gz</span>
+<span id="cb648-3"><a href="handle-vcf.html#cb648-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb648-4"><a href="handle-vcf.html#cb648-4" aria-hidden="true" tabindex="-1"></a><span class="co"># make another with the last three samples</span></span>
+<span id="cb648-5"><a href="handle-vcf.html#cb648-5" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Oz</span> <span class="at">-s</span> s006,s007,s008 all.bcf <span class="op">&gt;</span> last3.vcf.gz</span>
+<span id="cb648-6"><a href="handle-vcf.html#cb648-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb648-7"><a href="handle-vcf.html#cb648-7" aria-hidden="true" tabindex="-1"></a><span class="co"># merging requires that the files be indexed</span></span>
+<span id="cb648-8"><a href="handle-vcf.html#cb648-8" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index first3.vcf.gz</span>
+<span id="cb648-9"><a href="handle-vcf.html#cb648-9" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index last3.vcf.gz</span>
+<span id="cb648-10"><a href="handle-vcf.html#cb648-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb648-11"><a href="handle-vcf.html#cb648-11" aria-hidden="true" tabindex="-1"></a><span class="co"># merge those into a file with 6 samples</span></span>
+<span id="cb648-12"><a href="handle-vcf.html#cb648-12" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> merge <span class="at">-Oz</span> first3.vcf.gz last3.vcf.gz <span class="op">&gt;</span> 6-samples.vcf.gz</span></code></pre></div>
+</div>
+<div id="filter-out-variants-for-a-variety-of-reasons" class="section level3" number="22.1.6">
+<h3><span class="header-section-number">22.1.6</span> Filter out variants for a variety of reasons</h3>
+<p>There are a lot of ways to filter out variants. <code>bcftools</code> leaves things
+very general here, and so just about anything is possible. Some simple ones:</p>
+<p><strong>Just the biallelic SNPs please</strong> Get things with no more than 2 alleles and
+no fewer than two alleles, and of a type = SNP:</p>
+<div class="sourceCode" id="cb649"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb649-1"><a href="handle-vcf.html#cb649-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and summarize the result to look at it, all in one line:</span></span>
+<span id="cb649-2"><a href="handle-vcf.html#cb649-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Ou</span> <span class="at">-m</span> 2 <span class="at">-M</span> 2 <span class="at">--types</span><span class="op">=</span>snps all.bcf <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<p><strong>Just the biallelic indels please</strong></p>
+<div class="sourceCode" id="cb650"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb650-1"><a href="handle-vcf.html#cb650-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and see the result all in one line:</span></span>
+<span id="cb650-2"><a href="handle-vcf.html#cb650-2" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-Ou</span> <span class="at">-m</span> 2 <span class="at">-M</span> 2 <span class="at">--types</span><span class="op">=</span>indels all.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<p>Note the use of <code>-Ou</code> in order to pipe uncompressed BCF output directly into
+<code>bcftools stats</code> using the <code>-</code> for a filename.</p>
+<p><strong>Fraction of missing sites less than X</strong></p>
+<p>If you want to make sure that 60% of your individuals have at least
+one read at the genotype, you can do this:</p>
+<div class="sourceCode" id="cb651"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb651-1"><a href="handle-vcf.html#cb651-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-i</span> <span class="st">&#39;F_MISSING &lt; 0.4&#39;</span> all.vcf.gz <span class="kw">|</span> <span class="ex">bcftools</span> stats <span class="at">-</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;/^SN/&#39;</span></span></code></pre></div>
+<p>Play with setting the <code>F_MISSING</code> to different values and see how that affects
+the number of variants retained. (Not much with this example data set, it turns
+out, because there is not much missing data.</p>
+<p><strong>Exclude based on various features of the data</strong></p>
+<p>You can use the <code>-e</code> option to <code>bcftools view</code> or <code>bcftools filter</code> to <em>exclude</em> sites that
+meet certain criteria. (You can use <code>-i</code> to <em>include</em> those sites and no others).</p>
+<p>For a terrifying terse and dense description of what sorts of expressions can be used to
+describe the criteria, see the web manual section on expressions: <a href="http://samtools.github.io/bcftools/bcftools.html#expressions">http://samtools.github.io/bcftools/bcftools.html#expressions</a>.</p>
+<p>For example, to only keep things with a maximum-likelihood-estimated allele frequency between 0.4 and 0.6:</p>
+<div class="sourceCode" id="cb652"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb652-1"><a href="handle-vcf.html#cb652-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-i</span> <span class="st">&#39;INFO/MLEAF &gt;= 0.4 &amp;&amp; INFO/MLEAF &lt;= 0.6&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>We are using the <code>-H</code> option there just so that we can easily see the result using <code>less</code>.</p>
+<p>How about excluding those sites in which any individual had a DP less than 5. We can
+test each of the DP columns in the FORMAT columns. We name these <code>FMT/DP</code>.
+Note that each test (from each sample)
+is combined with an OR by default, so:</p>
+<div class="sourceCode" id="cb653"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb653-1"><a href="handle-vcf.html#cb653-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-e</span> <span class="st">&#39;FMT/DP &lt; 5&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<hr />
+<p>This has only scratched the surface of what is possible with bcftools.</p>
 
+</div>
+</div>
 </div>
             </section>
 
           </div>
         </div>
       </div>
-
-<a href="intro.html" class="navigation navigation-next navigation-unique" aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="boneyard-1.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook/js/app.min.js"></script>
@@ -633,11 +917,11 @@ gitbook.start({
 "size": 2
 },
 "edit": {
-"link": "https://github.com/eriqande/eca-bioinf-handbook/edit/master/index.Rmd",
+"link": "https://github.com/eriqande/eca-bioinf-handbook/edit/master/3.05.5-basic-handling-of-VCF-files.Rmd",
 "text": "Edit"
 },
 "history": {
-"link": "https://github.com/eriqande/eca-bioinf-handbook/commits/master/index.Rmd",
+"link": "https://github.com/eriqande/eca-bioinf-handbook/commits/master/3.05.5-basic-handling-of-VCF-files.Rmd",
 "text": null
 },
 "view": {

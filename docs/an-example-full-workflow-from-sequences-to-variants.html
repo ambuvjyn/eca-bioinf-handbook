@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-04-07" />
+<meta name="date" content="2022-04-11" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1837,6 +1837,13 @@ used by GATK, and it also outlined all of the options to the GATK program
 array, each one requesting 2 CPUs (so we can use 2 reader threads, effectively)
 to import all of our gVCF files made in the last step into a genomics
 data base.</p>
+This step corresponds to the colored nodes in our now-familiar workflow DAG:
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:gdb-import-dag"></span>
+<img src="figs/snakemake-dags/genomics-db-import.svg" alt="Importing gVCF files into the genomics data bases." width="100%" />
+<p class="caption">
+FIGURE 27.7: Importing gVCF files into the genomics data bases.
+</p>
+</div>
 <p>As mentioned in Section <a href="variant-calling.html#genomics-db">20.2.3</a>, these jobs parallelize over
 chromosomes; however, for non-model organisms with more fragmented reference
 genomes, for the unplaced scaffolds we will be parallelizing over the
@@ -1945,7 +1952,7 @@ long as it is named with the extension <code>.list</code>—rather than on the c
 a <code>SLURM_ARRAY_TASK_ID</code> into the name of a scaffold group. We can do that with a little
 Unix and awk:</p>
 <div class="sourceCode" id="cb754"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb754-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb754-1" aria-hidden="true" tabindex="-1"></a><span class="fu">awk</span> <span class="st">&#39;NR&gt;1 {print $1}&#39;</span> scaffold_groups.tsv <span class="kw">|</span> <span class="fu">uniq</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;BEGIN {printf(&quot;index\tsg\n&quot;)} {printf(&quot;%d\t%s\n&quot;, ++n, $1)}&#39;</span> <span class="op">&gt;</span> numbered-scaff-groups.tsv</span></code></pre></div>
-<p>If you looks at the file created there, you will see that it looks like this:</p>
+<p>If you look at the file created there, you will see that it looks like this:</p>
 <pre><code>index   sg
 1   scaff_group_001
 2   scaff_group_002</code></pre>
@@ -2243,6 +2250,13 @@ in our reference genome.</p>
 also it has information about all the samples. In other words, it has all the information it
 needs to make a VCF file for the chromosome or scaffold group that it encompasses.
 Accordingly, it is pretty easy to run the GenotypeGVCFs tool on a genomics data base.</p>
+This step corresponds to the colored node in our now-familiar workflow DAG:
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:gdb2vcf-dag"></span>
+<img src="figs/snakemake-dags/genomics-db2vcf.svg" alt="Joint genotyping: making a VCF file from a genomics database/" width="100%" />
+<p class="caption">
+FIGURE 27.8: Joint genotyping: making a VCF file from a genomics database/
+</p>
+</div>
 <p>The webpage describing how this tools works can be found <a href="https://gatk.broadinstitute.org/hc/en-us/articles/4418054384027-GenotypeGVCFs">here</a>.</p>
 <p>The basic command, for the chromosome <code>CM031202.1</code> (the shortest one!) in our example workflow looks like:</p>
 <div class="sourceCode" id="cb765"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb765-1"><a href="an-example-full-workflow-from-sequences-to-variants.html#cb765-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gatk</span> <span class="at">--java-options</span> <span class="st">&quot;-Xmx4g&quot;</span> GenotypeGVCFs <span class="dt">\</span></span>

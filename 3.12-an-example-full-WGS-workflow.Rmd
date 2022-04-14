@@ -1,4 +1,4 @@
-# An example full workflow from sequences to variants
+# An example full workflow from sequences to variants {#example-wgs-flow}
 
 The purpose of this chapter is to present an accessible example workflow
 showing all the steps of taking raw sequences in FASTQ files through to
@@ -1524,6 +1524,13 @@ array, each one requesting 2 CPUs (so we can use 2 reader threads, effectively)
 to import all of our gVCF files made in the last step into a genomics
 data base.  
 
+This step corresponds to the colored nodes in our now-familiar workflow DAG:
+```{r gdb-import-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Importing gVCF files into the genomics data bases.'}
+knitr::include_graphics("figs/snakemake-dags/genomics-db-import.svg", auto_pdf = TRUE)
+```
+
+
+
 As mentioned in Section \@ref(genomics-db), these jobs parallelize over
 chromosomes; however, for non-model organisms with more fragmented reference
 genomes, for the unplaced scaffolds we will be parallelizing over the
@@ -1659,7 +1666,7 @@ Unix and awk:
 awk 'NR>1 {print $1}' scaffold_groups.tsv | uniq | awk 'BEGIN {printf("index\tsg\n")} {printf("%d\t%s\n", ++n, $1)}' > numbered-scaff-groups.tsv
 ```
 
-If you looks at the file created there, you will see that it looks like this:
+If you look at the file created there, you will see that it looks like this:
 ```
 index	sg
 1	scaff_group_001
@@ -1997,6 +2004,12 @@ also it has information about all the samples.  In other words, it has all the i
 needs to make a VCF file for the chromosome or scaffold group that it encompasses.
 Accordingly, it is pretty easy to run the GenotypeGVCFs tool on a genomics data base.
 
+This step corresponds to the colored node in our now-familiar workflow DAG:
+```{r gdb2vcf-dag, echo=FALSE, fig.align='center', out.width='100%', fig.cap='Joint genotyping: making a VCF file from a genomics database/'}
+knitr::include_graphics("figs/snakemake-dags/genomics-db2vcf.svg", auto_pdf = TRUE)
+```
+
+
 The webpage describing how this tools works can be found [here](https://gatk.broadinstitute.org/hc/en-us/articles/4418054384027-GenotypeGVCFs).
 
 The basic command, for the chromosome `CM031202.1` (the shortest one!) in our example workflow looks like:
@@ -2052,7 +2065,7 @@ mkdir -p $logdir
 gatk --java-options "-Xmx4g" GenotypeGVCFs \
    -R resources/genome.fasta \
    -V gendb://results/genomics_db/$chrom \
-   -O results/vcf_parts/$chrom.vcf.gz > $logdir/stdout.$chrom 2> $logdir/stderr.$chrom 
+   -O $outdir/$chrom.vcf.gz > $logdir/stdout.$chrom 2> $logdir/stderr.$chrom 
 
 
 ```
@@ -2105,7 +2118,7 @@ mkdir -p $logdir
 gatk --java-options "-Xmx4g" GenotypeGVCFs \
    -R resources/genome.fasta \
    -V gendb://results/genomics_db/$sg \
-   -O results/vcf_parts/$chrom.vcf.gz > $logdir/stdout.$sg 2> $logdir/stderr.$sg 
+   -O $outdir/$sg.vcf.gz > $logdir/stdout.$sg 2> $logdir/stderr.$sg 
 
 
 ```
@@ -2142,6 +2155,60 @@ data bases that we put in `results/stepwise_genomics_db` while testing
 the sequential updating of the data bases. Put the output files
 into `results/stepwise_vcf_parts`.  See if you get the same variants
 out of it (you should!).
+
+### Catenate all the vcf.gz files into a single VCF file and index it
+
+After running the above steps, we have six different vcf.gz files, four for each
+of four chromosomes, and two for each of two scaffold groups.  Sometimes it is nice
+to keep the VCF files for different chromosomes separate; however because indexing
+a VCF file allows for rapid, indexed access to any place in the genome, there isn't
+much reason to keep all the pieces separate unless you are going to be parsing each
+file with non-standard tools (i.e., reading each chromosome into R, which, must say, is
+really NOT recommended---there are specialized tools for handling VCF files and you
+should become comfortable with them).
+
+In order to catenate these 7 `vcf.gz` files into a single one, and to index it, we
+will use `bcftools`.  We will get the latest version of bcftools available on conda at 
+time time this was written, version 1.15.1, and put it in its own conda
+environment named `bcftools`.
+```sh
+mamba create -n bcftools -c bioconda bcftools=1.15.1
+```
+When that has finished, activate the environment and then type `bcftools` to
+get a list of all the different possible `bcftools` subcommands:
+```sh
+conda activate bcftools
+bcftools
+```
+Right now we will be using `bcftools concat` to catenate the files, and then
+we will use `bcftools index` to index the result.  We will put the result
+into `results/vcf`.
+```sh
+# first, do this to get the help information for bcftools concat
+bcftools concat
+```
+
+Note that if we order our chromosome names and our scaffold groups
+alphabetically they are in the correct (genomic) order, so it is
+pretty easy to specify the in that order on the command line, like this:
+```sh
+mkdir -p results/vcf
+bcftools concat -O z results/vcf_parts/*.vcf.gz > results/vcf/all.vcf.gz
+```
+Note the `-O z` option which makes the program produce _compressed_ VCF format
+(hence we gave it the `.vcf.gz` extension).
+
+There is another type of format common for VCF files, and that is "BCF" format.  We
+will also make a compressed BCF version (using the `-O b` option).  You should be
+comfortable working with either format.  BCF is simply a binary format of the same
+information.  It is not directly human readable, but that is not a problem, since
+most of the time you will look at these files using `bcftools view` (which is to VCF/BCF
+files what `samtools view` is to SAM/BAM files).
+```sh
+bcftools concat -O b results/vcf_parts/*.vcf.gz > results/vcf/all.bcf
+```
+
+Now, we are going to use these files to learn all about `bcftools` in Section \@ref(handle-vcf).
 
 ## Step 7. Filtering variants
 
