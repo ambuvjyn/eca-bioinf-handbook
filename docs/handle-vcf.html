@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-04-14" />
+<meta name="date" content="2022-04-18" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -626,8 +626,13 @@ can with most Unix tools. This makes it far more versatile than <code>vcftools</
 <h2><span class="header-section-number">22.1</span> bcftools</h2>
 <p>If you don’t already have <code>bcftools</code>, you can use <code>mamba</code> to create a conda
 environment called <code>bcftools</code> that has it:</p>
-<div class="sourceCode" id="cb626"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb626-1"><a href="handle-vcf.html#cb626-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bcftools <span class="at">-c</span> bioconda bcftools=1.15.1</span>
+<div class="sourceCode" id="cb626"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb626-1"><a href="handle-vcf.html#cb626-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bcftools <span class="at">-c</span> conda-forge <span class="at">-c</span> bioconda bcftools=1.15.1</span>
 <span id="cb626-2"><a href="handle-vcf.html#cb626-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bcftools</span></code></pre></div>
+<p>(Note the use of <code>-c conda-forge</code> in the above. This is present because
+some of the dependencies for <code>bcftools</code> are not found on the bioconda channel.
+Rather they are on the conda-forge channel. If you conda/mamba environment is not
+set up to search conda-forge by default, then the <code>-c conda-forge</code> is required to
+get all the dependencies.)</p>
 <p>Here, we just want to give everyone the chance to run through a few
 operations with <code>bcftools</code>, to start to get familiar with its interface.
 The first thing to note is that, like <code>samtools</code> (which is maintained by

@@ -2172,8 +2172,14 @@ will use `bcftools`.  We will get the latest version of bcftools available on co
 time time this was written, version 1.15.1, and put it in its own conda
 environment named `bcftools`.
 ```sh
-mamba create -n bcftools -c bioconda bcftools=1.15.1
+mamba create -n bcftools -c conda-forge -c bioconda bcftools=1.15.1
 ```
+(Note the use of `-c conda-forge` in the above.  This is present because
+some of the dependencies for `bcftools` are not found on the bioconda channel.
+Rather they are on the conda-forge channel.  If you conda/mamba environment is not
+set up to search conda-forge by default, then the `-c conda-forge` is required to 
+get all the dependencies.)
+
 When that has finished, activate the environment and then type `bcftools` to
 get a list of all the different possible `bcftools` subcommands:
 ```sh

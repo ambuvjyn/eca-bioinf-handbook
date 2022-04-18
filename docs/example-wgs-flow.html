@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-04-14" />
+<meta name="date" content="2022-04-18" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -2395,7 +2395,12 @@ should become comfortable with them).</p>
 will use <code>bcftools</code>. We will get the latest version of bcftools available on conda at
 time time this was written, version 1.15.1, and put it in its own conda
 environment named <code>bcftools</code>.</p>
-<div class="sourceCode" id="cb786"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb786-1"><a href="example-wgs-flow.html#cb786-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bcftools <span class="at">-c</span> bioconda bcftools=1.15.1</span></code></pre></div>
+<div class="sourceCode" id="cb786"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb786-1"><a href="example-wgs-flow.html#cb786-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="at">-n</span> bcftools <span class="at">-c</span> conda-forge <span class="at">-c</span> bioconda bcftools=1.15.1</span></code></pre></div>
+<p>(Note the use of <code>-c conda-forge</code> in the above. This is present because
+some of the dependencies for <code>bcftools</code> are not found on the bioconda channel.
+Rather they are on the conda-forge channel. If you conda/mamba environment is not
+set up to search conda-forge by default, then the <code>-c conda-forge</code> is required to
+get all the dependencies.)</p>
 <p>When that has finished, activate the environment and then type <code>bcftools</code> to
 get a list of all the different possible <code>bcftools</code> subcommands:</p>
 <div class="sourceCode" id="cb787"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb787-1"><a href="example-wgs-flow.html#cb787-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate bcftools</span>
