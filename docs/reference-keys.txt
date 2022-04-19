@@ -331,6 +331,7 @@ rename-the-samplesindividuals-in-the-file
 get-fragmentsparts-of-my-vcf-file
 combine-vcf-files-in-various-ways
 filter-out-variants-for-a-variety-of-reasons
+how-about-some-more-arcane-filtering-tasks-lets-dream-some-up
 bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome
 processing-amplicon-sequencing-data
 genome-annotation

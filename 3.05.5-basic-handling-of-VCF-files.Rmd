@@ -366,7 +366,10 @@ bcftools merge -Oz first3.vcf.gz last3.vcf.gz > 6-samples.vcf.gz
 ### Filter out variants for a variety of reasons
 
 There are a lot of ways to filter out variants.  `bcftools` leaves things
-very general here, and so just about anything is possible.  Some simple ones:
+very general here, and so just about anything is possible.  Some simple ones appear below.
+Remember, we are piping the result to `bcftools stats` just so that we can
+see the result.  If you really wanted to make a filtered file, you would typically
+just redirect it to a file.
 
 **Just the biallelic SNPs please**  Get things with no more than 2 alleles and
 no fewer than two alleles, and of a type = SNP:
@@ -400,15 +403,24 @@ out, because there is not much missing data.
 You can use the `-e` option to `bcftools view` or `bcftools filter` to _exclude_ sites that
 meet certain criteria. (You can use `-i` to _include_ those sites and no others).
 
-For a terrifying terse and dense description of what sorts of expressions can be used to
+For a terrifyingly terse and dense description of what sorts of expressions can be used to
 describe the criteria, see the web manual section on expressions: [http://samtools.github.io/bcftools/bcftools.html#expressions](http://samtools.github.io/bcftools/bcftools.html#expressions).
 
 For example, to only keep things with a maximum-likelihood-estimated allele frequency between 0.4 and 0.6:
 ```sh
-bcftools view -H -i 'INFO/MLEAF >= 0.4 && INFO/MLEAF <= 0.6' all.bcf | less
+bcftools view -i 'INFO/MLEAF >= 0.4 && INFO/MLEAF <= 0.6' all.bcf | bcftools query -f '%INFO/MLEAF\n' | less
 ```
 
-We are using the `-H` option there just so that we can easily see the result using `less`.
+Note we are piping the result to `bcftools query` in order to see what the actual MLEAFs are
+after filtering.  For the most part, this has worked, except for cases in which there are more than
+two allele freqencies.  If we wanted to filter those out, we could filter to only biallelic sites,
+or, for the sake of illustration, we could retain only those sites at which the MLEAF value for the
+_first_ alternate allele is between 0.4 and 0.6:
+```sh
+bcftools view -i 'INFO/MLEAF[0] >= 0.4 && INFO/MLEAF[0] <= 0.6' all.bcf | bcftools query -f '%INFO/MLEAF\n' | less
+```
+Cool!
+
 
 How about excluding those sites in which any individual had a DP less than 5.  We can
 test each of the DP columns in the FORMAT columns.  We name these `FMT/DP`.
@@ -418,6 +430,23 @@ is combined with an OR by default, so:
 bcftools view -H -e 'FMT/DP < 5' all.bcf | less
 ```
 
+To make it easier to see what the DPs are there, let's print them:
+```sh
+bcftools view -e 'FMT/DP < 5' all.bcf | bcftools query -f '%CHROM\t%POS\t[%DP\t]\n' | less
+```
+
+**More playing**
+
+Here is one that might be interesting.  Suppose that we want to
+filter our data set down to variant sites at which at least
+two of the eight individuals had at least 10 reads of the first alternate allele?
+```sh
+bcftools view -i 'COUNT(FMT/AD[:1] > 10) > 2' all.bcf | bcftools query -f '%CHROM\t%POS\t[%AD\t]\n' | less
+```
+
+Whoa!  Cool.
+
+How about some more arcane filtering tasks? Let's dream some up!
 ---
 
 This has only scratched the surface of what is possible with bcftools.

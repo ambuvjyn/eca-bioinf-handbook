@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-04-18" />
+<meta name="date" content="2022-04-19" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -478,6 +478,7 @@ div.csl-indent {
 <li class="chapter" data-level="22.1.5" data-path="handle-vcf.html"><a href="handle-vcf.html#combine-vcf-files-in-various-ways"><i class="fa fa-check"></i><b>22.1.5</b> Combine VCF files in various ways</a></li>
 <li class="chapter" data-level="22.1.6" data-path="handle-vcf.html"><a href="handle-vcf.html#filter-out-variants-for-a-variety-of-reasons"><i class="fa fa-check"></i><b>22.1.6</b> Filter out variants for a variety of reasons</a></li>
 </ul></li>
+<li class="chapter" data-level="22.2" data-path="handle-vcf.html"><a href="handle-vcf.html#how-about-some-more-arcane-filtering-tasks-lets-dream-some-up"><i class="fa fa-check"></i><b>22.2</b> How about some more arcane filtering tasks? Let’s dream some up!</a></li>
 </ul></li>
 <li class="chapter" data-level="23" data-path="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"><a href="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"><i class="fa fa-check"></i><b>23</b> Bioinformatics for RAD seq data with and without a reference genome</a></li>
 <li class="chapter" data-level="24" data-path="processing-amplicon-sequencing-data.html"><a href="processing-amplicon-sequencing-data.html"><i class="fa fa-check"></i><b>24</b> Processing amplicon sequencing data</a></li>
@@ -849,7 +850,10 @@ can easily combine them:</p>
 <div id="filter-out-variants-for-a-variety-of-reasons" class="section level3" number="22.1.6">
 <h3><span class="header-section-number">22.1.6</span> Filter out variants for a variety of reasons</h3>
 <p>There are a lot of ways to filter out variants. <code>bcftools</code> leaves things
-very general here, and so just about anything is possible. Some simple ones:</p>
+very general here, and so just about anything is possible. Some simple ones appear below.
+Remember, we are piping the result to <code>bcftools stats</code> just so that we can
+see the result. If you really wanted to make a filtered file, you would typically
+just redirect it to a file.</p>
 <p><strong>Just the biallelic SNPs please</strong> Get things with no more than 2 alleles and
 no fewer than two alleles, and of a type = SNP:</p>
 <div class="sourceCode" id="cb649"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb649-1"><a href="handle-vcf.html#cb649-1" aria-hidden="true" tabindex="-1"></a><span class="co"># do it and summarize the result to look at it, all in one line:</span></span>
@@ -869,20 +873,36 @@ out, because there is not much missing data.</p>
 <p><strong>Exclude based on various features of the data</strong></p>
 <p>You can use the <code>-e</code> option to <code>bcftools view</code> or <code>bcftools filter</code> to <em>exclude</em> sites that
 meet certain criteria. (You can use <code>-i</code> to <em>include</em> those sites and no others).</p>
-<p>For a terrifying terse and dense description of what sorts of expressions can be used to
+<p>For a terrifyingly terse and dense description of what sorts of expressions can be used to
 describe the criteria, see the web manual section on expressions: <a href="http://samtools.github.io/bcftools/bcftools.html#expressions">http://samtools.github.io/bcftools/bcftools.html#expressions</a>.</p>
 <p>For example, to only keep things with a maximum-likelihood-estimated allele frequency between 0.4 and 0.6:</p>
-<div class="sourceCode" id="cb652"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb652-1"><a href="handle-vcf.html#cb652-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-i</span> <span class="st">&#39;INFO/MLEAF &gt;= 0.4 &amp;&amp; INFO/MLEAF &lt;= 0.6&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
-<p>We are using the <code>-H</code> option there just so that we can easily see the result using <code>less</code>.</p>
+<div class="sourceCode" id="cb652"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb652-1"><a href="handle-vcf.html#cb652-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-i</span> <span class="st">&#39;INFO/MLEAF &gt;= 0.4 &amp;&amp; INFO/MLEAF &lt;= 0.6&#39;</span> all.bcf <span class="kw">|</span> <span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%INFO/MLEAF\n&#39;</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Note we are piping the result to <code>bcftools query</code> in order to see what the actual MLEAFs are
+after filtering. For the most part, this has worked, except for cases in which there are more than
+two allele freqencies. If we wanted to filter those out, we could filter to only biallelic sites,
+or, for the sake of illustration, we could retain only those sites at which the MLEAF value for the
+<em>first</em> alternate allele is between 0.4 and 0.6:</p>
+<div class="sourceCode" id="cb653"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb653-1"><a href="handle-vcf.html#cb653-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-i</span> <span class="st">&#39;INFO/MLEAF[0] &gt;= 0.4 &amp;&amp; INFO/MLEAF[0] &lt;= 0.6&#39;</span> all.bcf <span class="kw">|</span> <span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%INFO/MLEAF\n&#39;</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Cool!</p>
 <p>How about excluding those sites in which any individual had a DP less than 5. We can
 test each of the DP columns in the FORMAT columns. We name these <code>FMT/DP</code>.
 Note that each test (from each sample)
 is combined with an OR by default, so:</p>
-<div class="sourceCode" id="cb653"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb653-1"><a href="handle-vcf.html#cb653-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-e</span> <span class="st">&#39;FMT/DP &lt; 5&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
-<hr />
+<div class="sourceCode" id="cb654"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb654-1"><a href="handle-vcf.html#cb654-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-H</span> <span class="at">-e</span> <span class="st">&#39;FMT/DP &lt; 5&#39;</span> all.bcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>To make it easier to see what the DPs are there, let’s print them:</p>
+<div class="sourceCode" id="cb655"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb655-1"><a href="handle-vcf.html#cb655-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-e</span> <span class="st">&#39;FMT/DP &lt; 5&#39;</span> all.bcf <span class="kw">|</span> <span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t[%DP\t]\n&#39;</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p><strong>More playing</strong></p>
+<p>Here is one that might be interesting. Suppose that we want to
+filter our data set down to variant sites at which at least
+two of the eight individuals had at least 10 reads of the first alternate allele?</p>
+<div class="sourceCode" id="cb656"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb656-1"><a href="handle-vcf.html#cb656-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-i</span> <span class="st">&#39;COUNT(FMT/AD[:1] &gt; 10) &gt; 2&#39;</span> all.bcf <span class="kw">|</span> <span class="ex">bcftools</span> query <span class="at">-f</span> <span class="st">&#39;%CHROM\t%POS\t[%AD\t]\n&#39;</span> <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Whoa! Cool.</p>
+</div>
+</div>
+<div id="how-about-some-more-arcane-filtering-tasks-lets-dream-some-up" class="section level2" number="22.2">
+<h2><span class="header-section-number">22.2</span> How about some more arcane filtering tasks? Let’s dream some up!</h2>
 <p>This has only scratched the surface of what is possible with bcftools.</p>
 
-</div>
 </div>
 </div>
             </section>
