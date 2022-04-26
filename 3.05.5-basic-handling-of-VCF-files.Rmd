@@ -451,4 +451,477 @@ How about some more arcane filtering tasks? Let's dream some up!
 
 This has only scratched the surface of what is possible with bcftools.
 
+## Reconstituting a VCF file from genotype data
+
+There are many other formats for storing genotype data from high-throughput sequencing,
+although few, if any, of them allow for the richness of variant types that can be
+encoded in a VCF file, and most of them also don't allow for all the auxiliary information
+(like read depths, allele depths, genotype likelihoods, etc.) to also be easily stored,
+indexed, and accessed.  
+
+Some of the different formats are specialized to certain types of data.  For example,
+the program PLINK 2.0 has a binary format that is incredibly efficient for storing
+biallelic SNP data.  PLINK also has facilities in the program for converting to and
+from plink format to VCF.  Some formats, however, don't seem to have any associated
+programs for converting to VCF. 
+
+There can be times when you receive variant data from other people or sources that are
+not in VCF format.  Data may be archived or placed in public repositories
+in a variety of formats.  For example, some of the variant data from a recent pearl
+millet sequencing project has been made public at 
+[https://cegresources.icrisat.org/data_public/PM_SNPs/SNP_calls/](https://cegresources.icrisat.org/data_public/PM_SNPs/SNP_calls/), in the form of `.genotypes` files.
+
+Here, you can download the first 10000 lines of the file `WP.pgchr1.genotype.gz`
+at this link:
+[https://eriqande.github.io/eca-bioinf-handbook/downloads/WP.pgchr1_10K.genotype.gz](https://eriqande.github.io/eca-bioinf-handbook/downloads/WP.pgchr1_10K.genotype.gz), and you
+can get the explanation of the columns in the file (including the sample names)
+from this link:
+[https://eriqande.github.io/eca-bioinf-handbook/downloads/genotype.readme](https://eriqande.github.io/eca-bioinf-handbook/downloads/genotype.readme)
+
+or on your
+cluster, you could use:
+```sh
+wget https://eriqande.github.io/eca-bioinf-handbook/downloads/WP.pgchr1_10K.genotype.gz
+wget https://eriqande.github.io/eca-bioinf-handbook/downloads/genotype.readme
+```
+
+
+These files give the genotypes of individuals using
+[IUPAC nucleotide codes](https://www.bioinformatics.org/sms/iupac.html) for the bases.
+Each diploid sample gets a column, and a single letter gives the types of the two
+bases at that site in a sample.
+
+The meaning of each of the columns is given in the `genotype.readme` file:
+```
+Column	Description/SampleID
+1	Chromosome
+2	Position
+3	Reference genotype
+4	PE00838
+5	PE01458
+6	PE05720
+7	PE05722
+8	PE05724
+9	PE08084
+...
+```
+So, we have the equivalent of a CHROM, and and POS and a REF column, then, we get
+one column for each sample.
+
+The `.genotypes` files look something like this, showing only the first few columns:
+```sh
+chr1    48      A       - - G G R G - - G - - G G G G G G - R G - G R - G A G G G -
+chr1    79      T       T T T T T T - T T - - T T T T T T T T T - T T T T T T T T T
+chr1    83      C       C C C C C C - C C - - C C C C C C C C C - C C C C C Y C C C
+chr1    95      C       C Y Y T C C - C C - - C C C C C Y C C C - C C C C C C C C C
+chr1    118     C       C C C C C C - C C C C C C C C C C C C C C C C C C C C C C C
+chr1    119     C       C M M M C C - C C C C C C C C C M M C C C C C C M C C C C C
+```
+Importantly, here we see that missing data is denoted by a `-`.
+
+Some of these sites are multiallelic.  We can see that by looking at the distinct genotypes
+in each row.  Here we can use `awk` to look at the distinct genotypes in a few of the
+multiallelic positions found in the `WP.pgchr1_10K.genotype.gz` we just downloaded:
+```sh
+gzcat WP.pgchr1_10K.genotype.gz | \
+  awk '
+    {
+      ref=$3; 
+      for(i=4;i<=NF;i++) {
+         if($i!="-" && $i!=ref && !($i in n)) n[$i]++
+      } 
+      printf("%s %s %s", $1, $2, ref); 
+      for(i in n) printf(" %s", i); 
+      printf("\n");  
+      delete n
+    }
+  ' | awk 'NF>5'
+```
+That gives use some output that looks like:
+```
+chr1 2118 G A R S
+chr1 4023 T A C W Y
+chr1 4404 G A C R S
+chr1 22272 C A M T W
+chr1 22843 C A M T
+chr1 50267 C A M T
+chr1 52108 C A M T Y
+chr1 52610 C A M T Y
+chr1 54107 A C G M R
+chr1 54192 G A C M R S
+...
+```
+
+This is good to know!  If we want to convert this to a VCF, we will
+have to pay attention to the fact that some sites have multiple alternate alleles.
+
+### Why create a VCF file?
+
+You may ask, why do you need a VCF file?  Well, perhaps you wish to annotate these variants,
+attaching information about their possible effects, given information about coding sequences
+that they might occur in.  This can be done by identifying where each position sits with
+respect to genomic features like mRNA transcript boundaries, exons, and coding sequence.
+
+Information about those sorts of genomic features can be found in a `.gff` file.  The
+extension `.gff` stands for "Genomics Features File."  The pearl millet GFF for the
+genome that the variants in the `.genotypes` were mapped against can
+be found at:
+[https://cegresources.icrisat.org/data_public/PearlMillet_Genome/v1.0/pm_assembly_v1.0.gff](https://cegresources.icrisat.org/data_public/PearlMillet_Genome/v1.0/pm_assembly_v1.0.gff).
+
+The first few lines of that file look like:
+```
+chr1	GLEAN	mRNA	29490538	29492233	0.670065	+	.	ID=Pgl_GLEAN_10008614;
+chr1	GLEAN	CDS	29490538	29490605	.	+	0	Parent=Pgl_GLEAN_10008614;
+chr1	GLEAN	CDS	29491108	29491390	.	+	1	Parent=Pgl_GLEAN_10008614;
+chr1	GLEAN	CDS	29491994	29492233	.	+	0	Parent=Pgl_GLEAN_10008614;
+chr1	GLEAN	mRNA	244026666	244030597	0.57488	+	.	ID=Pgl_GLEAN_10020091;
+chr1	GLEAN	CDS	244026666	244027096	.	+	0	Parent=Pgl_GLEAN_10020091;
+chr1	GLEAN	CDS	244027627	244028075	.	+	1	Parent=Pgl_GLEAN_10020091;
+chr1	GLEAN	CDS	244030287	244030597	.	+	2	Parent=Pgl_GLEAN_10020091;
+chr1	GLEAN	mRNA	224685509	224689330	0.653208	+	.	ID=Pgl_GLEAN_10021721;
+chr1	GLEAN	CDS	224685509	224685562	.	+	0	Parent=Pgl_GLEAN_10021721;
+chr1	GLEAN	CDS	224687184	224687617	.	+	0	Parent=Pgl_GLEAN_10021721;
+chr1	GLEAN	CDS	224687878	224688208	.	+	1	Parent=Pgl_GLEAN_10021721;
+chr1	GLEAN	CDS	224688317	224688388	.	+	0	Parent=Pgl_GLEAN_10021721;
+chr1	GLEAN	CDS	224688463	224688664	.	+	0	Parent=Pgl_GLEAN_10021721;
+chr1	GLEAN	CDS	224688789	224689330	.	+	2	Parent=Pgl_GLEAN_10021721;
+```
+Each row shows the start and stop position of some feature in the genome.
+Each of these features may themelves be sub-features of some other parent
+feature.  For example, the first feature is an mRNA transcript
+with the ID `Pgl_GLEAN_10008614`.  Next there are several coding sequences
+(CDS) that are subfeatures of the `Pgl_GLEAN_10008614` transcript, which
+can be seen because they have `Pgl_GLEAN_10008614` as their parent.
+
+Trying to figure out whether a variant occurs in a position within a coding
+sequence that will create an amino acid change can
+be done by figuring out whether the variant is in a coding sequence and whether the
+sequence change causes a non-synonymous change in the codon that it is in, etc.  Doing so
+by writing your own scripts is hard and subject to a lot of error. (I know, because
+I spent a good several days doing that some years ago, and then found I had made a lot
+of mistakes when I went to check the interesting sites I found on the
+GenBank genome browser!)  There is
+a lot to figure out because the coding sequences are translated from either the plus (+)
+or the minus (-) strand relative to the reference genome, etc.
+
+It is much easier to use a program like [snpEff](http://pcingola.github.io/SnpEff/)
+to do that for you.  _However_, snpEff takes VCF as the input format. Hence,
+one might want to convert a `.genotypes` file to VCF.
+
+### Converting the `.genotypes` file to VCF
+
+There are lots of ways we could do this. Today we are going to use awk, because
+it is fast and can process the file one line at a time, so it has a very
+small memory footprint.  
+
+Obviously, the `.genotypes` file really only has information about the
+genotypes themselves, so when we make a VCF file out of it, it is going to
+be pretty stripped down.  In fact, this is really going to become a
+minimal VCF file.  There is so little information in it, that the
+header for it will be just the minimal header:
+```
+##fileformat=VCFv4.2
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+```
+and then it will have the #CHROM header line:
+```
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	PE00838	PE01458	PE05720	PE05722 ...
+```
+And then we will start with the variant lines that will look like this:
+```
+chr1	48	.	A	G	100	PASS	.	GT	./.	./.	1/1	1/1	0/1 ...
+```
+For each variant, we have a CHROM and a POS.  We don't have an ID, so
+those will all be set to `.`.  We have a REF and an ALT, and for the QUAL column
+we will just arbitrarily put in a `100`, and in the FILTER column we will give each
+variant a `PASS`.  There is no other information about these variants so
+we list the INFO with `.` (missing data).  Then, the FORMAT column lists only the single
+field, `GT`, which is described in our minimal header, and then the actual genotypes
+get listed.
+
+To make such a VCF file, we write an awk script that first prints
+the header lines, and then, for each variant, it does two passes through
+the information in the `.genotypes` file:
+
+1. A first pass to figure out what the reference and all the different
+alternate alleles are.  Numbers are assigned to the different alternate
+alleles at this step.
+2. A second pass to convert each column to something that looks like `0/1` or `1/1`, etc.
+
+
+Before we proceed, let's confirm that only the 2-nucleotide IUPAC codes are used, which makes sense, because
+these are diploids.
+```sh
+gzcat WP.pgchr1.genotype_10K.gz | awk '{for(i=3;i<=NF;i++) n[$i]++} NR>100000 {for(i in n) print i, n[i]; exit}'
+A 5240464
+C 7949796
+G 7852659
+K 85767
+M 83639
+R 263234
+S 78251
+T 5274252
+W 79988
+Y 265687
+- 10526640
+```
+
+So, we need a way of converting IUPAC codes to alleles.
+Below, for each IUPAC-code-genotype given in the first column, the
+first and second alleles are given in the second and third columns:
+```sh
+A A A
+C C C
+G G G
+T T T
+R A G
+Y C T
+S G C
+W A T
+K G T
+M A C
+```
+If we had such a table stored in a file `extra/iupac.txt`, we could
+use `awk` to write a block of `awk`
+code that defines some awk arrays giving the values of the first and second
+allele for each.  That would look like this:
+```sh
+ awk '{printf("iupac[\"%s\",1] = \"%s\";\n", $1, $2); printf("iupac[\"%s\",2] = \"%s\";\n\n", $1, $3);}' extra/iupac.txt
+iupac["A",1] = "A";
+iupac["A",2] = "A";
+
+iupac["C",1] = "C";
+iupac["C",2] = "C";
+
+iupac["G",1] = "G";
+iupac["G",2] = "G";
+
+iupac["T",1] = "T";
+iupac["T",2] = "T";
+
+iupac["R",1] = "A";
+iupac["R",2] = "G";
+
+iupac["Y",1] = "C";
+iupac["Y",2] = "T";
+
+iupac["S",1] = "G";
+iupac["S",2] = "C";
+
+iupac["W",1] = "A";
+iupac["W",2] = "T";
+
+iupac["K",1] = "G";
+iupac["K",2] = "T";
+
+iupac["M",1] = "A";
+iupac["M",2] = "C";
+```
+Then we can put that code into a little awk script that we will call
+`genotypes2vcf.awk`.  You can copy the code in the following
+block and put it into a file called `script/genotypes2vcf.awk` (i.e., it
+is called `genotypes2vcf.awk` inside a directory you made called `script`):
+```sh
+# we begin by creating arrays that tell us the first and second allele
+# of each IUPAC-coded genotype
+BEGIN {
+  iupac["A",1] = "A";
+  iupac["A",2] = "A";
+
+  iupac["C",1] = "C";
+  iupac["C",2] = "C";
+
+  iupac["G",1] = "G";
+  iupac["G",2] = "G";
+
+  iupac["T",1] = "T";
+  iupac["T",2] = "T";
+
+  iupac["R",1] = "A";
+  iupac["R",2] = "G";
+
+  iupac["Y",1] = "C";
+  iupac["Y",2] = "T";
+
+  iupac["S",1] = "G";
+  iupac["S",2] = "C";
+
+  iupac["W",1] = "A";
+  iupac["W",2] = "T";
+
+  iupac["K",1] = "G";
+  iupac["K",2] = "T";
+
+  iupac["M",1] = "A";
+  iupac["M",2] = "C";
+
+  # Now, print the minimal header lines
+  printf("##fileformat=VCFv4.2\n")
+  printf("##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n")
+  printf("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT")
+
+}
+
+
+# we catenate the sample names, each on a line starting with SAMPLE
+# to the input, and then print them all here
+$1=="SAMPLE" {
+  printf("\t%s", $NF);
+  next
+}
+
+/xxxxxxxxxxxxxx/ {printf("\n"); next}
+
+
+
+# then, for each row, we make a first pass and define integers for the
+# different alternate alleles. Then we make a second pass and print
+# the VCF line
+{
+  CHROM=$1;
+  POS=$2
+  delete a_ints; # clear these arrays
+  delete alleles;
+  a_idx = 0;  # start the allele index at 0 (the REF)
+  alleles[$3] = a_idx; # reference allele gets a 0
+  a_ints[a_idx] = $3;  # keep this array to have alleles in sorted order,
+                       # indexed from 0 to the number of alleles - 1
+
+  # cycle over all the columns, and the two alleles within each genotype
+  # in that column, and add any new alleles found to the alleles hash array
+  for(i=4;i<=NF;i++) {
+    for(a=1;a<=2;a++) if($i != "-") {
+      alle = iupac[$i, a];
+      if(!(alle in alleles)) {  # if we have not seen this allele before
+        alleles[alle] = ++a_idx;
+        a_ints[a_idx] = alle
+      }
+    }
+  }
+
+  # Now we can print the VCF line
+  # print CHROM, POS, ID, and REF columns
+  printf("%s\t%s\t.\t%s", $1, $2, $3) 
+
+  # print the ALT field, including comma-separated alleles if multiallelic
+  if(a_idx == 0) { # if there are no alternate alleles ALT gets a .
+    printf("\t.")
+  } else {
+    printf("\t%s", a_ints[1])
+    for(a=2;a<=a_idx;a++)
+      printf(",%s", a_ints[a])
+  }
+
+  # Set all the QUALs to 100, the FILTERs to PASS and the INFO to .
+  printf("\t100\tPASS\t.")
+
+  # make the FORMAT column.  It just has GT
+  printf("\tGT")
+
+  # now, cycle over the individuals and print their genotypes
+  for(i=4;i<=NF;i++) {
+    if($i=="-") {
+      printf("\t./.");
+    } else {
+      a = iupac[$i, 1];
+      b = iupac[$i, 2];
+      printf("\t%s/%s", alleles[a], alleles[b])
+    }
+  }
+  
+  printf("\n")
+}
+```
+
+In order to use that `awk` script we will use `awk`'s `-f` option
+to read the script, and we will also
+pass to `awk` via _stdin_ the genotypes file with the sample names on top of it followed
+by a line with an `xxxxxxxxxxxxxxxxx`  
+```sh
+(
+  awk 'NR>=5 {printf("SAMPLE %s\n", $2);}' genotype.readme; 
+  echo xxxxxxxxxxxxxxxxx; 
+  gzcat WP.pgchr1_10K.genotype.gz
+) | awk -f script/genotypes2vcf.awk > WP.pgchr1_10K.vcf
+```
+That creates the VCF file, `WP.pgchr1_10K.vcf`.  Woo-hoo!  On my old laptop, that takes about 10 seconds.  So, about 1 second per 1000 variants.
+That means that if you have 3.6 million variants, it will take about an hour to
+convert them all to this VCF format.  But once they are in VCF, you can
+compress and index them
+and manipulate them quite quickly.
+
+### Reheader the VCF
+
+It is good practice to have the reference genome information in the VCF header.
+We can do that with the `bcftools reheader` subcommand.  To do so, you need to have
+the `.fai` file made by running `samtools faidx` on the reference genome. You can
+download the `.fai` file from:
+[https://eriqande.github.io/eca-bioinf-handbook/downloads/pearl_millet_v1.1.fa.fai](https://eriqande.github.io/eca-bioinf-handbook/downloads/pearl_millet_v1.1.fa.fai)
+or, on your cluster, use:
+```sh
+wget https://eriqande.github.io/eca-bioinf-handbook/downloads/pearl_millet_v1.1.fa.fai
+```
+Once we have that, we can reheader the VCF file like this (it is piped to `less`
+just so you can view the result without it bombing your screen).
+```sh
+bcftools reheader -f pearl_millet_v1.1.fa.fai WP.pgchr1_10K.vcf | less
+```
+
+While we are at it, however, we are going to go one step further and add some
+fields to the INFO column.  We are going to calculate the alternate allele count (AC)
+the total number of alleles of all types (AN) the alternate allele
+frequency (AF) and the minor allele
+frequency (MAF) for each variant. To add these INFO tags we will use the
+`fill-tags` plug-in for `bcftools`.  This plug-in comes standard with `bcftools`.
+You can see the help information for it like this:
+```sh
+bcftools +fill-tags -h
+```
+For a detailed list of the available tags to fill you can do:
+```sh
+bcftools +fill-tags -- -l
+```
+So, we can add the genome to the header and add AN, AC, AF, and MAF fields to the INFO, _and_ compress the file into a vcf.gz, all in one fell swoop with the following, and then
+we can index it.
+```sh
+bcftools reheader -f pearl_millet_v1.1.fa.fai WP.pgchr1_10K.vcf | \
+    bcftools +fill-tags - -Oz -o WP.pgchr1_10K.vcf.gz -- -t AN,AC,AF,MAF
+
+# then we could index twice to get both a .tbi and a .csi index
+# like this
+bcftools index WP.pgchr1_10K.vcf.gz  # makes .csi
+bcftools index -t WP.pgchr1_10K.vcf.gz  # makes .tbi
+```
+
+And then you could look it at like this:
+```sh
+bcftools view WP.pgchr1_10K.vcf.gz | less
+```
+Or you could compute statistics for it like this:
+```sh
+bcftools stats WP.pgchr1_10K.vcf.gz | less
+```
+And, if you wanted to look at only the multiallelic sites you could do this:
+```sh
+bcftools view -m 3 WP.pgchr1_10K.vcf.gz | less
+```
+Wow! Playing around with this makes it clear that the VCF format is pretty
+awesome, and that if you get good at using `bcftools`, then there are so many
+wonderful possibilities.
+
+### Where to from here?
+
+A good exercise, (especially for anyone studying pearl millet!), would be
+to write a script that cycled over the different chromosomes and made a VCF
+for each one, then use `bcftools concat` to concatenate them into a single VCF file and add
+a few info tags.  Once that is done, you would have a VCF file ready
+to annotate some variants with `snpEff`.
+
+To automate this all on all the cluster it is worth noting that the `.genotype`
+files can be downloaded like so:
+```sh
+wget --no-check-certificate https://cegresources.icrisat.org/data_public/PM_SNPs/SNP_calls/WP.pgchr7.genotype.gz
+```
+
+Perhaps on Thursday we can review a Snakefile that would do all this.
 

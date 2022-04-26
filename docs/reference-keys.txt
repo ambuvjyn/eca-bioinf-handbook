@@ -332,6 +332,11 @@ get-fragmentsparts-of-my-vcf-file
 combine-vcf-files-in-various-ways
 filter-out-variants-for-a-variety-of-reasons
 how-about-some-more-arcane-filtering-tasks-lets-dream-some-up
+reconstituting-a-vcf-file-from-genotype-data
+why-create-a-vcf-file
+converting-the-.genotypes-file-to-vcf
+reheader-the-vcf
+where-to-from-here
 bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome
 processing-amplicon-sequencing-data
 genome-annotation

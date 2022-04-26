@@ -24,7 +24,7 @@
 <meta name="author" content="Eric C. Anderson" />
 
 
-<meta name="date" content="2022-04-19" />
+<meta name="date" content="2022-04-26" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -479,6 +479,13 @@ div.csl-indent {
 <li class="chapter" data-level="22.1.6" data-path="handle-vcf.html"><a href="handle-vcf.html#filter-out-variants-for-a-variety-of-reasons"><i class="fa fa-check"></i><b>22.1.6</b> Filter out variants for a variety of reasons</a></li>
 </ul></li>
 <li class="chapter" data-level="22.2" data-path="handle-vcf.html"><a href="handle-vcf.html#how-about-some-more-arcane-filtering-tasks-lets-dream-some-up"><i class="fa fa-check"></i><b>22.2</b> How about some more arcane filtering tasks? Let’s dream some up!</a></li>
+<li class="chapter" data-level="22.3" data-path="handle-vcf.html"><a href="handle-vcf.html#reconstituting-a-vcf-file-from-genotype-data"><i class="fa fa-check"></i><b>22.3</b> Reconstituting a VCF file from genotype data</a>
+<ul>
+<li class="chapter" data-level="22.3.1" data-path="handle-vcf.html"><a href="handle-vcf.html#why-create-a-vcf-file"><i class="fa fa-check"></i><b>22.3.1</b> Why create a VCF file?</a></li>
+<li class="chapter" data-level="22.3.2" data-path="handle-vcf.html"><a href="handle-vcf.html#converting-the-.genotypes-file-to-vcf"><i class="fa fa-check"></i><b>22.3.2</b> Converting the <code>.genotypes</code> file to VCF</a></li>
+<li class="chapter" data-level="22.3.3" data-path="handle-vcf.html"><a href="handle-vcf.html#reheader-the-vcf"><i class="fa fa-check"></i><b>22.3.3</b> Reheader the VCF</a></li>
+<li class="chapter" data-level="22.3.4" data-path="handle-vcf.html"><a href="handle-vcf.html#where-to-from-here"><i class="fa fa-check"></i><b>22.3.4</b> Where to from here?</a></li>
+</ul></li>
 </ul></li>
 <li class="chapter" data-level="23" data-path="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"><a href="bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome.html"><i class="fa fa-check"></i><b>23</b> Bioinformatics for RAD seq data with and without a reference genome</a></li>
 <li class="chapter" data-level="24" data-path="processing-amplicon-sequencing-data.html"><a href="processing-amplicon-sequencing-data.html"><i class="fa fa-check"></i><b>24</b> Processing amplicon sequencing data</a></li>
@@ -902,7 +909,412 @@ two of the eight individuals had at least 10 reads of the first alternate allele
 <div id="how-about-some-more-arcane-filtering-tasks-lets-dream-some-up" class="section level2" number="22.2">
 <h2><span class="header-section-number">22.2</span> How about some more arcane filtering tasks? Let’s dream some up!</h2>
 <p>This has only scratched the surface of what is possible with bcftools.</p>
+</div>
+<div id="reconstituting-a-vcf-file-from-genotype-data" class="section level2" number="22.3">
+<h2><span class="header-section-number">22.3</span> Reconstituting a VCF file from genotype data</h2>
+<p>There are many other formats for storing genotype data from high-throughput sequencing,
+although few, if any, of them allow for the richness of variant types that can be
+encoded in a VCF file, and most of them also don’t allow for all the auxiliary information
+(like read depths, allele depths, genotype likelihoods, etc.) to also be easily stored,
+indexed, and accessed.</p>
+<p>Some of the different formats are specialized to certain types of data. For example,
+the program PLINK 2.0 has a binary format that is incredibly efficient for storing
+biallelic SNP data. PLINK also has facilities in the program for converting to and
+from plink format to VCF. Some formats, however, don’t seem to have any associated
+programs for converting to VCF.</p>
+<p>There can be times when you receive variant data from other people or sources that are
+not in VCF format. Data may be archived or placed in public repositories
+in a variety of formats. For example, some of the variant data from a recent pearl
+millet sequencing project has been made public at
+<a href="https://cegresources.icrisat.org/data_public/PM_SNPs/SNP_calls/">https://cegresources.icrisat.org/data_public/PM_SNPs/SNP_calls/</a>, in the form of <code>.genotypes</code> files.</p>
+<p>Here, you can download the first 10000 lines of the file <code>WP.pgchr1.genotype.gz</code>
+at this link:
+<a href="https://eriqande.github.io/eca-bioinf-handbook/downloads/WP.pgchr1_10K.genotype.gz">https://eriqande.github.io/eca-bioinf-handbook/downloads/WP.pgchr1_10K.genotype.gz</a>, and you
+can get the explanation of the columns in the file (including the sample names)
+from this link:
+<a href="https://eriqande.github.io/eca-bioinf-handbook/downloads/genotype.readme">https://eriqande.github.io/eca-bioinf-handbook/downloads/genotype.readme</a></p>
+<p>or on your
+cluster, you could use:</p>
+<div class="sourceCode" id="cb657"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb657-1"><a href="handle-vcf.html#cb657-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://eriqande.github.io/eca-bioinf-handbook/downloads/WP.pgchr1_10K.genotype.gz</span>
+<span id="cb657-2"><a href="handle-vcf.html#cb657-2" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://eriqande.github.io/eca-bioinf-handbook/downloads/genotype.readme</span></code></pre></div>
+<p>These files give the genotypes of individuals using
+<a href="https://www.bioinformatics.org/sms/iupac.html">IUPAC nucleotide codes</a> for the bases.
+Each diploid sample gets a column, and a single letter gives the types of the two
+bases at that site in a sample.</p>
+<p>The meaning of each of the columns is given in the <code>genotype.readme</code> file:</p>
+<pre><code>Column  Description/SampleID
+1   Chromosome
+2   Position
+3   Reference genotype
+4   PE00838
+5   PE01458
+6   PE05720
+7   PE05722
+8   PE05724
+9   PE08084
+...</code></pre>
+<p>So, we have the equivalent of a CHROM, and and POS and a REF column, then, we get
+one column for each sample.</p>
+<p>The <code>.genotypes</code> files look something like this, showing only the first few columns:</p>
+<div class="sourceCode" id="cb659"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb659-1"><a href="handle-vcf.html#cb659-1" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    48      A       <span class="at">-</span> <span class="at">-</span> G G R G <span class="at">-</span> <span class="at">-</span> G <span class="at">-</span> <span class="at">-</span> G G G G G G <span class="at">-</span> R G <span class="at">-</span> G R <span class="at">-</span> G A G G G <span class="at">-</span></span>
+<span id="cb659-2"><a href="handle-vcf.html#cb659-2" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    79      T       T T T T T T <span class="at">-</span> T T <span class="at">-</span> <span class="at">-</span> T T T T T T T T T <span class="at">-</span> T T T T T T T T T</span>
+<span id="cb659-3"><a href="handle-vcf.html#cb659-3" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    83      C       C C C C C C <span class="at">-</span> C C <span class="at">-</span> <span class="at">-</span> C C C C C C C C C <span class="at">-</span> C C C C C Y C C C</span>
+<span id="cb659-4"><a href="handle-vcf.html#cb659-4" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    95      C       C Y Y T C C <span class="at">-</span> C C <span class="at">-</span> <span class="at">-</span> C C C C C Y C C C <span class="at">-</span> C C C C C C C C C</span>
+<span id="cb659-5"><a href="handle-vcf.html#cb659-5" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    118     C       C C C C C C <span class="at">-</span> C C C C C C C C C C C C C C C C C C C C C C C</span>
+<span id="cb659-6"><a href="handle-vcf.html#cb659-6" aria-hidden="true" tabindex="-1"></a><span class="ex">chr1</span>    119     C       C M M M C C <span class="at">-</span> C C C C C C C C C M M C C C C C C M C C C C C</span></code></pre></div>
+<p>Importantly, here we see that missing data is denoted by a <code>-</code>.</p>
+<p>Some of these sites are multiallelic. We can see that by looking at the distinct genotypes
+in each row. Here we can use <code>awk</code> to look at the distinct genotypes in a few of the
+multiallelic positions found in the <code>WP.pgchr1_10K.genotype.gz</code> we just downloaded:</p>
+<div class="sourceCode" id="cb660"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb660-1"><a href="handle-vcf.html#cb660-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gzcat</span> WP.pgchr1_10K.genotype.gz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb660-2"><a href="handle-vcf.html#cb660-2" aria-hidden="true" tabindex="-1"></a>  awk <span class="st">&#39;</span></span>
+<span id="cb660-3"><a href="handle-vcf.html#cb660-3" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb660-4"><a href="handle-vcf.html#cb660-4" aria-hidden="true" tabindex="-1"></a><span class="st">      ref=$3; </span></span>
+<span id="cb660-5"><a href="handle-vcf.html#cb660-5" aria-hidden="true" tabindex="-1"></a><span class="st">      for(i=4;i&lt;=NF;i++) {</span></span>
+<span id="cb660-6"><a href="handle-vcf.html#cb660-6" aria-hidden="true" tabindex="-1"></a><span class="st">         if($i!=&quot;-&quot; &amp;&amp; $i!=ref &amp;&amp; !($i in n)) n[$i]++</span></span>
+<span id="cb660-7"><a href="handle-vcf.html#cb660-7" aria-hidden="true" tabindex="-1"></a><span class="st">      } </span></span>
+<span id="cb660-8"><a href="handle-vcf.html#cb660-8" aria-hidden="true" tabindex="-1"></a><span class="st">      printf(&quot;%s %s %s&quot;, $1, $2, ref); </span></span>
+<span id="cb660-9"><a href="handle-vcf.html#cb660-9" aria-hidden="true" tabindex="-1"></a><span class="st">      for(i in n) printf(&quot; %s&quot;, i); </span></span>
+<span id="cb660-10"><a href="handle-vcf.html#cb660-10" aria-hidden="true" tabindex="-1"></a><span class="st">      printf(&quot;\n&quot;);  </span></span>
+<span id="cb660-11"><a href="handle-vcf.html#cb660-11" aria-hidden="true" tabindex="-1"></a><span class="st">      delete n</span></span>
+<span id="cb660-12"><a href="handle-vcf.html#cb660-12" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb660-13"><a href="handle-vcf.html#cb660-13" aria-hidden="true" tabindex="-1"></a><span class="st">  &#39;</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;NF&gt;5&#39;</span></span></code></pre></div>
+<p>That gives use some output that looks like:</p>
+<pre><code>chr1 2118 G A R S
+chr1 4023 T A C W Y
+chr1 4404 G A C R S
+chr1 22272 C A M T W
+chr1 22843 C A M T
+chr1 50267 C A M T
+chr1 52108 C A M T Y
+chr1 52610 C A M T Y
+chr1 54107 A C G M R
+chr1 54192 G A C M R S
+...</code></pre>
+<p>This is good to know! If we want to convert this to a VCF, we will
+have to pay attention to the fact that some sites have multiple alternate alleles.</p>
+<div id="why-create-a-vcf-file" class="section level3" number="22.3.1">
+<h3><span class="header-section-number">22.3.1</span> Why create a VCF file?</h3>
+<p>You may ask, why do you need a VCF file? Well, perhaps you wish to annotate these variants,
+attaching information about their possible effects, given information about coding sequences
+that they might occur in. This can be done by identifying where each position sits with
+respect to genomic features like mRNA transcript boundaries, exons, and coding sequence.</p>
+<p>Information about those sorts of genomic features can be found in a <code>.gff</code> file. The
+extension <code>.gff</code> stands for “Genomics Features File.” The pearl millet GFF for the
+genome that the variants in the <code>.genotypes</code> were mapped against can
+be found at:
+<a href="https://cegresources.icrisat.org/data_public/PearlMillet_Genome/v1.0/pm_assembly_v1.0.gff">https://cegresources.icrisat.org/data_public/PearlMillet_Genome/v1.0/pm_assembly_v1.0.gff</a>.</p>
+<p>The first few lines of that file look like:</p>
+<pre><code>chr1    GLEAN   mRNA    29490538    29492233    0.670065    +   .   ID=Pgl_GLEAN_10008614;
+chr1    GLEAN   CDS 29490538    29490605    .   +   0   Parent=Pgl_GLEAN_10008614;
+chr1    GLEAN   CDS 29491108    29491390    .   +   1   Parent=Pgl_GLEAN_10008614;
+chr1    GLEAN   CDS 29491994    29492233    .   +   0   Parent=Pgl_GLEAN_10008614;
+chr1    GLEAN   mRNA    244026666   244030597   0.57488 +   .   ID=Pgl_GLEAN_10020091;
+chr1    GLEAN   CDS 244026666   244027096   .   +   0   Parent=Pgl_GLEAN_10020091;
+chr1    GLEAN   CDS 244027627   244028075   .   +   1   Parent=Pgl_GLEAN_10020091;
+chr1    GLEAN   CDS 244030287   244030597   .   +   2   Parent=Pgl_GLEAN_10020091;
+chr1    GLEAN   mRNA    224685509   224689330   0.653208    +   .   ID=Pgl_GLEAN_10021721;
+chr1    GLEAN   CDS 224685509   224685562   .   +   0   Parent=Pgl_GLEAN_10021721;
+chr1    GLEAN   CDS 224687184   224687617   .   +   0   Parent=Pgl_GLEAN_10021721;
+chr1    GLEAN   CDS 224687878   224688208   .   +   1   Parent=Pgl_GLEAN_10021721;
+chr1    GLEAN   CDS 224688317   224688388   .   +   0   Parent=Pgl_GLEAN_10021721;
+chr1    GLEAN   CDS 224688463   224688664   .   +   0   Parent=Pgl_GLEAN_10021721;
+chr1    GLEAN   CDS 224688789   224689330   .   +   2   Parent=Pgl_GLEAN_10021721;</code></pre>
+<p>Each row shows the start and stop position of some feature in the genome.
+Each of these features may themelves be sub-features of some other parent
+feature. For example, the first feature is an mRNA transcript
+with the ID <code>Pgl_GLEAN_10008614</code>. Next there are several coding sequences
+(CDS) that are subfeatures of the <code>Pgl_GLEAN_10008614</code> transcript, which
+can be seen because they have <code>Pgl_GLEAN_10008614</code> as their parent.</p>
+<p>Trying to figure out whether a variant occurs in a position within a coding
+sequence that will create an amino acid change can
+be done by figuring out whether the variant is in a coding sequence and whether the
+sequence change causes a non-synonymous change in the codon that it is in, etc. Doing so
+by writing your own scripts is hard and subject to a lot of error. (I know, because
+I spent a good several days doing that some years ago, and then found I had made a lot
+of mistakes when I went to check the interesting sites I found on the
+GenBank genome browser!) There is
+a lot to figure out because the coding sequences are translated from either the plus (+)
+or the minus (-) strand relative to the reference genome, etc.</p>
+<p>It is much easier to use a program like <a href="http://pcingola.github.io/SnpEff/">snpEff</a>
+to do that for you. <em>However</em>, snpEff takes VCF as the input format. Hence,
+one might want to convert a <code>.genotypes</code> file to VCF.</p>
+</div>
+<div id="converting-the-.genotypes-file-to-vcf" class="section level3" number="22.3.2">
+<h3><span class="header-section-number">22.3.2</span> Converting the <code>.genotypes</code> file to VCF</h3>
+<p>There are lots of ways we could do this. Today we are going to use awk, because
+it is fast and can process the file one line at a time, so it has a very
+small memory footprint.</p>
+<p>Obviously, the <code>.genotypes</code> file really only has information about the
+genotypes themselves, so when we make a VCF file out of it, it is going to
+be pretty stripped down. In fact, this is really going to become a
+minimal VCF file. There is so little information in it, that the
+header for it will be just the minimal header:</p>
+<pre><code>##fileformat=VCFv4.2
+##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=&quot;Genotype&quot;&gt;</code></pre>
+<p>and then it will have the #CHROM header line:</p>
+<pre><code>#CHROM  POS ID  REF ALT QUAL    FILTER  INFO    FORMAT  PE00838 PE01458 PE05720 PE05722 ...</code></pre>
+<p>And then we will start with the variant lines that will look like this:</p>
+<pre><code>chr1    48  .   A   G   100 PASS    .   GT  ./. ./. 1/1 1/1 0/1 ...</code></pre>
+<p>For each variant, we have a CHROM and a POS. We don’t have an ID, so
+those will all be set to <code>.</code>. We have a REF and an ALT, and for the QUAL column
+we will just arbitrarily put in a <code>100</code>, and in the FILTER column we will give each
+variant a <code>PASS</code>. There is no other information about these variants so
+we list the INFO with <code>.</code> (missing data). Then, the FORMAT column lists only the single
+field, <code>GT</code>, which is described in our minimal header, and then the actual genotypes
+get listed.</p>
+<p>To make such a VCF file, we write an awk script that first prints
+the header lines, and then, for each variant, it does two passes through
+the information in the <code>.genotypes</code> file:</p>
+<ol style="list-style-type: decimal">
+<li>A first pass to figure out what the reference and all the different
+alternate alleles are. Numbers are assigned to the different alternate
+alleles at this step.</li>
+<li>A second pass to convert each column to something that looks like <code>0/1</code> or <code>1/1</code>, etc.</li>
+</ol>
+<p>Before we proceed, let’s confirm that only the 2-nucleotide IUPAC codes are used, which makes sense, because
+these are diploids.</p>
+<div class="sourceCode" id="cb666"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb666-1"><a href="handle-vcf.html#cb666-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gzcat</span> WP.pgchr1.genotype_10K.gz <span class="kw">|</span> <span class="fu">awk</span> <span class="st">&#39;{for(i=3;i&lt;=NF;i++) n[$i]++} NR&gt;100000 {for(i in n) print i, n[i]; exit}&#39;</span></span>
+<span id="cb666-2"><a href="handle-vcf.html#cb666-2" aria-hidden="true" tabindex="-1"></a><span class="ex">A</span> 5240464</span>
+<span id="cb666-3"><a href="handle-vcf.html#cb666-3" aria-hidden="true" tabindex="-1"></a><span class="ex">C</span> 7949796</span>
+<span id="cb666-4"><a href="handle-vcf.html#cb666-4" aria-hidden="true" tabindex="-1"></a><span class="ex">G</span> 7852659</span>
+<span id="cb666-5"><a href="handle-vcf.html#cb666-5" aria-hidden="true" tabindex="-1"></a><span class="ex">K</span> 85767</span>
+<span id="cb666-6"><a href="handle-vcf.html#cb666-6" aria-hidden="true" tabindex="-1"></a><span class="ex">M</span> 83639</span>
+<span id="cb666-7"><a href="handle-vcf.html#cb666-7" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> 263234</span>
+<span id="cb666-8"><a href="handle-vcf.html#cb666-8" aria-hidden="true" tabindex="-1"></a><span class="ex">S</span> 78251</span>
+<span id="cb666-9"><a href="handle-vcf.html#cb666-9" aria-hidden="true" tabindex="-1"></a><span class="ex">T</span> 5274252</span>
+<span id="cb666-10"><a href="handle-vcf.html#cb666-10" aria-hidden="true" tabindex="-1"></a><span class="ex">W</span> 79988</span>
+<span id="cb666-11"><a href="handle-vcf.html#cb666-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Y</span> 265687</span>
+<span id="cb666-12"><a href="handle-vcf.html#cb666-12" aria-hidden="true" tabindex="-1"></a><span class="ex">-</span> 10526640</span></code></pre></div>
+<p>So, we need a way of converting IUPAC codes to alleles.
+Below, for each IUPAC-code-genotype given in the first column, the
+first and second alleles are given in the second and third columns:</p>
+<div class="sourceCode" id="cb667"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb667-1"><a href="handle-vcf.html#cb667-1" aria-hidden="true" tabindex="-1"></a><span class="ex">A</span> A A</span>
+<span id="cb667-2"><a href="handle-vcf.html#cb667-2" aria-hidden="true" tabindex="-1"></a><span class="ex">C</span> C C</span>
+<span id="cb667-3"><a href="handle-vcf.html#cb667-3" aria-hidden="true" tabindex="-1"></a><span class="ex">G</span> G G</span>
+<span id="cb667-4"><a href="handle-vcf.html#cb667-4" aria-hidden="true" tabindex="-1"></a><span class="ex">T</span> T T</span>
+<span id="cb667-5"><a href="handle-vcf.html#cb667-5" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> A G</span>
+<span id="cb667-6"><a href="handle-vcf.html#cb667-6" aria-hidden="true" tabindex="-1"></a><span class="ex">Y</span> C T</span>
+<span id="cb667-7"><a href="handle-vcf.html#cb667-7" aria-hidden="true" tabindex="-1"></a><span class="ex">S</span> G C</span>
+<span id="cb667-8"><a href="handle-vcf.html#cb667-8" aria-hidden="true" tabindex="-1"></a><span class="ex">W</span> A T</span>
+<span id="cb667-9"><a href="handle-vcf.html#cb667-9" aria-hidden="true" tabindex="-1"></a><span class="ex">K</span> G T</span>
+<span id="cb667-10"><a href="handle-vcf.html#cb667-10" aria-hidden="true" tabindex="-1"></a><span class="ex">M</span> A C</span></code></pre></div>
+<p>If we had such a table stored in a file <code>extra/iupac.txt</code>, we could
+use <code>awk</code> to write a block of <code>awk</code>
+code that defines some awk arrays giving the values of the first and second
+allele for each. That would look like this:</p>
+<div class="sourceCode" id="cb668"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb668-1"><a href="handle-vcf.html#cb668-1" aria-hidden="true" tabindex="-1"></a> <span class="fu">awk</span> <span class="st">&#39;{printf(&quot;iupac[\&quot;%s\&quot;,1] = \&quot;%s\&quot;;\n&quot;, $1, $2); printf(&quot;iupac[\&quot;%s\&quot;,2] = \&quot;%s\&quot;;\n\n&quot;, $1, $3);}&#39;</span> extra/iupac.txt</span>
+<span id="cb668-2"><a href="handle-vcf.html#cb668-2" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;A&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb668-3"><a href="handle-vcf.html#cb668-3" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;A&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb668-4"><a href="handle-vcf.html#cb668-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-5"><a href="handle-vcf.html#cb668-5" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;C&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb668-6"><a href="handle-vcf.html#cb668-6" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;C&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb668-7"><a href="handle-vcf.html#cb668-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-8"><a href="handle-vcf.html#cb668-8" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;G&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb668-9"><a href="handle-vcf.html#cb668-9" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;G&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb668-10"><a href="handle-vcf.html#cb668-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-11"><a href="handle-vcf.html#cb668-11" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;T&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb668-12"><a href="handle-vcf.html#cb668-12" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;T&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb668-13"><a href="handle-vcf.html#cb668-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-14"><a href="handle-vcf.html#cb668-14" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;R&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb668-15"><a href="handle-vcf.html#cb668-15" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;R&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb668-16"><a href="handle-vcf.html#cb668-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-17"><a href="handle-vcf.html#cb668-17" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;Y&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb668-18"><a href="handle-vcf.html#cb668-18" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;Y&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb668-19"><a href="handle-vcf.html#cb668-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-20"><a href="handle-vcf.html#cb668-20" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;S&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb668-21"><a href="handle-vcf.html#cb668-21" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;S&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb668-22"><a href="handle-vcf.html#cb668-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-23"><a href="handle-vcf.html#cb668-23" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;W&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb668-24"><a href="handle-vcf.html#cb668-24" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;W&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb668-25"><a href="handle-vcf.html#cb668-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-26"><a href="handle-vcf.html#cb668-26" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;K&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb668-27"><a href="handle-vcf.html#cb668-27" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;K&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb668-28"><a href="handle-vcf.html#cb668-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb668-29"><a href="handle-vcf.html#cb668-29" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;M&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb668-30"><a href="handle-vcf.html#cb668-30" aria-hidden="true" tabindex="-1"></a><span class="va">iupac</span><span class="op">[</span><span class="st">&quot;M&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span></code></pre></div>
+<p>Then we can put that code into a little awk script that we will call
+<code>genotypes2vcf.awk</code>. You can copy the code in the following
+block and put it into a file called <code>script/genotypes2vcf.awk</code> (i.e., it
+is called <code>genotypes2vcf.awk</code> inside a directory you made called <code>script</code>):</p>
+<div class="sourceCode" id="cb669"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb669-1"><a href="handle-vcf.html#cb669-1" aria-hidden="true" tabindex="-1"></a><span class="co"># we begin by creating arrays that tell us the first and second allele</span></span>
+<span id="cb669-2"><a href="handle-vcf.html#cb669-2" aria-hidden="true" tabindex="-1"></a><span class="co"># of each IUPAC-coded genotype</span></span>
+<span id="cb669-3"><a href="handle-vcf.html#cb669-3" aria-hidden="true" tabindex="-1"></a><span class="ex">BEGIN</span> {</span>
+<span id="cb669-4"><a href="handle-vcf.html#cb669-4" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;A&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb669-5"><a href="handle-vcf.html#cb669-5" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;A&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb669-6"><a href="handle-vcf.html#cb669-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-7"><a href="handle-vcf.html#cb669-7" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;C&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb669-8"><a href="handle-vcf.html#cb669-8" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;C&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb669-9"><a href="handle-vcf.html#cb669-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-10"><a href="handle-vcf.html#cb669-10" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;G&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb669-11"><a href="handle-vcf.html#cb669-11" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;G&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb669-12"><a href="handle-vcf.html#cb669-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-13"><a href="handle-vcf.html#cb669-13" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;T&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb669-14"><a href="handle-vcf.html#cb669-14" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;T&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb669-15"><a href="handle-vcf.html#cb669-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-16"><a href="handle-vcf.html#cb669-16" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;R&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb669-17"><a href="handle-vcf.html#cb669-17" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;R&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb669-18"><a href="handle-vcf.html#cb669-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-19"><a href="handle-vcf.html#cb669-19" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;Y&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb669-20"><a href="handle-vcf.html#cb669-20" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;Y&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb669-21"><a href="handle-vcf.html#cb669-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-22"><a href="handle-vcf.html#cb669-22" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;S&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb669-23"><a href="handle-vcf.html#cb669-23" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;S&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb669-24"><a href="handle-vcf.html#cb669-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-25"><a href="handle-vcf.html#cb669-25" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;W&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb669-26"><a href="handle-vcf.html#cb669-26" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;W&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb669-27"><a href="handle-vcf.html#cb669-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-28"><a href="handle-vcf.html#cb669-28" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;K&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;G&quot;</span><span class="kw">;</span></span>
+<span id="cb669-29"><a href="handle-vcf.html#cb669-29" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;K&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;T&quot;</span><span class="kw">;</span></span>
+<span id="cb669-30"><a href="handle-vcf.html#cb669-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-31"><a href="handle-vcf.html#cb669-31" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;M&quot;</span>,1<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;A&quot;</span><span class="kw">;</span></span>
+<span id="cb669-32"><a href="handle-vcf.html#cb669-32" aria-hidden="true" tabindex="-1"></a>  <span class="va">iupac</span><span class="op">[</span><span class="st">&quot;M&quot;</span>,2<span class="op">]</span> <span class="ex">=</span> <span class="st">&quot;C&quot;</span><span class="kw">;</span></span>
+<span id="cb669-33"><a href="handle-vcf.html#cb669-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-34"><a href="handle-vcf.html#cb669-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Now, print the minimal header lines</span></span>
+<span id="cb669-35"><a href="handle-vcf.html#cb669-35" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;##fileformat=VCFv4.2\n&quot;</span><span class="kw">)</span></span>
+<span id="cb669-36"><a href="handle-vcf.html#cb669-36" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;##FORMAT=&lt;ID=GT,Number=1,Type=String,Description=</span><span class="dt">\&quot;</span><span class="st">Genotype</span><span class="dt">\&quot;</span><span class="st">&gt;\n&quot;</span><span class="kw">)</span></span>
+<span id="cb669-37"><a href="handle-vcf.html#cb669-37" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT&quot;</span><span class="kw">)</span></span>
+<span id="cb669-38"><a href="handle-vcf.html#cb669-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-39"><a href="handle-vcf.html#cb669-39" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span>
+<span id="cb669-40"><a href="handle-vcf.html#cb669-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-41"><a href="handle-vcf.html#cb669-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-42"><a href="handle-vcf.html#cb669-42" aria-hidden="true" tabindex="-1"></a><span class="co"># we catenate the sample names, each on a line starting with SAMPLE</span></span>
+<span id="cb669-43"><a href="handle-vcf.html#cb669-43" aria-hidden="true" tabindex="-1"></a><span class="co"># to the input, and then print them all here</span></span>
+<span id="cb669-44"><a href="handle-vcf.html#cb669-44" aria-hidden="true" tabindex="-1"></a><span class="va">$1</span><span class="ex">==</span><span class="st">&quot;SAMPLE&quot;</span> {</span>
+<span id="cb669-45"><a href="handle-vcf.html#cb669-45" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\t%s&quot;</span><span class="ex">,</span> <span class="va">$NF</span><span class="kw">);</span></span>
+<span id="cb669-46"><a href="handle-vcf.html#cb669-46" aria-hidden="true" tabindex="-1"></a>  <span class="ex">next</span></span>
+<span id="cb669-47"><a href="handle-vcf.html#cb669-47" aria-hidden="true" tabindex="-1"></a><span class="er">}</span></span>
+<span id="cb669-48"><a href="handle-vcf.html#cb669-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-49"><a href="handle-vcf.html#cb669-49" aria-hidden="true" tabindex="-1"></a><span class="ex">/xxxxxxxxxxxxxx/</span> {printf<span class="er">(</span><span class="st">&quot;\n&quot;</span><span class="kw">);</span> <span class="ex">next}</span></span>
+<span id="cb669-50"><a href="handle-vcf.html#cb669-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-51"><a href="handle-vcf.html#cb669-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-52"><a href="handle-vcf.html#cb669-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-53"><a href="handle-vcf.html#cb669-53" aria-hidden="true" tabindex="-1"></a><span class="co"># then, for each row, we make a first pass and define integers for the</span></span>
+<span id="cb669-54"><a href="handle-vcf.html#cb669-54" aria-hidden="true" tabindex="-1"></a><span class="co"># different alternate alleles. Then we make a second pass and print</span></span>
+<span id="cb669-55"><a href="handle-vcf.html#cb669-55" aria-hidden="true" tabindex="-1"></a><span class="co"># the VCF line</span></span>
+<span id="cb669-56"><a href="handle-vcf.html#cb669-56" aria-hidden="true" tabindex="-1"></a><span class="kw">{</span></span>
+<span id="cb669-57"><a href="handle-vcf.html#cb669-57" aria-hidden="true" tabindex="-1"></a>  <span class="va">CHROM=$1</span><span class="kw">;</span></span>
+<span id="cb669-58"><a href="handle-vcf.html#cb669-58" aria-hidden="true" tabindex="-1"></a>  <span class="va">POS=$2</span></span>
+<span id="cb669-59"><a href="handle-vcf.html#cb669-59" aria-hidden="true" tabindex="-1"></a>  <span class="ex">delete</span> a_ints<span class="kw">;</span> <span class="co"># clear these arrays</span></span>
+<span id="cb669-60"><a href="handle-vcf.html#cb669-60" aria-hidden="true" tabindex="-1"></a>  <span class="ex">delete</span> alleles<span class="kw">;</span></span>
+<span id="cb669-61"><a href="handle-vcf.html#cb669-61" aria-hidden="true" tabindex="-1"></a>  <span class="ex">a_idx</span> = 0<span class="kw">;</span>  <span class="co"># start the allele index at 0 (the REF)</span></span>
+<span id="cb669-62"><a href="handle-vcf.html#cb669-62" aria-hidden="true" tabindex="-1"></a>  <span class="va">alleles</span><span class="op">[</span><span class="va">$3</span><span class="op">]</span> <span class="ex">=</span> a_idx<span class="kw">;</span> <span class="co"># reference allele gets a 0</span></span>
+<span id="cb669-63"><a href="handle-vcf.html#cb669-63" aria-hidden="true" tabindex="-1"></a>  <span class="va">a_ints</span><span class="op">[</span>a_idx<span class="op">]</span> <span class="ex">=</span> <span class="va">$3</span><span class="kw">;</span>  <span class="co"># keep this array to have alleles in sorted order,</span></span>
+<span id="cb669-64"><a href="handle-vcf.html#cb669-64" aria-hidden="true" tabindex="-1"></a>                       <span class="co"># indexed from 0 to the number of alleles - 1</span></span>
+<span id="cb669-65"><a href="handle-vcf.html#cb669-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-66"><a href="handle-vcf.html#cb669-66" aria-hidden="true" tabindex="-1"></a>  <span class="co"># cycle over all the columns, and the two alleles within each genotype</span></span>
+<span id="cb669-67"><a href="handle-vcf.html#cb669-67" aria-hidden="true" tabindex="-1"></a>  <span class="co"># in that column, and add any new alleles found to the alleles hash array</span></span>
+<span id="cb669-68"><a href="handle-vcf.html#cb669-68" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span><span class="kw">(</span><span class="va">i=</span>4<span class="kw">;</span><span class="ex">i</span><span class="op">&lt;</span>=NF<span class="kw">;</span><span class="ex">i++</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb669-69"><a href="handle-vcf.html#cb669-69" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="kw">(</span><span class="va">a=</span>1<span class="kw">;</span><span class="ex">a</span><span class="op">&lt;</span>=2<span class="kw">;</span><span class="ex">a++</span><span class="kw">)</span> <span class="cf">if</span><span class="kw">(</span><span class="va">$i</span> != <span class="st">&quot;-&quot;</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb669-70"><a href="handle-vcf.html#cb669-70" aria-hidden="true" tabindex="-1"></a>      <span class="ex">alle</span> = iupac[<span class="va">$i</span>, a]<span class="kw">;</span></span>
+<span id="cb669-71"><a href="handle-vcf.html#cb669-71" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span><span class="kw">(</span><span class="ex">!</span><span class="er">(</span><span class="ex">alle</span> in alleles<span class="kw">))</span> <span class="kw">{</span>  <span class="co"># if we have not seen this allele before</span></span>
+<span id="cb669-72"><a href="handle-vcf.html#cb669-72" aria-hidden="true" tabindex="-1"></a>        <span class="va">alleles</span><span class="op">[</span>alle<span class="op">]</span> <span class="ex">=</span> ++a_idx<span class="kw">;</span></span>
+<span id="cb669-73"><a href="handle-vcf.html#cb669-73" aria-hidden="true" tabindex="-1"></a>        <span class="va">a_ints</span><span class="op">[</span>a_idx<span class="op">]</span> <span class="ex">=</span> alle</span>
+<span id="cb669-74"><a href="handle-vcf.html#cb669-74" aria-hidden="true" tabindex="-1"></a>      <span class="kw">}</span></span>
+<span id="cb669-75"><a href="handle-vcf.html#cb669-75" aria-hidden="true" tabindex="-1"></a>    <span class="kw">}</span></span>
+<span id="cb669-76"><a href="handle-vcf.html#cb669-76" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span></span>
+<span id="cb669-77"><a href="handle-vcf.html#cb669-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-78"><a href="handle-vcf.html#cb669-78" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Now we can print the VCF line</span></span>
+<span id="cb669-79"><a href="handle-vcf.html#cb669-79" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print CHROM, POS, ID, and REF columns</span></span>
+<span id="cb669-80"><a href="handle-vcf.html#cb669-80" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;%s\t%s\t.\t%s&quot;</span><span class="ex">,</span> <span class="va">$1</span>, <span class="va">$2</span>, <span class="va">$3</span><span class="kw">)</span> </span>
+<span id="cb669-81"><a href="handle-vcf.html#cb669-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-82"><a href="handle-vcf.html#cb669-82" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print the ALT field, including comma-separated alleles if multiallelic</span></span>
+<span id="cb669-83"><a href="handle-vcf.html#cb669-83" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span><span class="kw">(</span><span class="ex">a_idx</span> == 0<span class="kw">)</span> <span class="kw">{</span> <span class="co"># if there are no alternate alleles ALT gets a .</span></span>
+<span id="cb669-84"><a href="handle-vcf.html#cb669-84" aria-hidden="true" tabindex="-1"></a>    <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\t.&quot;</span><span class="kw">)</span></span>
+<span id="cb669-85"><a href="handle-vcf.html#cb669-85" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span> <span class="cf">else</span> <span class="kw">{</span></span>
+<span id="cb669-86"><a href="handle-vcf.html#cb669-86" aria-hidden="true" tabindex="-1"></a>    <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\t%s&quot;</span><span class="ex">,</span> a_ints[1]<span class="kw">)</span></span>
+<span id="cb669-87"><a href="handle-vcf.html#cb669-87" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="kw">(</span><span class="va">a=</span>2<span class="kw">;</span><span class="ex">a</span><span class="op">&lt;</span>=a_idx<span class="kw">;</span><span class="ex">a++</span><span class="kw">)</span></span>
+<span id="cb669-88"><a href="handle-vcf.html#cb669-88" aria-hidden="true" tabindex="-1"></a>      <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;,%s&quot;</span><span class="ex">,</span> a_ints[a]<span class="kw">)</span></span>
+<span id="cb669-89"><a href="handle-vcf.html#cb669-89" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span></span>
+<span id="cb669-90"><a href="handle-vcf.html#cb669-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-91"><a href="handle-vcf.html#cb669-91" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Set all the QUALs to 100, the FILTERs to PASS and the INFO to .</span></span>
+<span id="cb669-92"><a href="handle-vcf.html#cb669-92" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\t100\tPASS\t.&quot;</span><span class="kw">)</span></span>
+<span id="cb669-93"><a href="handle-vcf.html#cb669-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-94"><a href="handle-vcf.html#cb669-94" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make the FORMAT column.  It just has GT</span></span>
+<span id="cb669-95"><a href="handle-vcf.html#cb669-95" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\tGT&quot;</span><span class="kw">)</span></span>
+<span id="cb669-96"><a href="handle-vcf.html#cb669-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb669-97"><a href="handle-vcf.html#cb669-97" aria-hidden="true" tabindex="-1"></a>  <span class="co"># now, cycle over the individuals and print their genotypes</span></span>
+<span id="cb669-98"><a href="handle-vcf.html#cb669-98" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span><span class="kw">(</span><span class="va">i=</span>4<span class="kw">;</span><span class="ex">i</span><span class="op">&lt;</span>=NF<span class="kw">;</span><span class="ex">i++</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb669-99"><a href="handle-vcf.html#cb669-99" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="kw">(</span><span class="va">$i</span><span class="ex">==</span><span class="st">&quot;-&quot;</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb669-100"><a href="handle-vcf.html#cb669-100" aria-hidden="true" tabindex="-1"></a>      <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\t./.&quot;</span><span class="kw">);</span></span>
+<span id="cb669-101"><a href="handle-vcf.html#cb669-101" aria-hidden="true" tabindex="-1"></a>    <span class="kw">}</span> <span class="cf">else</span> <span class="kw">{</span></span>
+<span id="cb669-102"><a href="handle-vcf.html#cb669-102" aria-hidden="true" tabindex="-1"></a>      <span class="ex">a</span> = iupac[<span class="va">$i</span>, 1]<span class="kw">;</span></span>
+<span id="cb669-103"><a href="handle-vcf.html#cb669-103" aria-hidden="true" tabindex="-1"></a>      <span class="ex">b</span> = iupac[<span class="va">$i</span>, 2]<span class="kw">;</span></span>
+<span id="cb669-104"><a href="handle-vcf.html#cb669-104" aria-hidden="true" tabindex="-1"></a>      <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\t%s/%s&quot;</span><span class="ex">,</span> alleles[a], alleles[b]<span class="kw">)</span></span>
+<span id="cb669-105"><a href="handle-vcf.html#cb669-105" aria-hidden="true" tabindex="-1"></a>    <span class="kw">}</span></span>
+<span id="cb669-106"><a href="handle-vcf.html#cb669-106" aria-hidden="true" tabindex="-1"></a>  <span class="kw">}</span></span>
+<span id="cb669-107"><a href="handle-vcf.html#cb669-107" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb669-108"><a href="handle-vcf.html#cb669-108" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span><span class="er">(</span><span class="st">&quot;\n&quot;</span><span class="kw">)</span></span>
+<span id="cb669-109"><a href="handle-vcf.html#cb669-109" aria-hidden="true" tabindex="-1"></a><span class="kw">}</span></span></code></pre></div>
+<p>In order to use that <code>awk</code> script we will use <code>awk</code>’s <code>-f</code> option
+to read the script, and we will also
+pass to <code>awk</code> via <em>stdin</em> the genotypes file with the sample names on top of it followed
+by a line with an <code>xxxxxxxxxxxxxxxxx</code></p>
+<div class="sourceCode" id="cb670"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb670-1"><a href="handle-vcf.html#cb670-1" aria-hidden="true" tabindex="-1"></a><span class="kw">(</span></span>
+<span id="cb670-2"><a href="handle-vcf.html#cb670-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">awk</span> <span class="st">&#39;NR&gt;=5 {printf(&quot;SAMPLE %s\n&quot;, $2);}&#39;</span> genotype.readme<span class="kw">;</span> </span>
+<span id="cb670-3"><a href="handle-vcf.html#cb670-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> xxxxxxxxxxxxxxxxx<span class="kw">;</span> </span>
+<span id="cb670-4"><a href="handle-vcf.html#cb670-4" aria-hidden="true" tabindex="-1"></a>  <span class="ex">gzcat</span> WP.pgchr1_10K.genotype.gz</span>
+<span id="cb670-5"><a href="handle-vcf.html#cb670-5" aria-hidden="true" tabindex="-1"></a><span class="kw">)</span> <span class="kw">|</span> <span class="fu">awk</span> <span class="at">-f</span> script/genotypes2vcf.awk <span class="op">&gt;</span> WP.pgchr1_10K.vcf</span></code></pre></div>
+<p>That creates the VCF file, <code>WP.pgchr1_10K.vcf</code>. Woo-hoo! On my old laptop, that takes about 10 seconds. So, about 1 second per 1000 variants.
+That means that if you have 3.6 million variants, it will take about an hour to
+convert them all to this VCF format. But once they are in VCF, you can
+compress and index them
+and manipulate them quite quickly.</p>
+</div>
+<div id="reheader-the-vcf" class="section level3" number="22.3.3">
+<h3><span class="header-section-number">22.3.3</span> Reheader the VCF</h3>
+<p>It is good practice to have the reference genome information in the VCF header.
+We can do that with the <code>bcftools reheader</code> subcommand. To do so, you need to have
+the <code>.fai</code> file made by running <code>samtools faidx</code> on the reference genome. You can
+download the <code>.fai</code> file from:
+<a href="https://eriqande.github.io/eca-bioinf-handbook/downloads/pearl_millet_v1.1.fa.fai">https://eriqande.github.io/eca-bioinf-handbook/downloads/pearl_millet_v1.1.fa.fai</a>
+or, on your cluster, use:</p>
+<div class="sourceCode" id="cb671"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb671-1"><a href="handle-vcf.html#cb671-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://eriqande.github.io/eca-bioinf-handbook/downloads/pearl_millet_v1.1.fa.fai</span></code></pre></div>
+<p>Once we have that, we can reheader the VCF file like this (it is piped to <code>less</code>
+just so you can view the result without it bombing your screen).</p>
+<div class="sourceCode" id="cb672"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb672-1"><a href="handle-vcf.html#cb672-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> reheader <span class="at">-f</span> pearl_millet_v1.1.fa.fai WP.pgchr1_10K.vcf <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>While we are at it, however, we are going to go one step further and add some
+fields to the INFO column. We are going to calculate the alternate allele count (AC)
+the total number of alleles of all types (AN) the alternate allele
+frequency (AF) and the minor allele
+frequency (MAF) for each variant. To add these INFO tags we will use the
+<code>fill-tags</code> plug-in for <code>bcftools</code>. This plug-in comes standard with <code>bcftools</code>.
+You can see the help information for it like this:</p>
+<div class="sourceCode" id="cb673"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb673-1"><a href="handle-vcf.html#cb673-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> +fill-tags <span class="at">-h</span></span></code></pre></div>
+<p>For a detailed list of the available tags to fill you can do:</p>
+<div class="sourceCode" id="cb674"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb674-1"><a href="handle-vcf.html#cb674-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> +fill-tags <span class="at">--</span> <span class="at">-l</span></span></code></pre></div>
+<p>So, we can add the genome to the header and add AN, AC, AF, and MAF fields to the INFO, <em>and</em> compress the file into a vcf.gz, all in one fell swoop with the following, and then
+we can index it.</p>
+<div class="sourceCode" id="cb675"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb675-1"><a href="handle-vcf.html#cb675-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> reheader <span class="at">-f</span> pearl_millet_v1.1.fa.fai WP.pgchr1_10K.vcf <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb675-2"><a href="handle-vcf.html#cb675-2" aria-hidden="true" tabindex="-1"></a>    bcftools +fill-tags <span class="at">-</span> <span class="at">-Oz</span> <span class="at">-o</span> WP.pgchr1_10K.vcf.gz <span class="at">--</span> <span class="at">-t</span> AN,AC,AF,MAF</span>
+<span id="cb675-3"><a href="handle-vcf.html#cb675-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb675-4"><a href="handle-vcf.html#cb675-4" aria-hidden="true" tabindex="-1"></a><span class="co"># then we could index twice to get both a .tbi and a .csi index</span></span>
+<span id="cb675-5"><a href="handle-vcf.html#cb675-5" aria-hidden="true" tabindex="-1"></a><span class="co"># like this</span></span>
+<span id="cb675-6"><a href="handle-vcf.html#cb675-6" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index WP.pgchr1_10K.vcf.gz  <span class="co"># makes .csi</span></span>
+<span id="cb675-7"><a href="handle-vcf.html#cb675-7" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> index <span class="at">-t</span> WP.pgchr1_10K.vcf.gz  <span class="co"># makes .tbi</span></span></code></pre></div>
+<p>And then you could look it at like this:</p>
+<div class="sourceCode" id="cb676"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb676-1"><a href="handle-vcf.html#cb676-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view WP.pgchr1_10K.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Or you could compute statistics for it like this:</p>
+<div class="sourceCode" id="cb677"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb677-1"><a href="handle-vcf.html#cb677-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> stats WP.pgchr1_10K.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>And, if you wanted to look at only the multiallelic sites you could do this:</p>
+<div class="sourceCode" id="cb678"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb678-1"><a href="handle-vcf.html#cb678-1" aria-hidden="true" tabindex="-1"></a><span class="ex">bcftools</span> view <span class="at">-m</span> 3 WP.pgchr1_10K.vcf.gz <span class="kw">|</span> <span class="fu">less</span></span></code></pre></div>
+<p>Wow! Playing around with this makes it clear that the VCF format is pretty
+awesome, and that if you get good at using <code>bcftools</code>, then there are so many
+wonderful possibilities.</p>
+</div>
+<div id="where-to-from-here" class="section level3" number="22.3.4">
+<h3><span class="header-section-number">22.3.4</span> Where to from here?</h3>
+<p>A good exercise, (especially for anyone studying pearl millet!), would be
+to write a script that cycled over the different chromosomes and made a VCF
+for each one, then use <code>bcftools concat</code> to concatenate them into a single VCF file and add
+a few info tags. Once that is done, you would have a VCF file ready
+to annotate some variants with <code>snpEff</code>.</p>
+<p>To automate this all on all the cluster it is worth noting that the <code>.genotype</code>
+files can be downloaded like so:</p>
+<div class="sourceCode" id="cb679"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb679-1"><a href="handle-vcf.html#cb679-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> <span class="at">--no-check-certificate</span> https://cegresources.icrisat.org/data_public/PM_SNPs/SNP_calls/WP.pgchr7.genotype.gz</span></code></pre></div>
+<p>Perhaps on Thursday we can review a Snakefile that would do all this.</p>
 
+</div>
 </div>
 </div>
             </section>
