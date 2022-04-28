@@ -339,7 +339,10 @@ reheader-the-vcf
 where-to-from-here
 bioinformatics-for-rad-seq-data-with-and-without-a-reference-genome
 processing-amplicon-sequencing-data
-genome-annotation
+variant-annotation
+getting-a-gff-file
+lets-do-the-pearl-millet
+boneyard-2
 whole-genome-alignment-strategies
 mapping-of-scaffolds-to-a-closely-related-genome
 obtaining-ancestral-states-from-an-outgroup-genome

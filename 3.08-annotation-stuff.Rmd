@@ -1,9 +1,189 @@
-# Genome Annotation
+# Variant Annotation
 
-I don't intend this to be a treatise on how to actually annotate a genome.
-Presumably, that is a task that involves feeding a genome and a lot of mRNA 
-transcripts into a pipeline that then makes gene models, etc.  I guess I could
-talk a little about that process, 'cuz it would be fun to learn more about it.
+
+Today, when people assemble the genome of a species, they will also
+typically annotate that genome. This task involves feeding a genome and a lot of
+sequenced mRNA  transcripts into a pipeline that then uses a variety of
+models to predict which portions of the recently assembled genome correspond to
+genes, which genes those are, and which sequences within those genes correspond
+to introns, exons and coding sequences.  The result of this exercise is typically
+a file in GFF (Genomic Features Format) or in GTF (Gene Transfer Format) format
+that list the the chromosomes and coordinates at which different gene features
+occur.
+
+If a GFF or GTF file is available for the genome that you have mapped variants to and
+then have called variants from, then you can intersect the variants with the
+information in the GFF or GTF file to discover which variants might create changes
+in the gene---for example creating amino acid changes because the alleles at the
+variant represent non-synonymous changes in a codon, or even major effects like
+interfering with start or stop codons.
+
+Trying to figure out whether a variant occurs in a position within a coding
+sequence that will create an amino acid change can
+be done by figuring out whether the variant is in a coding sequence and whether the
+sequence change causes a non-synonymous change in the codon that it is in, etc.  Doing so
+by writing your own scripts is hard and subject to a lot of error. (I know, because
+I spent a good several days doing that some years ago, and then found I had made a lot
+of mistakes when I went to check the interesting sites I found on the
+GenBank genome browser!)  There is
+a lot to figure out because the coding sequences are translated from either the plus (+)
+or the minus (-) strand relative to the reference genome, etc.
+
+It is much easier to use a program like [SnpEff](http://pcingola.github.io/SnpEff/)
+to do that for you.  And that is what we will be discussing here. SnpEff is written
+in Java.  It takes as input a VCF file of variants and a data base of genomic features
+and outputs a VCF file that has an `ANNO` field within the VCF's `INFO` column that
+provides information about what genes (if any) the variant resides within, and what
+effect the variation at that site might have on the expression of the gene.
+
+The standard way to run SnpEff is to simply name the reference genome for the species
+you are using, and then have SnpEff download the appropriate data base for annotating
+variants found using that reference genome.  The authors of SnpEff tend to think that such a
+precompiled data base will be available for nearly any species, and as a consequence
+they have liberally peppered their documentation with warnings to the effect that there
+is almost surely a precompiled data base for your use.
+
+While it is impressive how many precompiled data bases there are for SnpEff, the reality is
+that if you are doing conservation genomics or evolutionary or agricultural
+genomics on non-model organisms it is more likely than not that
+there is no precompiled data base
+for your organism. (For example, there isn't a precompiled data base for a single
+member of the genus _Oncorhynchus_ at this time. 
+Rather, if you work on non-model organisms, you will typically
+have to create your own data base from an existing
+GFF or GTF file.  SnpEff allows you to do this, and that will be the first step that
+we do here.
+
+Since SnpEff is written in Java, it is pretty easy to simply install it from the
+SnpEff download page.  However, it is also available as a conda package, and we
+will use mamba to obtain SnpEff.  As of this writing, the latest version of
+SnpEff on Bioconda is 5.1.  It can be installed into its own environment with:
+```sh
+mamba create -n SnpEff -c bioconda snpeff=5.1
+```
+
+SnpEff comes loaded with a config file that it automatically reads.  When installed
+with conda, this location of this config file is not completely transparent, but
+we can find it by figuring out where the snpEff command is stored, using the `which`
+command. This command is a symbolic link, itself, so we need to figure out where that
+symlink points to, and then find the directory that file lives in.  One way to do that
+looks like this:
+```sh
+conda activate SnpEff
+
+# get the directory that the alias lives in
+FIRSTDIR=$(dirname $(dirname $(which snpEff)))
+# get the directory of the value of the alias
+TMP=$(dirname $(readlink -s `which snpEff`))
+# combine those to get the directory where the config file is
+SNPEFFDIR=${FIRSTDIR}${TMP/../}
+```
+Now, the variable `$SNPEFFDIR` holds the directory where the
+config file is.  That will be useful.
+
+
+### Getting a GFF file
+
+I am going to create a GFF file for our non-model organism example
+data.  This would typically be available at the Otsh_v2.0 FTP site at:
+[https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/296/145/GCA_018296145.1_Otsh_v2.0/](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/296/145/GCA_018296145.1_Otsh_v2.0/)
+
+The bad news is that there is no GFF file.  Instead, that information is stored
+in a GenBank Flat File (`.gbff`) format.  This needs to be converted to
+to GFF format.  To do that, one can use the python-based `bioconvert` utility that
+can be obtained from conda.  To do
+```sh
+mamba create -n se2 -c bioconda bioconvert snpeff=5.1
+```
+And then bioconvert totally failed because of a change in another library.
+Whatever...
+
+### Let's do the pearl millet
+
+We have a gff for pearl millet.  Let's see how this goes.
+
+**Step 1: Add pearl millet to the config.**  
+Here, we are going to create a new config file and put it in resources. Then
+we will add the pearl_millet to it.
+```sh
+# in: /home/eriq@colostate.edu/scratch/pearl-millet-play
+# make a directory
+mkdir -p resources/SnpEff
+
+# copy the config file
+cp $SNPEFFDIR/snpEff.config  resources/SnpEff/
+
+# add an entry for pearl millet
+echo "
+# Pearl millet genome, pearl_millet_v1.1
+Pearl_Millet_v1.1.genome : Pennisetum_glaucum_PM_v1.1
+" >> resources/SnpEff/snpEff.config
+```
+
+**Step 2: Get the fasta and the GFF**  
+We can download these directly to a folder and rename them sequences.fa and
+genes.gff.gz
+```sh
+# make a directory to put them in
+mkdir -p resources/SnpEff/data
+
+# get the fasta, gunzip and rename it
+wget --no-check-certificate https://cegresources.icrisat.org/data_public/PM_SNPs/pearl_millet_v1.1.fa.gz
+gunzip pearl_millet_v1.1.fa.gz
+mv pearl_millet_v1.1.fa resources/SnpEff/data/sequences.fa
+
+# get the GFF
+wget --no-check-certificate -O resources/SnpEff/data/genes.gff.gz https://cegresources.icrisat.org/data_public/PM_SNPs/PM.genechr.trans.gff.gz
+
+# then gunzip the GFF
+gunzip resources/SnpEff/data/genes.gff.gz
+
+# then move both of those files inside a directory called
+# Pearl_Millet_v1.1
+mkdir -p  resources/SnpEff/data/Pearl_Millet_v1.1
+mv resources/SnpEff/data/{sequences.fa,genes.gff} resources/SnpEff/data/Pearl_Millet_v1.1/
+```
+
+**Step 3: Build the data base from the GFF and the genome**  
+
+We run the `build` subcommand of snpEff, and we point it to the new
+config file.
+```sh
+snpEff build -Xmx8g  -noCheckCds -noCheckProtein -gff3 -c resources/SnpEff/snpEff.config  -v Pearl_Millet_v1.1
+```
+In the above, the `-Xmx8g` is providing the Java virtual machine with
+8 Gb of RAM.  It turns out that, by default, snpEff searches for inputs and writes output to a directory
+called `data` that resides in the same directory as the config file that is being used.
+This is not well documented, but what we have done above seems to work.
+
+Also, we are currently not checking against files of known coding sequence and protein
+sequence, because we don't have those.
+
+That command takes a few minutes to run, and it has created a series of files
+with `.bin` extensions in the directory `resources/SnpEff/data/Pearl_Millet_v1.1`. Those
+are the "data base" files that snpEff uses to annotate a VCF.
+
+**Step 4: Annotate the VCF **
+
+First we need to make the VCF
+```sh
+(samtools) [shas0113: pearl-millet-play]--% samtools faidx resources/genome.fasta
+```
+Then reheader the VCF parts:
+```sh
+for i in results/vcf_parts/[1-7].vcf; do echo $i; bcftools reheader -f resources/genome.fasta.fai $i | bcftools view -Oz -  > $i.gz; done
+```
+
+Then concatenate all of those:
+```sh
+mkdir results/vcf
+bcftools concat results/vcf_parts/*.vcf > results/vcf/all.vcf
+```
+
+
+
+## Boneyard
+
 
 However, I will be more interested in understanding what annotation data look like
 (i.e. in a GFF file) and how to associate it with SNP data (i.e. using snpEff).
