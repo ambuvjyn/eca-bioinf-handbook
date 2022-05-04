@@ -134,11 +134,18 @@ installing-rclone-on-a-remote-machine-without-sudo-access
 setting-up-configurations-on-the-remote-machine
 some-other-usage-tips
 get-seqs
+editing-files-on-a-remote-server-using-a-local-text-editor
+rsubl-ssh-config
+download-sublimetext-and-add-the-remotesubl-package-to-it
+download-the-rmate-shell-script-to-your-server-and-put-it-on-your-path
+using-rmate
 tmux
 an-analogy-for-how-tmux-works
 first-steps-with-tmux
 further-steps-with-tmux
 tmux-for-mac-users
+here-are-more-explicit-step-by-step-instructions-for-setting-this-up-with-summit
+making-a-new-profile-in-iterm
 installing-software-on-an-hpcc
 modules
 miniconda
@@ -152,7 +159,7 @@ can-i-add-more-programs-to-an-environment
 exporting-environments
 installing-java-programs
 install-gatk
-vim-its-time-to-get-serious-with-text-editing
+vim
 using-neovim-and-nvim-r-and-tmux-to-use-r-well-on-the-cluster
 chap-HPCC
 an-oversimplified-but-useful-view-of-a-computing-cluster

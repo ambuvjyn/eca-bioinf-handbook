@@ -149,7 +149,7 @@ mv resources/SnpEff/data/{sequences.fa,genes.gff} resources/SnpEff/data/Pearl_Mi
 We run the `build` subcommand of snpEff, and we point it to the new
 config file.
 ```sh
-snpEff build -Xmx8g  -noCheckCds -noCheckProtein -gff3 -c resources/SnpEff/snpEff.config  -v Pearl_Millet_v1.1
+snpEff build -Xmx4g  -noCheckCds -noCheckProtein -gff3 -c resources/SnpEff/snpEff.config  -v Pearl_Millet_v1.1
 ```
 In the above, the `-Xmx8g` is providing the Java virtual machine with
 8 Gb of RAM.  It turns out that, by default, snpEff searches for inputs and writes output to a directory
@@ -177,9 +177,12 @@ for i in results/vcf_parts/[1-7].vcf; do echo $i; bcftools reheader -f resources
 Then concatenate all of those:
 ```sh
 mkdir results/vcf
-bcftools concat results/vcf_parts/*.vcf > results/vcf/all.vcf
+bcftools concat results/vcf_parts/*.vcf.gz > results/vcf/all.vcf.gz
 ```
-
+Then run snpEff
+```sh
+ snpEff ann -c resources/SnpEff/snpEff.config  Pearl_Millet_v1.1 chr2_bit.vcf.gz > chr2_bit_annotated.vcf
+```
 
 
 ## Boneyard

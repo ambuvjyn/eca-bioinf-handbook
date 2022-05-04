@@ -1207,6 +1207,185 @@ and maybe add `-v -P` to give us verbose output and progress information, and co
 ```
 
 
+## Editing Files on a Remote Server using a Local Text Editor
+
+Section \@ref(vim) discusses the value of getting good at using a text-based
+text editor like `vim` or `emacs`, or even the easy-to-use `nano`.  That is
+all well and good; however, if you have become proficient with a local
+(i.e., running on your laptop) text editor with powerful features and
+outstanding syntax highlighting, like [SublimeText](https://www.sublimetext.com/), which
+is available for Mac, Windows, and Linux, then it can be very nice to
+be able to directly edit files on your remote server or cluster using your
+laptop's own installation of SublimeText.  
+
+It turns out that this is possible through the miracle of SSH port forwarding. Briefly,
+it works like this:
+
+1. When you log into your server with `ssh` you tell the server to connect a
+_remote port_ on the server to a _local port_ on your laptop.  This way, the server
+can send additional data streams back and forth through those connected ports
+to you.
+2. Then on the server, you run a shell script called `rmate` that will can open
+a file on the server and send its contents out through the remote port. Your laptop
+picks up these contents on the local port and can send those contents to SublimeText
+using a SublimeText plugin called RemoteSubl.
+3. Editing the contents of that file
+with SublimeText feels just like editing a local file on your laptop, but when you
+save your edits, SublimeText sends the changes back out through the local port to the
+remote port on your server, where `rmate` applies the changes to the file on the server.
+
+It is a great system for editing things on the remote server if you are familiar with
+SublimeText (which you should get familiar with, because it is a great editor!).
+
+More detailed, step-by-step instructions on how to set this up follow.
+
+### Step 1: Set up your SSH config file to automatically apply port forwarding to your connections to your server {#rsubl-ssh-config}
+
+The first thing we will do is something that can especially useful if you have several
+servers you connect to, and you would like to have shorter names for accessing them:
+set up an "alias" to them in your SSH config file.  Here we show how to set up such an
+alias to the SUMMIT cluster at Boulder.
+
+To do so, edit your `~/.ssh/config` file by adding the following lines to it:
+```
+Host summit
+   HostName login11.rc.colorado.edu
+   RemoteForward 52XXX localhost:52698
+
+```
+_But change the `XXX` in `52XXX` to three digits of your choice._ This is important
+so you aren't trying to access the same port as another user at the same time.  For
+example, use the digits of your birthday, like  `52122` if you were born on January 22, etc.
+This step connects port number 52XXX on the server to the local port 52698 on your laptop.
+
+Note that the login node you choose could be `login12.rc.colorado.edu` rather
+than `login11.rc.colorado.edu`, or even some other number if you routinely login
+to a specific login node (for example to use `tmux`...see Section \@ref(tmux)).
+
+Once you have done that, you should logout of SUMMIT, and then, when
+you log back in in the future you can use
+```sh
+ssh csu_eid@colostate@summit
+```
+instead of, for example,
+```sh
+ssh csu_eid@colostate@login11.rc.colorado.edu
+```
+and, when it logs you in, it will enable the port forwarding.
+
+
+### Download SublimeText and add the RemoteSubl package to it
+
+If you haven't already downloaded SublimeText, you should do that and you should
+experiment with using it.  It is an outstanding text editor.  You can try it for
+free for a long time (indefinitely, it seems), but if you find you like it, then
+officially buying a license for it is is a good idea.
+
+Once you have it installed, you must install the `RemoteSubl` plugin.  This is done
+with SublimeText's package control system.  The steps to do this are:
+
+1. Hit Shift-Command-P on a mac.  On windows I think it is Shift-Windows-P.  When you do
+this, sublime text will open a little text window on your screen.  Type into that
+window: `Package Control: Install Package`.  You don't have to type very much of that
+phrase before you see the whole phrase as a possible completion below where you are
+typing.  When you see the full phrase, use the arrow keys to select that phrase and
+hit Return.
+
+2. This should give you another text box.  Start typing `RemoteSubl` into that
+window, until you see it in the possible completions.  Select it from the completions
+(with your arrow keys, for example) and then hit return.
+
+
+### Download the `rmate` shell script to your server and put it on your PATH
+
+On the server, we need the `rmate` command to send the contents of a file
+you wish to edit to the remote port that will get forwarded to the local port
+on your laptop.  This command is a shell script that you can download with
+`wget`.  
+
+As we talked about in an earlier section, you should have a directory,
+`~/bin` that is in your PATH, because you should have a line in your
+`~/.bashrc` file like:
+```sh
+export PATH=$PATH:~/bin
+```
+If this is the case, then simply `cd`-ing to `~/bin` on SUMMIT and running the commands:
+```sh
+wget https://raw.githubusercontent.com/aurora/rmate/master/rmate
+chmod a+x rmate
+```
+should get you `rmate` and make it executable.
+
+### Using rmate
+
+If everything has gone according to plan, then, if you have logged into summit
+using the `summit` alias (i.e. using `ssh username@summit`), then you should
+be able to edit any file on your server with:
+```sh
+rmate -p 52XXX path/to/file
+```
+where `path/to/file` represents the path to whatever file you want to
+edit, and `52XXX` is actually the number of the remote port you are forwarding
+from, as set up in your `~/.ssh/config` file.  For example, in keeping with
+the example above, this would be:
+```sh
+rmate -p 52122 ~/.bashrc
+```
+to edit the `.bashrc` file on your remote server, or,
+```sh
+rmate -p 52122 my_script.R 
+```
+etc.
+
+Note that, by default, `rmate` will open a new tab in the currently active
+SublimeText window.  If you want to open the file in its own window, you
+can use:
+```sh
+rmate -p 52XXX -n path/to/file
+```
+The `-n` option forces the opening of a new SublimeText window.
+
+If you want to edit multiple files at once, for example, all the
+files in a `scripts` folder on your remote machine, you can do like this:
+```sh
+rmate -p 52XXX -n scripts/*
+```
+If you have a lot of files in that folder, then keeping track of them
+in SublimeText can be made a lot easier if you choose
+`View->Side Bar->Show Open Files` from the SublimeText menu options.
+This will show the names of all the open files in a side bar to the left.
+
+Because it can be a hassle to remember your remote port number and type
+it each time you use `rmate`, you can set up an `alias` in the
+`~/.bashrc` file on your server by adding the line:
+```sh
+alias subl='rmate -p 52XXX ' 
+```
+Then, on the command line, you can simply use
+```sh
+subl path/to/file
+
+# or
+
+subl -n path/to/file
+
+# or
+
+subl -n path_to_dir/*.R
+
+# etc.
+```
+and open remote files on your local SublimeText.
+
+
+When you have edited the file, save the change in SublimeText and then close
+the window.  It is that easy.
+
+Note that if you lose connection to the server (for example you close your laptop and
+it goes to sleep), then you will get a message telling you that SublimeText is no
+longer connected to any files on the server, and you will have to reconnect them if
+you want to edit them.
+
 
 ## `tmux`: the terminal multiplexer {#tmux}
 
@@ -1638,6 +1817,123 @@ knitr::include_graphics("figs/iterm-pw-trigger.png")
 ```
 
 If you are a Mac user, spend a weekend getting to know iTerm2.  It will be time well spent.
+
+### Here are more explicit, step-by-step instructions for setting this up with SUMMIT
+
+1. Make sure that you have no tmux sessions running.  Do this by detaching
+from any current tmux session (if any) with `<cntrl>-b d`.  Then, when you just have
+a normal shell (not through `tmux`), do `tmux ls` to see if there are any other `tmux`
+sessions.  If there are, then you should do: `tmux kill-session -t name` with `name`
+being seing to each of the session names.  Or, more simply, and directly, just do:
+`tmux kill-server`.  After that, check with `tmux ls` to make sure no other `tmux` sessions
+are running.
+
+2. Make sure your base conda environment is activated (`conda activate base`)
+and check the version of tmux that you are running with `tmux -V`.   (The default version of
+`tmux` on SUMMIT is 1.8).  While you are at it, you should do `which tmux` to see
+where `tmux` is found on the PATH.  If the tmux version
+is less than 2.9, then we will have to install a new version using conda.  We will put
+it into the base conda environment with:
+```sh
+conda activate base
+mamba install -c conda-forge tmux=2.9
+```
+(Note, I have used both versions 2.9 and 3.1, successfully.  You can
+change 2.9 to 3.1 if you want, but if you already have 2.9, you may as
+well keep using that.)
+The reason we are getting a version of `tmux` later than the ridiculously old `1.8`
+on SUMMIT is that we need the new `-CC` command line option to `tmux`.
+
+3. Once you have the correct version (>=2.9) of `tmux` installed in your base
+environment, check the path to it:
+```sh
+conda activate base
+which tmux
+```
+The result should be something like: `/projects/eriq@colostate.edu/miniconda3/bin/tmux`
+but it will have your username in there.  Make a note of this.  We will call this
+your `conda-base-tmux-path`.  
+
+4. Make sure that you have followed the directions in Section \@ref(rsubl-ssh-config)
+to create an SSH config file that has an alias named `summit` to your preferred login
+node on SUMMIT.
+
+5. Now, we are going to make a profile in iTerm2 to logon to summit via Tmux.
+Get ready, strap yourself in.  This gets its own section in the following:
+
+#### Making a new profile in iTerm
+
+First, we are going to population iTerm's password manager with
+our SUMMIT password.  This stores our password in an encrypted
+file and and iTerm will be able to provide it when we log in to
+SUMMIT. Choose `Window->Password Manager` from iTerm's menu. Note
+that "Password Manager" is down near the bottom.  Then, hit the "+"
+to add a new password. It will pop up a "New Account" line. Double
+click "New Account" to edit that and change it to "summit".  When
+that line is highlighted, then click "Edit Password".  In the popup,
+but your SUMMIT password with the trailing `,push`.  Then hit "Close".
+
+
+Then from iTerm2's menu, choose, `Profiles->Open Profiles`. Then click the
+`Edit Profiles` button.  Then at the bottom left of that window hit the
+plus symbol to add a new profile:
+```{r, echo=FALSE}
+knitr::include_graphics("figs/summit-tmux-new-profile.png")
+```
+
+
+Then, add a Command that is of the form
+```sh
+ssh -t csu_eid@colostate.edu@summit "conda-base-tmux-path -CC attach -t summy || conda-base-tmux-path -CC new -s summy"
+```
+to the text box left of the dropdown menu where you can find the "Command".
+
+Note that you have to change `csu_eid` to your actual CSU Eid (for example,
+mine is `eriq`) and you have to change `conda-base-tmux-path` to the path
+that you got when you did `which tmux` above (for example, mine is
+`/projects/eriq@colostate.edu/miniconda3/bin/tmux`). So, my whole command would
+look like:
+```sh
+ssh -t eriq@colostate.edu@summit "/projects/eriq@colostate.edu/miniconda3/bin/tmux -CC attach -t summy || /projects/eriq@colostate.edu/miniconda3/bin/tmux -CC new -s summy"
+```
+It is probably best to edit this whole command in a text editor, customizing it with
+your username and path and then copy it _en masse_ into the "Command" window in the
+iTerm profile.  Here is another picture:
+```{r, echo=FALSE}
+knitr::include_graphics("figs/summit-tmux-command.png")
+```
+
+
+A little background is in order here.  What this command says is:
+"login to the SSH alias `summit` (which we set up in the `~/.ssh/config`) and try to
+attach to a tmux session named `summy`. If attaching to session `summy` fails (because
+there is no tmux session named `summy`) then create a new tmux session named `summy`."
+
+Now, we need to set this iTerm profile up to open the iTerm password manager
+when it sees the phrase `Password:` when it logs into summit with this profile.
+Choose the "Advanced" tab on the upper right and "Edit" the triggers:
+```{r, echo=FALSE}
+knitr::include_graphics("figs/summit-tmux-triggers.png")
+```
+
+Once you have done that, click the "+" to add a trigger:
+```{r, echo=FALSE}
+knitr::include_graphics("figs/summit-tmux-add-trigger.png")
+```
+Then, in the following fields do:
+
+* Regular Expression: Add `^Password:`
+* Action: Choose "Open Password Manager"
+* Parameters: Choose "summit"
+* Instant: Make sure it is checked
+* Enabled: Make sure it is checked
+
+You might have to extend the area of the screen a little bit.
+```{r, echo=FALSE}
+knitr::include_graphics("figs/summit-tmux-trigger-setup.png")
+```
+When you are done. Hit "Close"
+
 
 
 ## Installing Software on an HPCC
@@ -2443,7 +2739,7 @@ If that looks like a bunch of gibberish, rejoice! We will learn about the VCF fi
 format soon!
 
 
-## `vim`: it's time to get serious with text editing
+## `vim`: it's time to get serious with text editing {#vim}
 
 Introduce newbs to the `vimtutor`.
 
