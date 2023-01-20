@@ -435,6 +435,7 @@ on the cluster. (Of course, you should replace `eriq@colostate.edu` with your ow
 user name!)
 
 
+
 ## Getting compute resources allocated to your jobs on an HPCC
 
 ### Interactive sessions
@@ -1447,6 +1448,52 @@ to our genome.
 
 Let's proceed to Section \@ref(map-with-array).
 
+
+## Keeping track of how many resources were used or are being used
+
+### Checking out resource use by currently running jobs
+
+If you want to get more information about a currently running
+job you can use:
+```
+scontrol show job <job_id>
+```
+where `<job_id>` is the slurm job ID.
+
+This can be helpful if you see someone using all the cores on a node, and you
+want to see what they are doing.  You can login via `ssh nodeXX` (or whatever
+the node name is) and then run `top` or `ps -ax` to find their job.
+
+You might find that someone (or even yourself) has checked out
+20 cores, but there job only ends up using one of them.
+
+So, this can be helpful for guiding yourself and others.
+
+
+### How efficient were you with allocated cores and memory?
+
+After a job has finished, some SLURM environments have the `seff` command,
+which stands for `SLURM efficiency`.  It gives a nice summary of how much
+CPU use you made as a function of how much you were allocated.  And it does the
+same with memory.  
+
+The syntax is `seff <job_id>`.  For example:
+```sh
+% seff 474963
+```
+Gives, in my case, output that looks like:
+```
+Job ID: 474963
+Cluster: sedna
+User/Group: eanderson/eanderson
+State: COMPLETED (exit code 0)
+Cores: 1
+CPU Utilized: 00:10:30
+CPU Efficiency: 99.21% of 00:10:35 core-walltime
+Job Wall-clock time: 00:10:35
+Memory Utilized: 443.09 MB
+Memory Efficiency: 9.63% of 4.49 GB
+```
 
 
 ## Last year's stuff.  Now somewhat defunct

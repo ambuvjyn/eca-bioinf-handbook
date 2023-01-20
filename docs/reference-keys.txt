@@ -1,5 +1,4 @@
 fig:file-hierarchy
-tab:unix-chap-review
 tab:metachars
 fig:filezilla-passwd
 fig:filezilla-timeout
@@ -182,6 +181,9 @@ slurm-job-array-hands-on
 more-convert-task-ids
 make-a-numbered-units.tsv-file
 make-a-line-assign.sh-script-and-put-it-in-your-path
+keeping-track-of-how-many-resources-were-used-or-are-being-used
+checking-out-resource-use-by-currently-running-jobs
+how-efficient-were-you-with-allocated-cores-and-memory
 last-years-stuff.-now-somewhat-defunct
 prepation-interlude-an-in-class-exercise-to-make-sure-everything-is-configured-correctly
 more-boneyard

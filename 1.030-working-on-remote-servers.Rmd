@@ -1265,11 +1265,11 @@ to a specific login node (for example to use `tmux`...see Section \@ref(tmux)).
 Once you have done that, you should logout of SUMMIT, and then, when
 you log back in in the future you can use
 ```sh
-ssh csu_eid@colostate@summit
+ssh csu_eid@colostate.edu@summit
 ```
 instead of, for example,
 ```sh
-ssh csu_eid@colostate@login11.rc.colorado.edu
+ssh csu_eid@colostate.edu@login11.rc.colorado.edu
 ```
 and, when it logs you in, it will enable the port forwarding.
 
@@ -1289,7 +1289,7 @@ this, sublime text will open a little text window on your screen.  Type into tha
 window: `Package Control: Install Package`.  You don't have to type very much of that
 phrase before you see the whole phrase as a possible completion below where you are
 typing.  When you see the full phrase, use the arrow keys to select that phrase and
-hit Return.
+hit Return.  If you don't see `Package Control: Install Package` you might see `Install Package Control`.  Select that and install Package Control.  After that, `Package Control: Install Package` should show up.
 
 2. This should give you another text box.  Start typing `RemoteSubl` into that
 window, until you see it in the possible completions.  Select it from the completions
@@ -1312,7 +1312,7 @@ export PATH=$PATH:~/bin
 If this is the case, then simply `cd`-ing to `~/bin` on SUMMIT and running the commands:
 ```sh
 wget https://raw.githubusercontent.com/aurora/rmate/master/rmate
-chmod a+x rmate
+chmod u+x rmate
 ```
 should get you `rmate` and make it executable.
 
