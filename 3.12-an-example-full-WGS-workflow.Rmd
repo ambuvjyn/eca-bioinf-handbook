@@ -291,7 +291,7 @@ JAEPEU010007942.1       367     42701352        60      61
 JAEPEU010006675.1       416     42701807        60      61
 JAEPEU010003074.1       440     42702311        60      61
 ```
-Each line gives information about a differet sequence in the referenc fasta
+Each line gives information about a different sequence in the reference fasta
 file, listed in the order that the sequences appear in the fasta file.
 
 The five columns of each line hold this information:
